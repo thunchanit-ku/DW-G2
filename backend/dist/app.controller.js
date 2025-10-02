@@ -18,7 +18,7 @@ let AppController = class AppController {
         this.appService = appService;
     }
     getHello() {
-        return this.appService.getHello();
+        return "test asdf asdf dasf dsaf dsqa fdqsafadsfasd";
     }
 };
 exports.AppController = AppController;
