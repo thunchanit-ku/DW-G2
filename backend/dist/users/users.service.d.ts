@@ -1,4 +1,4 @@
-interface User {
+export interface User {
     id: string;
     name: string;
     email: string;
@@ -36,4 +36,3 @@ export declare class UsersService {
         message: string;
     };
 }
-export {};
