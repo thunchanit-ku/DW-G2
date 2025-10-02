@@ -1,4 +1,4 @@
-interface Product {
+export interface Product {
     id: string;
     name: string;
     price: number;
@@ -33,4 +33,3 @@ export declare class ProductsService {
         message: string;
     };
 }
-export {};

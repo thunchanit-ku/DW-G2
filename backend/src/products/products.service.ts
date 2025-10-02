@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-interface Product {
+export interface Product {
   id: string;
   name: string;
   price: number;
