@@ -195,14 +195,45 @@ cd backend
 npm install @nestjs/typeorm typeorm mysql2
 ```
 
+## 🔌 Backend APIs
+
+โปรเจคนี้มี Backend 2 ส่วน:
+
+1. **Next.js API Routes** (Port 3000)
+   - `/api/example` - ตัวอย่าง API
+   - `/api/users` - User management
+   - `/api/products` - Product management
+   - `/api/auth` - Authentication
+
+2. **NestJS Backend** (Port 4000) - สำหรับโปรเจคขนาดใหญ่
+   ```bash
+   cd backend
+   npm run start:dev
+   ```
+   - `http://localhost:4000/api/users`
+   - `http://localhost:4000/api/products`
+
+ดูรายละเอียดใน [BACKEND_API.md](./BACKEND_API.md)
+
 ## 📚 Resources
 
 - [Next.js Documentation](https://nextjs.org/docs)
+- [NestJS Documentation](https://docs.nestjs.com)
 - [Ant Design Components](https://ant.design/components/overview)
 - [Lucide Icons](https://lucide.dev/icons)
 - [LottieFiles](https://lottiefiles.com)
 - [Tailwind CSS](https://tailwindcss.com/docs)
 - [drawDB](https://drawdb.vercel.app) - ออกแบบ Database Schema
+
+## 📖 Documentation
+
+- [README.md](./README.md) - คู่มือหลัก
+- [QUICK_START.md](./QUICK_START.md) - เริ่มต้นใช้งาน
+- [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) - โครงสร้างโปรเจค
+- [BACKEND_API.md](./BACKEND_API.md) - API Documentation
+- [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) - Database Schema
+- [COLOR_PALETTES.md](./COLOR_PALETTES.md) - แนะนำชุดสี
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - คู่มือการ Deploy
 
 ## 🤝 Contributing
 
