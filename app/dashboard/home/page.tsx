@@ -115,6 +115,7 @@ export default function HomePage() {
       title: 'ปีการศึกษา',
       dataIndex: 'year',
       key: 'year',
+      align: 'center' as const,
     },
     {
       title: 'ภาคการศึกษา',
@@ -132,6 +133,7 @@ export default function HomePage() {
       title: 'ผลการเรียน',
       dataIndex: 'semesterGPA',
       key: 'semesterGPA',
+      align: 'center' as const,
       render: (gpa: number) => (
         <span className="font-bold">{gpa.toFixed(2)}</span>
       ),
@@ -140,6 +142,7 @@ export default function HomePage() {
       title: 'GPA',
       dataIndex: 'cumulativeGPA',
       key: 'cumulativeGPA',
+      align: 'center' as const,
       render: (gpa: number | null) => (
         gpa !== null ? <span className="font-bold">{gpa.toFixed(2)}</span> : null
       ),
@@ -166,30 +169,35 @@ export default function HomePage() {
       title: 'หมวดวิชา',
       dataIndex: 'category',
       key: 'category',
+      width: 200,
+      align: 'center' as const,
     },
     {
-      title: <span>จำนวนหน่วยกิตที่<span className="text-green-600">เรียนไปแล้ว</span></span>,
+      title: <div className="whitespace-nowrap">จำนวนหน่วยกิตที่<span className="text-green-600">เรียนไปแล้ว</span></div>,
       dataIndex: 'completed',
       key: 'completed',
-      align: 'right' as const,
+      align: 'center' as const,
+      width: 180,
       render: (value: number) => (
         <span className="font-bold text-green-600">{value}</span>
       ),
     },
     {
-      title: <span>จำนวนหน่วยกิตที่<span className="text-red-600">ยังไม่เรียน</span></span>,
+      title: <div className="whitespace-nowrap">จำนวนหน่วยกิตที่<span className="text-red-600">ยังไม่เรียน</span></div>,
       dataIndex: 'remaining',
       key: 'remaining',
-      align: 'right' as const,
+      align: 'center' as const,
+      width: 180,
       render: (value: number) => (
         <span className="font-bold text-red-600">{value}</span>
       ),
     },
     {
-      title: 'หน่วยกิตทั้งหมด',
+      title: <div className="whitespace-nowrap">หน่วยกิตทั้งหมด</div>,
       dataIndex: 'total',
       key: 'total',
-      align: 'right' as const,
+      align: 'center' as const,
+      width: 150,
       render: (value: number) => (
         <span className="font-bold">{value}</span>
       ),
@@ -198,7 +206,8 @@ export default function HomePage() {
       title: 'เกรด',
       dataIndex: 'gpa',
       key: 'gpa',
-      align: 'right' as const,
+      align: 'center' as const,
+      width: 100,
       render: (value: number) => (
         <span className="font-bold">{value.toFixed(2)}</span>
       ),
