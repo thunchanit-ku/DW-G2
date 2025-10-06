@@ -64,11 +64,34 @@ export class StudentController {
     return this.studentService.updatedata(semester, year);
   }
 
-<<<<<<< HEAD
-  //kong
-=======
-    //bright
->>>>>>> origin/main
+  
+//  @Post('data')
+//   async getDataFromBody(
+//     @Body() body: { semester: string; year: number }
+//   ) {
+//     const { semester, year } = body;
+//     return this.studentService.updatedata(semester, year);
+//   }
+
+  
+//  @Post('data')
+//   async getDataFromBody(
+//     @Body() body: { semester: string; year: number }
+//   ) {
+//     const { semester, year } = body;
+//     return this.studentService.updatedata(semester, year);
+//   }
+
+  
+//  @Post('data')
+//   async getDataFromBody(
+//     @Body() body: { semester: string; year: number }
+//   ) {
+//     const { semester, year } = body;
+//     return this.studentService.updatedata(semester, year);
+//   }
+
+
 }
 
 
