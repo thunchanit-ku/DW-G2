@@ -63,6 +63,15 @@ export class StudentController {
     const { semester, year } = body;
     return this.studentService.updatedata(semester, year);
   }
+  //   @Delete(':id')
+  // async remove(@Param('id') id: string) {
+  //   return this.studentService.remove(id);
+  // }
+
+  //   @Delete(':id')
+  // async remove(@Param('id') id: string) {
+  //   return this.studentService.remove(id);
+  // }
 
   
 //  @Post('data')
@@ -93,5 +102,6 @@ export class StudentController {
 
 
 }
+
 
 
