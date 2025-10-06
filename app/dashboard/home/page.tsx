@@ -18,7 +18,7 @@ export default function HomePage() {
 :'', titleTh:''});
 
 
- const handleSubmit = async () => {
+const handleSubmit = async () => {
     if (!student) {
       alert('กรุณากรอกรหัสนิสิต');
       return;
@@ -29,11 +29,31 @@ export default function HomePage() {
       const data = await res.json();
       console.log(data);
       setResult(data);
+
+      // คำนวณ GPA สะสมเพื่อแสดงบนหัวเรื่อง โดยไม่พึ่ง session
+      try {
+        const gpaRes = await fetch(`http://localhost:4000/api/student/grade-progress/${student}`);
+        const gpaData = await gpaRes.json();
+        if (Array.isArray(gpaData) && gpaData.length > 0) {
+          const last = gpaData[gpaData.length - 1];
+          const cumulative = last['GPAสะสม'];
+          // ใช้ state แยกสำหรับ Header GPA ถ้ายังไม่มี ให้สร้างด้านบน
+          // @ts-ignore
+          if (typeof setHeaderGpa === 'function') setHeaderGpa(typeof cumulative === 'number' ? cumulative : null);
+        }
+      } catch {}
+
+      // เก็บรหัสนิสิตไว้ชั่วคราว และแจ้งหน้าอื่นให้รีเฟรชข้อมูล
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('selectedStudentId', student);
+        window.dispatchEvent(new CustomEvent('dw:selected-student-changed', { detail: student }));
+      }
     } catch (err) {
       console.error('เกิดข้อผิดพลาด:', err);
       alert('ไม่สามารถเรียกข้อมูลได้');
     }
   };
+  const [headerGpa, setHeaderGpa] = useState<number | null>(null);
   // ข้อมูลนักศึกษา
   const studentInfo = {
     studentId: '6020500357',
@@ -270,7 +290,7 @@ export default function HomePage() {
             ข้อมูลสมาชิก : {result.fisrtNameTh} {result.lastNameTh}
           </h4>
           <h4 className="text-xl font-bold text-black">
-            GPA {studentInfo?.gpa.toFixed(2)}
+            GPA {headerGpa != null ? headerGpa.toFixed(2) : '-'}
           </h4>
         </div>
 

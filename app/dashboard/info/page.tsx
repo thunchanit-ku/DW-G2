@@ -60,6 +60,20 @@ export default function InfoPage() {
       id = sessionStorage.getItem('selectedStudentId');
     }
     if (id) fetchProfile(id);
+
+    // ฟังการเปลี่ยน ID จากหน้า Home เพื่ออัปเดตทันที
+    const onSelectedChange = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      if (detail) fetchProfile(detail);
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('dw:selected-student-changed', onSelectedChange as EventListener);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('dw:selected-student-changed', onSelectedChange as EventListener);
+      }
+    };
   }, [searchParams]);
 
   return (
