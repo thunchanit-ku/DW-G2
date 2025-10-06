@@ -9,13 +9,14 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import {StudentService}from '../service/test.service'
 import { CreateStudentDto } from '../dto/test.dto';
 
 @Controller('student')
 export class StudentController {
-  constructor(private readonly studentService: StudentService) {}
+  constructor(private readonly studentService: StudentService , private readonly studenasdftService: StudentService  ) {}
 
   // POST /student
   @Post()
@@ -53,5 +54,13 @@ export class StudentController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.studentService.remove(id);
+  }
+
+ @Post('data')
+  async getDataFromBody(
+    @Body() body: { semester: string; year: number }
+  ) {
+    const { semester, year } = body;
+    return this.studentService.updatedata(semester, year);
   }
 }
