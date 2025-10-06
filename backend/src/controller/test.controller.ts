@@ -63,9 +63,15 @@ export class StudentController {
     const { semester, year } = body;
     return this.studentService.updatedata(semester, year);
   }
-
-
-
+  // ใช้คำนวณ GPA ภาค / GPA สะสม / ผลต่างเกรด
+  @Get('grade-progress/:id')
+  async getGradeProgress(@Param('id') id: string) {
+    const result = await this.studentService.calculateGradeProgress(id);
+    if (!result || result.length === 0) {
+      throw new HttpException('No GPA data found for this student', HttpStatus.NOT_FOUND);
+    }
+    return result;
+  }
 }
 
 

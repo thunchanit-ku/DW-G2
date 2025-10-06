@@ -113,4 +113,45 @@ export class StudentService {
   return toSave;
 }
 
+async calculateGradeProgress(studentId: string) {
+  const sql = `
+    SELECT 
+        t.studentId,
+        t.ปีการศึกษา,
+        t.ภาคการศึกษา,
+        t.หน่วยกิตรวม,
+        t.GPAภาค,
+        t.GPAสะสม,
+        ROUND(t.GPAภาค - @prev_gpa, 2) AS ผลต่างเกรด,
+        @prev_gpa := t.GPAภาค
+    FROM (
+        SELECT 
+            fr.studentId,
+            fr.semesterYearInRegis AS ปีการศึกษา,
+            fr.semesterPartInRegis AS ภาคการศึกษา,
+            SUM(fr.creditRegis) AS หน่วยกิตรวม,
+            ROUND(SUM(fr.creditRegis * fr.gradeNumber) / SUM(fr.creditRegis), 2) AS GPAภาค,
+            (
+                SELECT 
+                    ROUND(SUM(f2.creditRegis * f2.gradeNumber) / SUM(f2.creditRegis), 2)
+                FROM fact_regis f2
+                WHERE f2.studentId = fr.studentId
+                  AND (
+                      f2.semesterYearInRegis < fr.semesterYearInRegis OR
+                      (f2.semesterYearInRegis = fr.semesterYearInRegis 
+                       AND f2.semesterPartInRegis <= fr.semesterPartInRegis)
+                  )
+            ) AS GPAสะสม
+        FROM fact_regis fr
+        WHERE fr.studentId = ?
+        GROUP BY fr.studentId, fr.semesterYearInRegis, fr.semesterPartInRegis
+        ORDER BY fr.semesterYearInRegis, fr.semesterPartInRegis
+    ) AS t
+    JOIN (SELECT @prev_gpa := NULL) AS vars;
+  `;
+
+  const result = await this.fact_regisRepo.query(sql, [studentId]);
+  return result;
+}
+
 }
