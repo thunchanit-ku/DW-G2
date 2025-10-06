@@ -1,33 +1,66 @@
 'use client';
 
 import { Card, Button } from 'antd';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
+import { useEffect, useState } from 'react';
+
+type StudentProfile = {
+  studentId: string;
+  nameTh: string;
+  nameEn: string;
+  nationalId: string | null;
+  gender: string | null;
+  phone: string | null;
+  email: string | null;
+  parentPhone: string | null;
+  advisor: string | null;
+  campus: string | null;
+  faculty: string | null;
+  major: string | null;
+  programType: string | null;
+  studentStatus: string | null;
+  gpa: number | null;
+  highSchool: string | null;
+  highSchoolLocation: string | null;
+};
 
 export default function InfoPage() {
   const router = useRouter();
 
-  // ข้อมูลนักศึกษา
-  const studentInfo = {
-    studentId: '6320500603',
-    nameTh: 'ภัทรพร ปัญญาอุดมพร',
-    nameEn: 'Phattaraporn panyaaudomporn',
-    nationalId: 'xxxxxxxxx4955',
-    gender: 'หญิง',
-    phone: '0950427705',
-    email: 'phattaraporn.sa@ku.th',
-    parentPhone: '0992581852',
-    advisor: 'รศ.ดร.ฐิติพงษ์ สถิรเมธีกุล',
-    campus: 'กำแพงแสน',
-    faculty: 'วิศวกรรมศาสตร์ กำแพงแสน',
-    major: 'วิศวกรรมศาสตร์คอมพิวเตอร์',
-    programType: 'ภาษาไทย',
-    studentStatus: 'กำลังศึกษา',
-    gpa: 3.42,
-    highSchool: 'โรงเรียนวัดธรรมจริยาภิรมย์',
-    highSchoolLocation: 'อำเภอบ้านแพ้ว จังหวัดสมุทรสาคร',
+  const searchParams = useSearchParams();
+  const [studentInfo, setStudentInfo] = useState<StudentProfile | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProfile = async (id: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(`http://localhost:4000/api/student/profile/${id}`);
+      if (!res.ok) {
+        throw new Error(`Request failed: ${res.status}`);
+      }
+      const data = await res.json();
+      setStudentInfo(data as StudentProfile);
+    } catch (e: any) {
+      setError(e.message ?? 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
+      setStudentInfo(null);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    // 1) ถ้ามี id ใน query ให้ใช้ก่อน
+    let id: string | null = searchParams.get('id');
+    // 2) ถ้าไม่มี ให้ใช้จาก sessionStorage (ค่าชั่วคราวจากหน้า Home)
+    if (!id && typeof window !== 'undefined') {
+      id = sessionStorage.getItem('selectedStudentId');
+    }
+    if (id) fetchProfile(id);
+  }, [searchParams]);
 
   return (
     <DashboardLayout>
@@ -37,6 +70,10 @@ export default function InfoPage() {
 
         <hr className="my-6" />
 
+        {/* Loading/Error */}
+        {loading && <div className="mb-4">กำลังโหลด...</div>}
+        {error && <div className="mb-4 text-red-600">{error}</div>}
+
         {/* Personal Information Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
@@ -44,23 +81,23 @@ export default function InfoPage() {
             <div className="space-y-3 ml-5">
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">รหัสประจำตัวนิสิต</p>
-                <p className="text-gray-600">{studentInfo.studentId}</p>
+                <p className="text-gray-600">{studentInfo?.studentId ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">ชื่อ-นามสกุล (ไทย)</p>
-                <p className="text-gray-600">{studentInfo.nameTh}</p>
+                <p className="text-gray-600">{studentInfo?.nameTh ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">ชื่อ-นามสกุล (อังกฤษ)</p>
-                <p className="text-gray-600">{studentInfo.nameEn}</p>
+                <p className="text-gray-600">{studentInfo?.nameEn ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">รหัสประจำตัวประชาชน</p>
-                <p className="text-gray-600">{studentInfo.nationalId}</p>
+                <p className="text-gray-600">{studentInfo?.nationalId ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">เพศ</p>
-                <p className="text-gray-600">{studentInfo.gender}</p>
+                <p className="text-gray-600">{studentInfo?.gender ?? '-'}</p>
               </div>
             </div>
           </div>
@@ -70,15 +107,15 @@ export default function InfoPage() {
             <div className="space-y-3 ml-5">
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">เบอร์โทรศัพท์</p>
-                <p className="text-gray-600">{studentInfo.phone}</p>
+                <p className="text-gray-600">{studentInfo?.phone ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">e-Mail</p>
-                <p className="text-gray-600">{studentInfo.email}</p>
+                <p className="text-gray-600">{studentInfo?.email ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">เบอร์โทรศัพท์ผู้ปกครอง</p>
-                <p className="text-gray-600">{studentInfo.parentPhone}</p>
+                <p className="text-gray-600">{studentInfo?.parentPhone ?? '-'}</p>
               </div>
             </div>
           </div>
@@ -93,31 +130,31 @@ export default function InfoPage() {
             <div className="space-y-3 ml-5">
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">อาจารย์ที่ปรึกษา</p>
-                <p className="text-gray-600">{studentInfo.advisor}</p>
+                <p className="text-gray-600">{studentInfo?.advisor ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">วิทยาเขต</p>
-                <p className="text-gray-600">{studentInfo.campus}</p>
+                <p className="text-gray-600">{studentInfo?.campus ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">คณะ</p>
-                <p className="text-gray-600">{studentInfo.faculty}</p>
+                <p className="text-gray-600">{studentInfo?.faculty ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">สาขาวิชา</p>
-                <p className="text-gray-600">{studentInfo.major}</p>
+                <p className="text-gray-600">{studentInfo?.major ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">ประเภทหลักสูตร</p>
-                <p className="text-gray-600">{studentInfo.programType}</p>
+                <p className="text-gray-600">{studentInfo?.programType ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">สถานภาพนิสิต</p>
-                <p className="text-gray-600">{studentInfo.studentStatus}</p>
+                <p className="text-gray-600">{studentInfo?.studentStatus ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">เกรดเฉลี่ยสะสม</p>
-                <p className="text-gray-600">{studentInfo.gpa.toFixed(2)}</p>
+                <p className="text-gray-600">{studentInfo?.gpa != null ? studentInfo.gpa.toFixed(2) : '-'}</p>
               </div>
             </div>
           </div>
@@ -127,11 +164,11 @@ export default function InfoPage() {
             <div className="space-y-3 ml-5">
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">ชื่อโรงเรียน</p>
-                <p className="text-gray-600">{studentInfo.highSchool}</p>
+                <p className="text-gray-600">{studentInfo?.highSchool ?? '-'}</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <p className="text-black font-medium">ที่อยู่โรงเรียน</p>
-                <p className="text-gray-600">{studentInfo.highSchoolLocation}</p>
+                <p className="text-gray-600">{studentInfo?.highSchoolLocation ?? '-'}</p>
               </div>
             </div>
           </div>
@@ -148,6 +185,7 @@ export default function InfoPage() {
             แก้ไข
           </Button>
         </div>
+
       </div>
     </DashboardLayout>
   );

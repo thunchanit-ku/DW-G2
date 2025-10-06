@@ -154,4 +154,56 @@ async calculateGradeProgress(studentId: string) {
   return result;
 }
 
+// ดึงข้อมูลโปรไฟล์นักศึกษาให้ตรงกับหน้าจอข้อมูลส่วนตัว/การศึกษา
+async getStudentProfile(studentId: string) {
+  const sql = `
+    SELECT
+      s.studentId AS studentId,
+      CONCAT_WS(' ', s.titleTh, s.fisrtNameTh, s.lastNameTh) AS nameTh,
+      CONCAT_WS(' ', s.titleEng, s.fisrtNameEng, s.lastNameEng) AS nameEn,
+      s.personId AS nationalId,
+      s.genderTh AS gender,
+      s.tell AS phone,
+      s.email AS email,
+      s.parentTell AS parentPhone,
+
+      -- มิติการศึกษา
+      CONCAT_WS(' ', t.titleTecherTh, t.fisrtNameTh, t.lastNameTh) AS advisor,
+      d.campus AS campus,
+      d.faculty AS faculty,
+      d.departmentName AS major,
+      p.langProgram AS programType,
+
+      -- สถานภาพและ GPA สะสมจาก fact_term_summary แถวล่าสุดของแต่ละนักศึกษา
+      ss.status AS studentStatus,
+      fts_latest.gpaAll AS gpa,
+
+      -- ข้อมูลโรงเรียนเดิม
+      sch.schoolName AS highSchool,
+      prov.provinceName AS highSchoolLocation
+    FROM fact_student fs
+    JOIN student s           ON s.studentId = fs.studentId
+    LEFT JOIN teacher t      ON t.teacherId = fs.teacherId
+    LEFT JOIN department d   ON d.departmentId = fs.departmentId
+    LEFT JOIN program p      ON p.programId = fs.programId
+    LEFT JOIN school sch     ON sch.schoolId = fs.schoolId
+    LEFT JOIN province prov  ON prov.provinceId = sch.provinceId
+    LEFT JOIN (
+      SELECT x.studentId, x.gpaAll, x.studentStatusId
+      FROM fact_term_summary x
+      JOIN (
+        SELECT studentId, MAX(semesterId) AS maxSem
+        FROM fact_term_summary
+        GROUP BY studentId
+      ) m ON m.studentId = x.studentId AND m.maxSem = x.semesterId
+    ) fts_latest ON fts_latest.studentId = s.studentId
+    LEFT JOIN studentstatus ss ON ss.studentStatusId = fts_latest.studentStatusId
+    WHERE s.studentId = ?
+    LIMIT 1;
+  `;
+
+  const [row] = await this.fact_regisRepo.query(sql, [studentId]);
+  return row || null;
+}
+
 }

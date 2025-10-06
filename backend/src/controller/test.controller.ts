@@ -72,6 +72,16 @@ export class StudentController {
     }
     return result;
   }
+
+  // โปรไฟล์นักศึกษา (ตรงตามหน้าจอข้อมูลส่วนตัว)
+  @Get('profile/:id')
+  async getProfile(@Param('id') id: string) {
+    const data = await this.studentService.getStudentProfile(id);
+    if (!data) {
+      throw new HttpException('Student not found', HttpStatus.NOT_FOUND);
+    }
+    return data;
+  }
 }
 
 

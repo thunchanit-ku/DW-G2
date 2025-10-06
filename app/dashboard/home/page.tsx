@@ -267,10 +267,10 @@ export default function HomePage() {
         {/* Student Header */}
         <div className="flex justify-between items-center mb-4">
           <h4 className="text-xl font-bold text-black">
-            ข้อมูลสมาชิก : {result.fisrtNameTh}
+            ข้อมูลสมาชิก : {result.fisrtNameTh} {result.lastNameTh}
           </h4>
           <h4 className="text-xl font-bold text-black">
-            GPA {studentInfo.gpa.toFixed(2)}
+            GPA {studentInfo?.gpa.toFixed(2)}
           </h4>
         </div>
 
@@ -286,7 +286,7 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">ชื่อ - นามสกุล:</span>
-              <span className="text-gray-600">{result.fisrtNameTh}</span>
+              <span className="text-gray-600">{result.fisrtNameTh} {result.lastNameTh}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black"></span>
