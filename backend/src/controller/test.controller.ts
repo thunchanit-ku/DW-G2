@@ -64,5 +64,11 @@ export class StudentController {
     return this.studentService.updatedata(semester, year);
   }
 
+<<<<<<< HEAD
   //kong
+=======
+    //bright
+>>>>>>> origin/main
 }
+
+
