@@ -173,6 +173,7 @@ async getStudentProfile(studentId: string) {
       d.faculty AS faculty,
       d.departmentName AS major,
       p.langProgram AS programType,
+      p.nameProgram AS programName,
 
       -- สถานภาพและ GPA สะสมจาก fact_term_summary แถวล่าสุดของแต่ละนักศึกษา
       ss.status AS studentStatus,
