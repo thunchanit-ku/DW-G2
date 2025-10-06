@@ -15,7 +15,8 @@ export default function HomePage() {
 
   const [result, setResult] = useState({ email: '' , fisrtNameEng: '',fisrtNameTh: '',lastNameTh
 :'',parentTell:'',studentId:'', studentUsername
-:'', titleTh:''});
+:'', titleTh:'', titleEng:'', lastNameEng:'', faculty:'', major:'', program:'', curriculum:'', advisor:'', phone:'', birthDate:'', address:'', zipCode:'',nameTh:'',nameEn:''
+, programType:'', programName:''});
 
 
 const handleSubmit = async () => {
@@ -25,7 +26,7 @@ const handleSubmit = async () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:4000/api/student/${student}`);
+      const res = await fetch(`http://localhost:4000/api/student/profile/${student}`);
       const data = await res.json();
       console.log(data);
       setResult(data);
@@ -306,7 +307,7 @@ const handleSubmit = async () => {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">ชื่อ - นามสกุล:</span>
-              <span className="text-gray-600">{result.fisrtNameTh} {result.lastNameTh}</span>
+              <span className="text-gray-600">{result.nameTh}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black"></span>
@@ -314,7 +315,7 @@ const handleSubmit = async () => {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">เบอร์โทรศัพท์:</span>
-              <span className="text-gray-600">{result.parentTell}</span>
+              <span className="text-gray-600">{result.phone}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">อีเมล:</span>
@@ -326,19 +327,19 @@ const handleSubmit = async () => {
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">คณะ:</span>
-              <span className="text-gray-600">{studentInfo.faculty}</span>
+              <span className="text-gray-600">{result.faculty}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">สาขาวิชา:</span>
-              <span className="text-gray-600">{studentInfo.program}</span>
+              <span className="text-gray-600">{result.major}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">หลักสูตร:</span>
-              <span className="text-gray-600">{studentInfo.curriculum}</span>
+              <span className="text-gray-600">{result.programType} {result.programName}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">อาจารย์ที่ปรึกษา:</span>
-              <span className="text-gray-600">{studentInfo.advisor}</span>
+              <span className="text-gray-600">{result.advisor}</span>
             </div>
           </div>
         </div>
