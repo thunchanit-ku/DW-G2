@@ -63,8 +63,11 @@ export class StudentController {
     const { semester, year } = body;
     return this.studentService.updatedata(semester, year);
   }
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() updateData: Partial<CreateStudentDto>) {
+    return this.studentService.update(id, updateData);
+  }  
 
-    //bright
 }
 
 
