@@ -24,8 +24,6 @@ import { TestModule } from './module/test.module';
       synchronize: false, // ⚠️ ห้าม true ใน production!
       logging: false,
     }),
-    UsersModule,
-    ProductsModule,
     TestModule,
   ],
   controllers: [AppController],
