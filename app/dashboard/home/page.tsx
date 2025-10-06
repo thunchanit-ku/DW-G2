@@ -4,10 +4,10 @@ import { Card, Table, Divider } from 'antd';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
-import SemesterChart from '@/components/charts/SemesterChart';
 import CategoryChart from '@/components/charts/CategoryChart';
 import DonutChart from '@/components/charts/DonutChart';
 import { useEffect, useState } from 'react';
+import SemesterResults from '@/components/charts/SemesterChart';
 
 export default function HomePage() {
 
@@ -324,79 +324,7 @@ export default function HomePage() {
         </div>
 
         {/* Semester Results */}
-        <Card title="รายงานผลการเรียนแต่ละภาคการศึกษา" className="mb-6 shadow-md">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Chart */}
-            <div>
-              <div className="mb-4">
-                <div className="flex flex-wrap gap-4 text-xs">
-                  <span><span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span>เกรด(0-1.74)</span>
-                  <span><span className="inline-block w-3 h-3 bg-orange-500 rounded-full mr-1"></span>เกรด(1.75-1.99)</span>
-                  <span><span className="inline-block w-3 h-3 bg-green-400 rounded-full mr-1"></span>เกรด(2.0-3.24)</span>
-                  <span><span className="inline-block w-3 h-3 bg-blue-400 rounded-full mr-1"></span>เกรด(3.25-4.00)</span>
-                </div>
-              </div>
-              <div className="h-64">
-                <SemesterChart
-                  labels={['ภาคต้น 2563', 'ภาคปลาย 2563', 'ภาคต้น 2564', 'ภาคปลาย 2564']}
-                  semesterGPAs={[2.13, 3.34, 2.60, 3.33]}
-                  cumulativeGPAs={[2.13, 2.63, 2.62, 2.78]}
-                />
-              </div>
-            </div>
-
-            {/* Table */}
-            <div>
-              <Table
-                columns={semesterColumns}
-                dataSource={[...semesterData, {
-                  key: 'summary',
-                  year: 'ผลการเรียนเฉลี่ย',
-                  semester: '',
-                  credits: 82,
-                  semesterGPA: 2.78,
-                  cumulativeGPA: null,
-                  change: null,
-                }]}
-                pagination={false}
-                size="small"
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Category Results */}
-        <Card title="ผลการเรียนในแต่ละหมวดวิชา" className="mb-6 shadow-md">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Chart */}
-            <div>
-              <div className="mb-4">
-                <div className="flex flex-wrap gap-4 text-xs">
-                  <span><span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span>เกรด(0-1.74)</span>
-                  <span><span className="inline-block w-3 h-3 bg-orange-500 rounded-full mr-1"></span>เกรด(1.75-1.99)</span>
-                  <span><span className="inline-block w-3 h-3 bg-green-400 rounded-full mr-1"></span>เกรด(2.0-3.24)</span>
-                  <span><span className="inline-block w-3 h-3 bg-blue-400 rounded-full mr-1"></span>เกรด(3.25-4.00)</span>
-                </div>
-              </div>
-              <div className="h-64">
-                <CategoryChart
-                  labels={['หมวดวิชาแกน', 'หมวดวิชาศึกษาทั่วไป', 'หมวดวิชาเฉพาะบังคับ', 'หมวดวิชาเฉพาะเลือก', 'หมวดวิชาเสรี']}
-                  gpas={[3.13, 3.23, 3.33, 3.38, 3.40]}
-                />
-              </div>
-            </div>
-
-            {/* Table */}
-            <div>
-              <Table
-                columns={categoryColumns}
-                dataSource={categoryData}
-                pagination={false}
-                size="small"
-              />
-            </div>
-          </div>
-        </Card>
+        <SemesterResults studentId={student}/>
 
         {/* Donut Charts Section */}
         <Card title="รายงานหน่วยกิตที่ลงทะเบียนแบ่งตามหมวดวิชา (%)" className="shadow-md">

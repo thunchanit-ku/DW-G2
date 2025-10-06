@@ -157,15 +157,20 @@ const SemesterResults: React.FC<Props> = ({ studentId }) => {
 
         {/* ✅ Table Section */}
         <div>
-          <Table
-            columns={semesterColumns}
-            dataSource={tableData}
-            pagination={false}
-            size="small"
-            loading={loading}
-            rowKey={(record: any, index) => index.toString()}
-          />
-        </div>
+        <Table
+          columns={semesterColumns}
+          dataSource={tableData}
+          pagination={false}
+          size="small"
+          loading={loading}
+          rowKey={(record: any) =>
+            // ถ้าเป็น row summary ให้ใช้ key "summary"
+            record.key ? record.key : `${record.studentId}-${record['ปีการศึกษา']}-${record['ภาคการศึกษา']}`
+          }
+        />
+      </div>
+
+
       </div>
     </Card>
   );
