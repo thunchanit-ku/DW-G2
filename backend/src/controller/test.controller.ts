@@ -63,4 +63,6 @@ export class StudentController {
     const { semester, year } = body;
     return this.studentService.updatedata(semester, year);
   }
+
+  //kong
 }
