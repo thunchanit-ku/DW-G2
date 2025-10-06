@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { TestModule } from './module/test.module';
+import { FdModule } from './module/fd.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { TestModule } from './module/test.module';
       logging: false,
     }),
     TestModule,
+    FdModule,
   ],
   controllers: [AppController],
   providers: [AppService],

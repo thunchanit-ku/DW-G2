@@ -13,6 +13,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const test_module_1 = require("./module/test.module");
+const fd_module_1 = require("./module/fd.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,6 +36,7 @@ exports.AppModule = AppModule = __decorate([
                 logging: false,
             }),
             test_module_1.TestModule,
+            fd_module_1.FdModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

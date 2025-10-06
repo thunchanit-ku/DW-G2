@@ -1,7 +1,7 @@
 'use client';
 
-import { Card, Table, Divider } from 'antd';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { Card, Table, Divider, Input, Button, message } from 'antd';
+import { TrendingUp, TrendingDown, Search } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
 import CategoryChart from '@/components/charts/CategoryChart';
@@ -12,15 +12,15 @@ import SemesterResults from '@/components/charts/SemesterChart';
 export default function HomePage() {
 
   const [student, SetStudent] = useState('');
-
   const [result, setResult] = useState({ email: '' , fisrtNameEng: '',fisrtNameTh: '',lastNameTh
 :'',parentTell:'',studentId:'', studentUsername
 :'', titleTh:''});
+  const [headerGpa, setHeaderGpa] = useState<number | null>(null);
 
 
 const handleSubmit = async () => {
     if (!student) {
-      alert('กรุณากรอกรหัสนิสิต');
+      message.error('กรุณากรอกรหัสนิสิต');
       return;
     }
 
@@ -30,30 +30,33 @@ const handleSubmit = async () => {
       console.log(data);
       setResult(data);
 
-      // คำนวณ GPA สะสมเพื่อแสดงบนหัวเรื่อง โดยไม่พึ่ง session
+      // คำนวณ GPA สะสมเพื่อแสดงบนหัวเรื่อง
       try {
         const gpaRes = await fetch(`http://localhost:4000/api/student/grade-progress/${student}`);
         const gpaData = await gpaRes.json();
         if (Array.isArray(gpaData) && gpaData.length > 0) {
           const last = gpaData[gpaData.length - 1];
           const cumulative = last['GPAสะสม'];
-          // ใช้ state แยกสำหรับ Header GPA ถ้ายังไม่มี ให้สร้างด้านบน
-          // @ts-ignore
-          if (typeof setHeaderGpa === 'function') setHeaderGpa(typeof cumulative === 'number' ? cumulative : null);
+          setHeaderGpa(typeof cumulative === 'number' ? cumulative : null);
         }
-      } catch {}
+      } catch (gpaErr) {
+        console.log('ไม่สามารถดึงข้อมูล GPA ได้:', gpaErr);
+        setHeaderGpa(null);
+      }
 
       // เก็บรหัสนิสิตไว้ชั่วคราว และแจ้งหน้าอื่นให้รีเฟรชข้อมูล
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('selectedStudentId', student);
         window.dispatchEvent(new CustomEvent('dw:selected-student-changed', { detail: student }));
       }
+
+      message.success('ค้นหาข้อมูลนิสิตสำเร็จ');
     } catch (err) {
       console.error('เกิดข้อผิดพลาด:', err);
-      alert('ไม่สามารถเรียกข้อมูลได้');
+      message.error('ไม่สามารถเรียกข้อมูลได้');
     }
   };
-  const [headerGpa, setHeaderGpa] = useState<number | null>(null);
+
   // ข้อมูลนักศึกษา
   const studentInfo = {
     studentId: '6020500357',
@@ -263,20 +266,40 @@ const handleSubmit = async () => {
     <DashboardLayout>
       <div className="container mx-auto p-6">
 
-        <div className="flex items-center gap-4 mb-6"> 
-          <input
-            type="text"
-            placeholder="กรุณาใส่รหัสนิสิต"
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-             value={student}
-        onChange={(e) => SetStudent(e.target.value)}
-          />
-          <button
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            onClick={handleSubmit}>
-            ส่งข้อมูล
-          </button>
-        </div>
+        {/* Search Student Section */}
+        <Card title="ค้นหานิสิต" className="mb-6 shadow-md">
+          <div className="flex items-center gap-4 mb-4">
+            <Input
+              type="text"
+              placeholder="กรุณาใส่รหัสนิสิต"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+              value={student}
+              onChange={(e) => SetStudent(e.target.value)}
+            />
+            <Button
+              type="primary"
+              icon={<Search className="w-5 h-5" />}
+              size="large"
+              onClick={handleSubmit}
+            >
+              ส่งข้อมูล
+            </Button>
+          </div>
+          {result.studentId && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h5 className="text-lg font-semibold text-gray-800 mb-2">ข้อมูลนิสิต:</h5>
+              <p className="text-gray-700">
+                <strong>รหัสนิสิต:</strong> {result.studentId}
+              </p>
+              <p className="text-gray-700">
+                <strong>ชื่อ-นามสกุล:</strong> {result.titleTh} {result.fisrtNameTh} {result.lastNameTh}
+              </p>
+              <p className="text-gray-700">
+                <strong>อีเมล:</strong> {result.email}
+              </p>
+            </div>
+          )}
+        </Card>
 
 
         {/* Navigation Cards */}

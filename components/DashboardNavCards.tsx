@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from 'antd';
-import { Home, User, FileText, Calculator } from 'lucide-react';
+import { Home, User, FileText, Calculator, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
 const navCards = [
@@ -37,11 +37,19 @@ const navCards = [
     borderColor: 'border-l-4 border-yellow-500',
     textColor: 'text-yellow-500',
   },
+  {
+    title: 'UPDATE GRADES',
+    subtitle: 'อัปเดตผลการเรียน',
+    icon: <RefreshCw className="w-10 h-10" />,
+    href: '/dashboard/update-grades',
+    borderColor: 'border-l-4 border-purple-500',
+    textColor: 'text-purple-500',
+  },
 ];
 
 export default function DashboardNavCards() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
       {navCards.map((card, index) => (
         <Link key={index} href={card.href}>
           <Card
