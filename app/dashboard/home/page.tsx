@@ -7,11 +7,36 @@ import DashboardNavCards from '@/components/DashboardNavCards';
 import SemesterChart from '@/components/charts/SemesterChart';
 import CategoryChart from '@/components/charts/CategoryChart';
 import DonutChart from '@/components/charts/DonutChart';
+import { useEffect, useState } from 'react';
 
 export default function HomePage() {
+
+  const [student, SetStudent] = useState('');
+
+  const [result, setResult] = useState({ email: '' , fisrtNameEng: '',fisrtNameTh: '',lastNameTh
+:'',parentTell:'',studentId:'', studentUsername
+:'', titleTh:''});
+
+
+ const handleSubmit = async () => {
+    if (!student) {
+      alert('กรุณากรอกรหัสนิสิต');
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:4000/api/student/${student}`);
+      const data = await res.json();
+      console.log(data);
+      setResult(data);
+    } catch (err) {
+      console.error('เกิดข้อผิดพลาด:', err);
+      alert('ไม่สามารถเรียกข้อมูลได้');
+    }
+  };
   // ข้อมูลนักศึกษา
   const studentInfo = {
-    studentId: '6320500603',
+    studentId: '6020500357',
     nameTH: 'ภัทรพร ปัญญาอุดมพร',
     nameEN: 'Phattaraporn panyaaudomporn',
     phone: '0950427705',
@@ -217,6 +242,23 @@ export default function HomePage() {
   return (
     <DashboardLayout>
       <div className="container mx-auto p-6">
+
+        <div className="flex items-center gap-4 mb-6"> 
+          <input
+            type="text"
+            placeholder="กรุณาใส่รหัสนิสิต"
+            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+             value={student}
+        onChange={(e) => SetStudent(e.target.value)}
+          />
+          <button
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            onClick={handleSubmit}>
+            ส่งข้อมูล
+          </button>
+        </div>
+
+
         {/* Navigation Cards */}
         <DashboardNavCards />
 
@@ -225,7 +267,7 @@ export default function HomePage() {
         {/* Student Header */}
         <div className="flex justify-between items-center mb-4">
           <h4 className="text-xl font-bold text-black">
-            ข้อมูลสมาชิก : {studentInfo.nameTH}
+            ข้อมูลสมาชิก : {result.fisrtNameTh}
           </h4>
           <h4 className="text-xl font-bold text-black">
             GPA {studentInfo.gpa.toFixed(2)}
@@ -240,23 +282,23 @@ export default function HomePage() {
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">รหัสนิสิต:</span>
-              <span className="text-gray-600">{studentInfo.studentId}</span>
+              <span className="text-gray-600">{result.studentId}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">ชื่อ - นามสกุล:</span>
-              <span className="text-gray-600">{studentInfo.nameTH}</span>
+              <span className="text-gray-600">{result.fisrtNameTh}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black"></span>
-              <span className="text-gray-600">{studentInfo.nameEN}</span>
+              <span className="text-gray-600">{result.fisrtNameEng}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">เบอร์โทรศัพท์:</span>
-              <span className="text-gray-600">{studentInfo.phone}</span>
+              <span className="text-gray-600">{result.parentTell}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <span className="font-medium text-black">อีเมล:</span>
-              <span className="text-gray-600">{studentInfo.email}</span>
+              <span className="text-gray-600">{result.email}</span>
             </div>
           </div>
 
