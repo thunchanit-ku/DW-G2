@@ -10,7 +10,6 @@ import { useEffect, useState } from 'react';
 import SemesterResults from '@/components/charts/SemesterChart';
 import { getStudent } from '../service/home.service';
 export default function HomePage() {
-
   const [student, SetStudent] = useState('');
   const [result, setResult] = useState({ 
     email: '', 
@@ -39,6 +38,17 @@ export default function HomePage() {
   });
   const [headerGpa, setHeaderGpa] = useState<number | null>(null);
 
+  // โหลดข้อมูลจาก sessionStorage ถ้ามี
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedResult = sessionStorage.getItem('studentResult');
+      const savedStudent = sessionStorage.getItem('studentInput');
+      const savedGpa = sessionStorage.getItem('headerGpa');
+      if (savedResult) setResult(JSON.parse(savedResult));
+      if (savedStudent) SetStudent(savedStudent);
+      if (savedGpa) setHeaderGpa(Number(savedGpa));
+    }
+  }, []);
 
 const handleSubmit = async () => {
     if (!student) {
@@ -48,11 +58,14 @@ const handleSubmit = async () => {
 
     try {
 
-      // const res = await fetch(`http://localhost:4000/api/student/profile/${student}`);
-      const res =  await getStudent(student);
-      // const data = await res.json();
-      console.log(res);
+      const res = await getStudent(student);
       setResult(res);
+
+      // เก็บข้อมูลลง sessionStorage
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('studentResult', JSON.stringify(res));
+        sessionStorage.setItem('studentInput', student);
+      }
 
       // คำนวณ GPA สะสมเพื่อแสดงบนหัวเรื่อง
       try {
@@ -62,10 +75,17 @@ const handleSubmit = async () => {
           const last = gpaData[gpaData.length - 1];
           const cumulative = last['GPAสะสม'];
           setHeaderGpa(typeof cumulative === 'number' ? cumulative : null);
+          // เก็บ GPA ลง sessionStorage
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('headerGpa', String(cumulative));
+          }
         }
       } catch (gpaErr) {
         console.log('ไม่สามารถดึงข้อมูล GPA ได้:', gpaErr);
         setHeaderGpa(null);
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('headerGpa');
+        }
       }
 
       // เก็บรหัสนิสิตไว้ชั่วคราว และแจ้งหน้าอื่นให้รีเฟรชข้อมูล
@@ -309,7 +329,7 @@ const handleSubmit = async () => {
               ส่งข้อมูล
             </Button>
           </div>
-          {result.studentId && (
+          {/* {result.studentId && (
             <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h5 className="text-lg font-semibold text-gray-800 mb-2">ข้อมูลนิสิต:</h5>
               <p className="text-gray-700">
@@ -322,7 +342,7 @@ const handleSubmit = async () => {
                 <strong>อีเมล:</strong> {result.email}
               </p>
             </div>
-          )}
+          )} */}
         </Card>
 
 

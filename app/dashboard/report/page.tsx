@@ -1,26 +1,36 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, Table, Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
+import { getStudentProfile } from '../service/student.service';
 
 export default function ReportPage() {
-  // ข้อมูลนักศึกษา
-  const studentInfo = {
-    studentId: '6320500603',
-    nameTh: 'นางสาวภัทรพร ปัญญาอุดมพร',
-    nameEn: 'Phattaraporn panyaaudomporn',
-    phone: '0950427705',
-    email: 'phattaraporn.sa@ku.th',
-    faculty: 'วิศวกรรมศาสตร์',
-    major: 'วิศวกรรมคอมพิวเตอร์',
-    program: 'ภาษาไทย (ภาคปกติ)',
-    advisor: 'รศ.ดร.ฐิติพงษ์ สถิรเมธีกุล',
-    gpa: 3.38,
-  };
+  // สร้าง state สำหรับข้อมูลนักศึกษา
+  const [studentInfo, setStudentInfo] = useState<any>(null);
 
-  // ตารางวิชาที่ไม่ผ่านตามแผน
+  // โหลด studentId จาก sessionStorage หรือกำหนดเอง
+  useEffect(() => {
+    async function fetchProfile() {
+      let studentId = '';
+      if (typeof window !== 'undefined') {
+        studentId = sessionStorage.getItem('selectedStudentId') || '';
+      }
+      if (studentId) {
+        try {
+          const data = await getStudentProfile(studentId);
+          setStudentInfo(data);
+        } catch (e) {
+          setStudentInfo(null);
+        }
+      }
+    }
+    fetchProfile();
+  }, []);
+
+  // ตารางวิชาที่ไม่ผ่านตามแผน (mock เหมือนเดิม)
   const failedCoursesColumns = [
     {
       title: 'ชั้นปี',
@@ -99,7 +109,7 @@ export default function ReportPage() {
     },
   ];
 
-  // ตารางวิชาตกค้างที่ผ่านแล้ว
+  // ตารางวิชาตกค้างที่ผ่านแล้ว (mock เหมือนเดิม)
   const passedCoursesColumns = [
     {
       title: 'ชั้นปี',
@@ -168,7 +178,7 @@ export default function ReportPage() {
     },
   ];
 
-  // ตารางวิชาแยกตามหมวด
+  // ตารางวิชาแยกตามหมวด (mock เหมือนเดิม)
   const coursesByCategory = [
     {
       key: '1',
@@ -191,7 +201,6 @@ export default function ReportPage() {
       credits: '3',
     },
   ];
-
   const coursesColumns = [
     {
       title: 'ปีการศึกษา',
@@ -247,8 +256,12 @@ export default function ReportPage() {
 
         {/* Student Info Header */}
         <div className="flex justify-between items-center mb-4">
-          <h4 className="text-black font-bold">ข้อมูลสมาชิก : {studentInfo.nameTh}</h4>
-          <h4 className="text-black font-bold">GPA {studentInfo.gpa.toFixed(2)}</h4>
+          <h4 className="text-black font-bold">
+            ข้อมูลสมาชิก : {studentInfo ? studentInfo.nameTh : '-'}
+          </h4>
+          <h4 className="text-black font-bold">
+            GPA {studentInfo?.gpa != null ? studentInfo.gpa.toFixed(2) : '-'}
+          </h4>
         </div>
 
         <hr className="my-6" />
@@ -258,42 +271,42 @@ export default function ReportPage() {
           <div className="space-y-3 ml-5">
             <div className="grid grid-cols-2 gap-2">
               <p className="text-black font-medium">รหัสนิสิต:</p>
-              <p className="text-gray-600">{studentInfo.studentId}</p>
+              <p className="text-gray-600">{studentInfo ? studentInfo.studentId : '-'}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <p className="text-black font-medium">ชื่อ - นามสกุล:</p>
-              <p className="text-gray-600">{studentInfo.nameTh}</p>
+              <p className="text-gray-600">{studentInfo ? studentInfo.nameTh : '-'}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <p className="text-black font-medium"></p>
-              <p className="text-gray-600">{studentInfo.nameEn}</p>
+              <p className="text-gray-600">{studentInfo ? studentInfo.nameEn : '-'}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <p className="text-black font-medium">เบอร์โทรศัพท์:</p>
-              <p className="text-gray-600">{studentInfo.phone}</p>
+              <p className="text-gray-600">{studentInfo ? studentInfo.phone : '-'}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <p className="text-black font-medium">อีเมล:</p>
-              <p className="text-gray-600">{studentInfo.email}</p>
+              <p className="text-gray-600">{studentInfo ? studentInfo.email : '-'}</p>
             </div>
           </div>
 
           <div className="space-y-3 ml-5">
             <div className="grid grid-cols-2 gap-2">
               <p className="text-black font-medium">คณะ:</p>
-              <p className="text-gray-600">{studentInfo.faculty}</p>
+              <p className="text-gray-600">{studentInfo ? studentInfo.faculty : '-'}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <p className="text-black font-medium">สาขาวิชา:</p>
-              <p className="text-gray-600">{studentInfo.major}</p>
+              <p className="text-gray-600">{studentInfo ? studentInfo.major : '-'}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <p className="text-black font-medium">หลักสูตร:</p>
-              <p className="text-gray-600">{studentInfo.program}</p>
+              <p className="text-gray-600">{studentInfo ? studentInfo.programType : '-'} {studentInfo ? studentInfo.programName : '-'}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <p className="text-black font-medium">อาจารย์ที่ปรึกษา:</p>
-              <p className="text-gray-600">{studentInfo.advisor}</p>
+              <p className="text-gray-600">{studentInfo ? studentInfo.advisor : '-'}</p>
             </div>
           </div>
         </div>

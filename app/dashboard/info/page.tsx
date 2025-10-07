@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
 import { useEffect, useState } from 'react';
+import { getStudentProfile } from '../service/student.service';
 
 type StudentProfile = {
   studentId: string;
@@ -38,11 +39,12 @@ export default function InfoPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`http://localhost:4000/api/student/profile/${id}`);
-      if (!res.ok) {
-        throw new Error(`Request failed: ${res.status}`);
-      }
-      const data = await res.json();
+      // const res = await fetch(`http://localhost:4000/api/student/profile/${id}`);
+      // if (!res.ok) {
+      //   throw new Error(`Request failed: ${res.status}`);
+      // }
+      // const data = await res.json();
+      const data = await getStudentProfile(id);
       setStudentInfo(data as StudentProfile);
     } catch (e: any) {
       setError(e.message ?? 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
@@ -75,6 +77,15 @@ export default function InfoPage() {
       }
     };
   }, [searchParams]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const profile = sessionStorage.getItem('selectedStudentProfile');
+      if (profile) {
+        setStudentInfo(JSON.parse(profile));
+      }
+    }
+  }, []);
 
   return (
     <DashboardLayout>
