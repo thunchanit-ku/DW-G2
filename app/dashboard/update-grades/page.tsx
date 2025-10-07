@@ -5,6 +5,7 @@ import { Card, Input, Button, Select, Table, message, Spin, Alert, Tag, Row, Col
 import { RefreshCw, Search, AlertCircle, BookOpen } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
+import { Console } from 'node:console';
 
 interface StudentInfo {
   studentId: string;
@@ -76,11 +77,11 @@ export default function UpdateGradesPage() {
     setLoading(true);
     try {
       // ตรวจสอบว่า backend ทำงานอยู่หรือไม่
-      const healthCheck = await fetch('http://localhost:4000/api');
-      if (!healthCheck.ok) {
-        throw new Error('Backend server ไม่ทำงาน');
-      }
-
+      // const healthCheck = await fetch('http://localhost:4000/api/');
+      // if (!healthCheck.ok) {
+      //   throw new Error('Backend server ไม่ทำงาน');
+      // }
+      console.log("studenttttttttt" ,student);
       const res = await fetch(`http://localhost:4000/api/fd/${student}`);
       if (!res.ok) {
         const errorData = await res.json();

@@ -1,35 +1,57 @@
+// app.module.ts
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { ProductsModule } from './products/products.module';
 import { TestModule } from './module/test.module';
 import { FdModule } from './module/fd.module';
-
+import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      
+   envFilePath: [
+    join(process.cwd(), '.env'),      
+    join(__dirname, '..', '.env'),    
+    '.env',                           
+  ],
+   
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: '158.108.207.232',
-      port: 3306,
-      username: 'dw_student',
-      password: 'dw_student',
-      database: 'DW-student-g2',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false, // ⚠️ ห้าม true ใน production!
-      logging: false,
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const host = config.get<string>('DB_HOST');
+        const port = config.get<string>('DB_PORT');
+        const user = config.get<string>('DB_USER');
+        const pass = config.get<string>('DB_PASS');
+        const name = config.get<string>('DB_NAME');
+
+        console.log('[DB-CONFIG]', { host, port, user, name });
+
+        if (!host || !port || !user || !name) {
+          throw new Error('ENV not loaded! Check envFilePath / working dir / .env location');
+        }
+
+        return {
+          type: 'mysql' as const,
+          host,
+          port: parseInt(port, 10),
+          username: user,
+          password: pass,
+          database: name,
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: config.get('DB_SYNC', 'false') === 'true',
+          logging: false,
+          retryAttempts: 10,
+          retryDelay: 3000,
+        };
+      },
     }),
     TestModule,
     FdModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  
+
 })
 export class AppModule {}

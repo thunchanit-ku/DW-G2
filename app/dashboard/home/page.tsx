@@ -8,7 +8,7 @@ import CategoryChart from '@/components/charts/CategoryChart';
 import DonutChart from '@/components/charts/DonutChart';
 import { useEffect, useState } from 'react';
 import SemesterResults from '@/components/charts/SemesterChart';
-
+import { getStudent } from '../service/home.service';
 export default function HomePage() {
 
   const [student, SetStudent] = useState('');
@@ -47,10 +47,12 @@ const handleSubmit = async () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:4000/api/student/profile/${student}`);
-      const data = await res.json();
-      console.log(data);
-      setResult(data);
+
+      // const res = await fetch(`http://localhost:4000/api/student/profile/${student}`);
+      const res =  await getStudent(student);
+      // const data = await res.json();
+      console.log(res);
+      setResult(res);
 
       // คำนวณ GPA สะสมเพื่อแสดงบนหัวเรื่อง
       try {
