@@ -197,9 +197,13 @@ async getStudentProfile(studentId: string) {
       d.departmentName AS major,
       p.langProgram AS programType,
 
-      -- สถานภาพและ GPA สะสมจาก fact_term_summary แถวล่าสุดของแต่ละนักศึกษา
+-- สถานภาพนักศึกษา และ GPA สะสมคำนวณจาก fact_regis
       ss.status AS studentStatus,
-      fts_latest.gpaAll AS gpa,
+      (
+        SELECT ROUND(SUM(fr.creditRegis * fr.gradeNumber) / SUM(fr.creditRegis), 2)
+        FROM fact_regis fr
+        WHERE fr.studentId = s.studentId
+      ) AS gpa,
 
       -- ข้อมูลโรงเรียนเดิม
       sch.schoolName AS highSchool,
@@ -212,7 +216,7 @@ async getStudentProfile(studentId: string) {
     LEFT JOIN school sch     ON sch.schoolId = fs.schoolId
     LEFT JOIN province prov  ON prov.provinceId = sch.provinceId
     LEFT JOIN (
-      SELECT x.studentId, x.gpaAll, x.studentStatusId
+      SELECT x.studentId, x.studentStatusId
       FROM fact_term_summary x
       JOIN (
         SELECT studentId, MAX(semesterId) AS maxSem
