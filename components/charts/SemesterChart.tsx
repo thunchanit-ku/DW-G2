@@ -121,9 +121,12 @@ const SemesterResults: React.FC<Props> = ({ studentId }) => {
         (sum, item) => sum + Number(item["หน่วยกิตรวม"]),
         0
       ),
-      "GPAภาค":
-        semesterData.reduce((sum, item) => sum + item["GPAภาค"], 0) /
-        (semesterData.length || 1),
+      "GPAภาค": Number(
+  (
+    semesterData.reduce((sum, item) => sum + item["GPAภาค"], 0) /
+    (semesterData.length || 1)
+    ).toFixed(2)
+    ),
       "GPAสะสม": semesterData[semesterData.length - 1]?.["GPAสะสม"] || "-",
       "ผลต่างเกรด": "",
     },
