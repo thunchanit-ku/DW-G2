@@ -13,6 +13,8 @@ import {
 } from '@nestjs/common';
 import {StudentService}from '../service/test.service'
 import { CreateStudentDto } from '../dto/test.dto';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Controller('student')
 export class StudentController {
@@ -33,7 +35,17 @@ export class StudentController {
   async findAll() {
     return this.studentService.findAll();
   }
-
+ @Get('Courseplan-checking')
+  async getCourseplanCheck() {
+    try {
+      return await this.studentService.getCourseplanChecking();
+    } catch (error) {
+      throw new HttpException(
+        'Failed to load course plan data: ' + error.message,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
   // GET /student/:id
   @Get(':id')
   async findOne(@Param('id') id: string) {
@@ -82,7 +94,9 @@ export class StudentController {
     }
     return data;
   }
+
 }
+  
 
 
 

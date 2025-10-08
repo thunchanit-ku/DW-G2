@@ -211,4 +211,84 @@ async getStudentProfile(studentId: string) {
   return row || null;
 }
 
+  // ✅ อ่านไฟล์ mock_api_term_summary.json (อยู่นอก src)
+  async getCourseplanChecking() {
+  try {
+    // 1️⃣ path ไปที่ root project
+    const filePath = path.resolve(__dirname, '../../../mock_api_term_summary.json');
+    console.log('mock_api_term_summary.json');
+
+    // 2️⃣ ตรวจสอบว่ามีไฟล์อยู่ไหม
+    const fileExists = await fs
+      .access(filePath)
+      .then(() => true)
+      .catch(() => false);
+
+    if (!fileExists) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    // 3️⃣ อ่านไฟล์ JSON
+    const fileData = await fs.readFile(filePath, 'utf-8');
+    const jsonData = JSON.parse(fileData);
+
+    // 4️⃣ ดึง subjectCourseId ทั้งหมดจาก JSON
+    const subjectCourseIds = jsonData
+      .map((item: any) => item.subjectCourseId)
+      .filter((id: any) => id !== undefined);
+
+    if (subjectCourseIds.length === 0) {
+      throw new Error('ไม่พบ subjectCourseId ในไฟล์ JSON');
+    }
+
+    // 5️⃣ เขียน SQL JOIN query (ใช้ query เดิมของคุณ)
+    const sql = `
+      SELECT 
+    s.nameSubjectThai , scg.subjectCategoryName , s.credit
+    FROM subjectCourse as sc
+    JOIN subject s ON sc.subjectId = s.subjectId
+	  JOIN subjectCategory scg ON scg.subjectCategoryId = s.subjectCategoryId
+      WHERE sc.subjectCourseId IN (?)
+    `;
+
+    // 6️⃣ รัน query ผ่าน Repository ที่เกี่ยวข้อง เช่น courseListRepo
+    const dbResult = await this.courseListRepo.query(sql, [subjectCourseIds]);
+    console.log(dbResult)
+    // 7️⃣ รวมข้อมูล JSON เดิมกับข้อมูลจากฐานข้อมูล
+   const mergedData = jsonData.map((item: any) => {
+      const match = dbResult.find(
+        (r: any) => r.subjectCourseId === item.subjectCourseId
+      );
+      return {
+        stdPlanId: item.stdPlanId,
+        studentId: item.studentId,
+        courseCode: item.subjectCourseId,
+        courseName: match?.nameSubjectThai || '-',
+        credits: match?.credit || '-',
+        category: match?.subjectCategoryName || '-',
+        semester: item.semester,
+        semesterPartInYear: item.semesterPartInYear,
+        status: item.note || item.grade || '-',
+        isPass: item.isPass,
+      };
+    });
+
+    // ✅ แยกข้อมูลตามสถานะ (ผ่าน / ไม่ผ่าน)
+    const passedCourses = mergedData.filter((i) => i.isPass);
+    const failedCourses = mergedData.filter((i) => !i.isPass);
+
+    // ✅ ส่งผลลัพธ์กลับ
+    return {
+      message: 'Course plan and subject data merged successfully',
+      totalJson: jsonData.length,
+      totalMatched: dbResult.length,
+      passedCourses,
+      failedCourses,
+    };
+  
+    } catch (error) {
+    console.error('❌ Error in getCourseplanChecking:', error.message);
+    throw new Error('Cannot process course plan data: ' + error.message);
+  }
+}
 }
