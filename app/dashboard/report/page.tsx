@@ -14,37 +14,45 @@ export default function ReportPage() {
   const [passedCourses, setPassedCourses] = useState<any[]>([]);
   // โหลด studentId จาก sessionStorage หรือกำหนดเอง
   useEffect(() => {
-  async function fetchData() {
-    let studentId = '';
-    if (typeof window !== 'undefined') {
-      studentId = sessionStorage.getItem('selectedStudentId') || '';
-    }
+    async function fetchData() {
+      let studentId = '';
+      if (typeof window !== 'undefined') {
+        studentId = sessionStorage.getItem('selectedStudentId') || '';
+      }
 
-    if (studentId) {
-      try {
-        // โหลดข้อมูลนักศึกษา
-        const profileData = await getStudentProfile(studentId);
-        setStudentInfo(profileData);
+      if (studentId) {
+        try {
+          // โหลดข้อมูลนักศึกษา
+          const profileData = await getStudentProfile(studentId);
+          setStudentInfo(profileData);
 
-        // โหลดข้อมูล courseplan checking
+          // โหลดข้อมูล courseplan checking
           const courseplanRes = await fetch(`http://localhost:4000/api/student/courseplan-checking`);
-        if (!courseplanRes.ok) throw new Error('Cannot fetch courseplan data');
-        const courseplanData = await courseplanRes.json();
+          if (!courseplanRes.ok) throw new Error('Cannot fetch courseplan data');
+          const courseplanData = await courseplanRes.json();
 
-        if (courseplanData?.data) {
-          const failed = courseplanData.data.filter((item: any) => !item.isPass);
-          const passed = courseplanData.data.filter((item: any) => item.isPass);
+          console.log("dataaaaaaaaaaa", courseplanData);
+
+          // const failed = courseplanData.data.filter((item: any) => !item.isPass);
+          // const passed = courseplanData.data.filter((item: any) => item.isPass);
+
+          const passed = courseplanData.passedCourses;
+
+          const failed = courseplanData.failedCourses;
+          console.log("datapass", passed);
+          console.log("datafail", failed);
+
           setFailedCourses(failed);
           setPassedCourses(passed);
+
+        } catch (e) {
+          console.error('Error loading data:', e);
         }
-      } catch (e) {
-        console.error('Error loading data:', e);
       }
     }
-  }
 
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
 
   // ตารางวิชาที่ไม่ผ่านตามแผน (mock เหมือนเดิม)
   const failedCoursesColumns = [
@@ -330,6 +338,7 @@ export default function ReportPage() {
         <br />
 
         {/* Failed Courses Table */}
+         <Card title="ผลการเรียนรายวิชาตกค้างที่ยังไม่ผ่าน" className="mb-6 shadow-md">
         <Table
           columns={failedCoursesColumns}
           dataSource={[
@@ -338,7 +347,7 @@ export default function ReportPage() {
               year: item.semester,
               semester: item.semesterPartInYear,
               category: item.category || '-',
-              courseCode: item.courseCode || '-',
+              courseCode: item.subjectCode || '-',
               courseName: item.courseName || '-',
               credits: item.credits || '-',
               status: item.status || '-',
@@ -360,40 +369,40 @@ export default function ReportPage() {
           rowClassName={(record) => record.key === 'summary' ? 'bg-blue-200 font-bold' : ''}
         />
 
-
+</Card>
         {/* Passed Courses Table */}
         <Card title="ผลการเรียนรายวิชาตกค้างที่ผ่านแล้ว" className="mb-6 shadow-md">
-              <Table
-        columns={passedCoursesColumns}
-        dataSource={[
-          ...passedCourses.map((item, index) => ({
-            key: index,
-            year: item.semester,
-            semester: item.semesterPartInYear,
-            category: item.category || '-',
-            courseCode: item.courseCode || '-',
-            courseName: item.courseName || '-',
-            credits: item.credits || '-',
-            status: item.status || '-',
-          })),
-          {
-            key: 'summary',
-            year: null,
-            semester: null,
-            category: null,
-            courseCode: <span className="font-bold">รวม</span>,
-            courseName: passedCourses.length.toString(),
-            credits: '-',
-            status: null,
-          },
-        ]}
-        pagination={false}
-        size="small"
-        bordered
-        rowClassName={(record) => record.key === 'summary' ? 'bg-blue-200 font-bold' : ''}
-      />
+          <Table
+            columns={passedCoursesColumns}
+            dataSource={[
+              ...passedCourses.map((item, index) => ({
+                key: index,
+                year: item.semester,
+                semester: item.semesterPartInYear,
+                category: item.category || '-',
+                courseCode: item.subjectCode || '-',
+                courseName: item.courseName || '-',
+                credits: item.credits || '-',
+                status: item.status || '-',
+              })),
+              {
+                key: 'summary',
+                year: null,
+                semester: null,
+                category: null,
+                courseCode: <span className="font-bold">รวม</span>,
+                courseName: passedCourses.length.toString(),
+                credits: '-',
+                status: null,
+              },
+            ]}
+            pagination={false}
+            size="small"
+            bordered
+            rowClassName={(record) => record.key === 'summary' ? 'bg-blue-200 font-bold' : ''}
+          />
 
-      </Card>
+        </Card>
 
         {/* Courses by Category Tabs */}
         <Card className="shadow-md">

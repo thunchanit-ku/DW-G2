@@ -2,7 +2,7 @@
   {
     "stdPlanId": 50,
     "studentId": "6520501077",
-    "subjectCourseId": 1,
+    "subjectCourseId": 1384,
     "gradeLabelId": null,
     "grade": "A",
     "isPass": true,
@@ -13,7 +13,7 @@
   {
     "stdPlanId": 51,
     "studentId": "6520501077",
-    "subjectCourseId": 2,
+    "subjectCourseId": 1385,
     "gradeLabelId": null,
     "grade": "C",
     "isPass": true,
@@ -24,7 +24,7 @@
   {
     "stdPlanId": 52,
     "studentId": "6520501077",
-    "subjectCourseId": 3,
+    "subjectCourseId": 1386,
     "gradeLabelId": null,
     "grade": "B",
     "isPass": true,
@@ -35,7 +35,7 @@
   {
     "stdPlanId": 53,
     "studentId": "6520501077",
-    "subjectCourseId": 4,
+    "subjectCourseId": 1387,
     "gradeLabelId": null,
     "grade": null,
     "isPass": false,
@@ -46,7 +46,7 @@
   {
     "stdPlanId": 54,
     "studentId": "6520501077",
-    "subjectCourseId": 5,
+    "subjectCourseId": 1388,
     "gradeLabelId": null,
     "grade": null,
     "isPass": false,
@@ -57,7 +57,7 @@
   {
     "stdPlanId": 55,
     "studentId": "6520501077",
-    "subjectCourseId": 6,
+    "subjectCourseId": 1389,
     "gradeLabelId": null,
     "grade": null,
     "isPass": false,
@@ -68,7 +68,7 @@
   {
     "stdPlanId": 56,
     "studentId": "6520501077",
-    "subjectCourseId": 7,
+    "subjectCourseId": 1390,
     "gradeLabelId": null,
     "grade": null,
     "isPass": false,

@@ -216,7 +216,8 @@ async getStudentProfile(studentId: string) {
   try {
     // 1️⃣ path ไปที่ root project
     const filePath = path.resolve(__dirname, '../../../mock_api_term_summary.json');
-    console.log('mock_api_term_summary.json');
+    
+    console.log('mock_api_term_summary.json' );
 
     // 2️⃣ ตรวจสอบว่ามีไฟล์อยู่ไหม
     const fileExists = await fs
@@ -241,10 +242,13 @@ async getStudentProfile(studentId: string) {
       throw new Error('ไม่พบ subjectCourseId ในไฟล์ JSON');
     }
 
+    console.log("subjectcourseId" , subjectCourseIds);
+
+
     // 5️⃣ เขียน SQL JOIN query (ใช้ query เดิมของคุณ)
     const sql = `
       SELECT 
-    s.nameSubjectThai , scg.subjectCategoryName , s.credit
+    s.nameSubjectThai , scg.subjectCategoryName , s.credit , s.subjectCategoryId , sc.subjectCourseId , s.subjectCode
     FROM subjectCourse as sc
     JOIN subject s ON sc.subjectId = s.subjectId
 	  JOIN subjectCategory scg ON scg.subjectCategoryId = s.subjectCategoryId
@@ -253,7 +257,7 @@ async getStudentProfile(studentId: string) {
 
     // 6️⃣ รัน query ผ่าน Repository ที่เกี่ยวข้อง เช่น courseListRepo
     const dbResult = await this.courseListRepo.query(sql, [subjectCourseIds]);
-    console.log(dbResult)
+    console.log("dveeeeeeee",dbResult);
     // 7️⃣ รวมข้อมูล JSON เดิมกับข้อมูลจากฐานข้อมูล
    const mergedData = jsonData.map((item: any) => {
       const match = dbResult.find(
@@ -263,16 +267,19 @@ async getStudentProfile(studentId: string) {
         stdPlanId: item.stdPlanId,
         studentId: item.studentId,
         courseCode: item.subjectCourseId,
-        courseName: match?.nameSubjectThai || '-',
-        credits: match?.credit || '-',
-        category: match?.subjectCategoryName || '-',
+        courseName: match.nameSubjectThai || '-',
+        credits: match.credit || '-',
+        category: match.subjectCategoryName || '-',
         semester: item.semester,
         semesterPartInYear: item.semesterPartInYear,
         status: item.note || item.grade || '-',
         isPass: item.isPass,
+        subjectCode: match.subjectCode || '-'
       };
     });
 
+
+    console.log("finish" , mergedData);
     // ✅ แยกข้อมูลตามสถานะ (ผ่าน / ไม่ผ่าน)
     const passedCourses = mergedData.filter((i) => i.isPass);
     const failedCourses = mergedData.filter((i) => !i.isPass);
