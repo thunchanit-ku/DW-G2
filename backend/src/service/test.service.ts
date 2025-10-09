@@ -134,7 +134,7 @@ async calculateGradeProgress(studentId: string) {
             (
                 SELECT 
                     ROUND(SUM(f2.creditRegis * f2.gradeNumber) / SUM(f2.creditRegis), 2)
-                FROM fact_regis f2
+                FROM fact_register f2
                 WHERE f2.studentId = fr.studentId
                   AND (
                       f2.semesterYearInRegis < fr.semesterYearInRegis OR
@@ -142,13 +142,15 @@ async calculateGradeProgress(studentId: string) {
                        AND f2.semesterPartInRegis <= fr.semesterPartInRegis)
                   )
             ) AS GPAสะสม
-        FROM fact_regis fr
+        FROM fact_register fr
         WHERE fr.studentId = ?
         GROUP BY fr.studentId, fr.semesterYearInRegis, fr.semesterPartInRegis
         ORDER BY fr.semesterYearInRegis, fr.semesterPartInRegis
     ) AS t
     JOIN (SELECT @prev_gpa := NULL) AS vars;
   `;
+
+  console.log(sql);
 
   const result = await this.fact_regisRepo.query(sql, [studentId]);
   return result;
@@ -175,11 +177,11 @@ async getStudentProfile(studentId: string) {
       p.langProgram AS programType,
       p.nameProgram AS programName,
 
-      -- สถานภาพนักศึกษา และ GPA สะสมคำนวณจาก fact_regis
+      -- สถานภาพนักศึกษา และ GPA สะสมคำนวณจาก fact_register
       ss.status AS studentStatus,
       (
         SELECT ROUND(SUM(fr.creditRegis * fr.gradeNumber) / SUM(fr.creditRegis), 2)
-        FROM fact_regis fr
+        FROM fact_register fr
         WHERE fr.studentId = s.studentId
       ) AS gpa,
 

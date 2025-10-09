@@ -11,7 +11,7 @@ import { CourseList } from './courselist.entity';
 import { Semester } from './semester.entity';
 import { TypeRegis } from './typeregis.entity';
 
-@Entity('fact_regis')
+@Entity('fact_register')
 export class FactRegis {
     @PrimaryGeneratedColumn()
     regisId: number;

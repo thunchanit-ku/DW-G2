@@ -14,7 +14,7 @@
 ✅ student, teacher, course, subject
 ✅ program, department, school, province
 ✅ semester, room, classtime
-✅ fact_regis, fact_student, fact_term_summary
+✅ fact_register, fact_student, fact_term_summary
 ✅ และอีก 18 tables
 ```
 

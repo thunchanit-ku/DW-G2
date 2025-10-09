@@ -1217,10 +1217,10 @@ INSERT INTO `department` (`departmentId`, `departmentCode`, `departmentName`, `d
 -- --------------------------------------------------------
 
 --
--- Table structure for table `fact_regis`
+-- Table structure for table `fact_register`
 --
 
-CREATE TABLE `fact_regis` (
+CREATE TABLE `fact_register` (
   `regisId` int(11) NOT NULL,
   `studentId` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
   `semesterId` int(11) NOT NULL,
@@ -1239,10 +1239,10 @@ CREATE TABLE `fact_regis` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Dumping data for table `fact_regis`
+-- Dumping data for table `fact_register`
 --
 
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (43392, '6320500549', 189, 630, '02999144', 731, 731, 'A', 4, 1, 1, 1, 1, 2563, 'ภาคต้น'),
 (43393, '6320500549', 189, 627, '01420113', 735, 735, 'A', 4, 1, 1, 1, 1, 2563, 'ภาคต้น'),
 (43394, '6320500549', 189, 628, '01999111', 717, 717, 'A', 4, 2, 1, 1, 1, 2563, 'ภาคต้น'),
@@ -1797,7 +1797,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (43943, '6320500581', 190, 643, '01417168', 702, 702, 'D+', 1.5, 3, 1, 1, 2, 2563, 'ภาคปลาย'),
 (43944, '6320500581', 190, 646, '02204111', 700, 700, 'D+', 1.5, 3, 1, 1, 2, 2563, 'ภาคปลาย'),
 (43945, '6320500581', 190, 649, '02204172', 712, 712, 'F', 0, 1, 1, 1, 2, 2563, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (43946, '6320500590', 190, 650, '01175114', 711, 711, 'A', 4, 1, 1, 1, 2, 2563, 'ภาคปลาย'),
 (43947, '6320500590', 190, 645, '01420114', 715, 715, 'A', 4, 1, 1, 1, 2, 2563, 'ภาคปลาย'),
 (43948, '6320500590', 190, 662, '02708102', 702, 702, 'A', 4, 3, 1, 1, 2, 2563, 'ภาคปลาย'),
@@ -2342,7 +2342,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (44487, '6320502444', 191, 668, '01403117', 700, 700, 'B', 3, 3, 1, 3, 3, 2564, 'ภาคฤดูร้อน'),
 (44488, '6320502452', 191, 668, '01403117', 700, 700, 'A', 4, 3, 1, 3, 3, 2564, 'ภาคฤดูร้อน'),
 (44489, '6320502452', 191, 680, '01387103', 700, 700, 'A', 4, 3, 1, 3, 3, 2564, 'ภาคฤดูร้อน');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (44490, '6320502461', 191, 750, '03751111', 700, 700, 'A', 4, 3, 1, 3, 3, 2564, 'ภาคฤดูร้อน'),
 (44491, '6320502461', 191, 668, '01403117', 700, 700, 'B', 3, 3, 1, 3, 3, 2564, 'ภาคฤดูร้อน'),
 (44492, '6320502479', 191, 750, '03751111', 700, 700, 'A', 4, 3, 1, 3, 3, 2564, 'ภาคฤดูร้อน'),
@@ -2892,7 +2892,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (45036, '6320501561', 193, 646, '02204111', 700, 700, 'C+', 2.5, 3, 1, 2, 2, 2564, 'ภาคปลาย'),
 (45037, '6320501561', 193, 687, '02204222', 711, 711, 'D+', 1.5, 1, 1, 2, 2, 2564, 'ภาคปลาย'),
 (45038, '6320501561', 193, 688, '02204223', 700, 700, 'F', 0, 3, 1, 2, 2, 2564, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (45039, '6320501561', 193, 701, '01999213', 703, 703, 'W', 0, 3, 1, 2, 2, 2564, 'ภาคปลาย'),
 (45040, '6320501588', 193, 686, '01208111', 700, 700, 'A', 4, 3, 1, 2, 2, 2564, 'ภาคปลาย'),
 (45041, '6320501588', 193, 691, '02204272', 711, 711, 'A', 4, 1, 1, 2, 2, 2564, 'ภาคปลาย'),
@@ -3442,7 +3442,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (45610, '6320503017', 195, 712, '02204311', 700, 700, 'C+', 2.5, 3, 1, 3, 1, 2565, 'ภาคต้น'),
 (45611, '6320503017', 195, 714, '02204351', 700, 700, 'C+', 2.5, 3, 1, 3, 1, 2565, 'ภาคต้น'),
 (45612, '6320503033', 195, 701, '01999213', 703, 703, 'A', 4, 3, 1, 3, 1, 2565, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (45613, '6320503033', 195, 713, '02204321', 700, 700, 'B+', 3.5, 3, 1, 3, 1, 2565, 'ภาคต้น'),
 (45614, '6320503033', 195, 716, '02204381', 712, 712, 'C', 2, 1, 1, 3, 1, 2565, 'ภาคต้น'),
 (45615, '6320503033', 195, 670, '02204221', 700, 700, 'C+', 2.5, 3, 1, 3, 1, 2565, 'ภาคต้น'),
@@ -3990,7 +3990,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (47177, '6420502039', 192, 626, '01420111', 701, 701, 'A', 4, 3, 1, 1, 1, 2564, 'ภาคต้น'),
 (47178, '6420502039', 192, 627, '01420113', 730, 730, 'A', 4, 1, 1, 1, 1, 2564, 'ภาคต้น'),
 (47179, '6420502039', 192, 628, '01999111', 717, 717, 'A', 4, 2, 1, 1, 1, 2564, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (47180, '6420502039', 192, 631, '01355101', 709, 709, 'B', 3, 3, 1, 1, 1, 2564, 'ภาคต้น'),
 (47181, '6420502039', 192, 625, '01417167', 700, 700, 'B', 3, 3, 1, 1, 1, 2564, 'ภาคต้น'),
 (47182, '6420502039', 192, 640, '01999021', 702, 702, 'B+', 3.5, 3, 1, 1, 1, 2564, 'ภาคต้น'),
@@ -4544,7 +4544,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (47730, '6420500982', 193, 643, '01417168', 702, 702, 'C+', 2.5, 3, 1, 1, 2, 2564, 'ภาคปลาย'),
 (47731, '6420500991', 193, 633, '01355103', 704, 704, 'A', 4, 3, 1, 1, 2, 2564, 'ภาคปลาย'),
 (47732, '6420500991', 193, 721, '01200101', 701, 701, 'A', 4, 3, 1, 1, 2, 2564, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (47733, '6420500991', 193, 647, '02204121', 700, 700, 'B', 3, 3, 1, 1, 2, 2564, 'ภาคปลาย'),
 (47734, '6420500991', 193, 649, '02204172', 712, 712, 'B', 3, 1, 1, 1, 2, 2564, 'ภาคปลาย'),
 (47735, '6420500991', 193, 644, '01420112', 700, 700, 'B+', 3.5, 3, 1, 1, 2, 2564, 'ภาคปลาย'),
@@ -5089,7 +5089,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (48274, '6420503655', 194, 668, '01403117', 700, 700, 'D', 1, 3, 1, 3, 3, 2565, 'ภาคฤดูร้อน'),
 (48275, '6420503663', 194, 680, '01387103', 700, 700, 'A', 4, 3, 1, 3, 3, 2565, 'ภาคฤดูร้อน'),
 (48276, '6420503663', 194, 668, '01403117', 700, 700, 'C', 2, 3, 1, 3, 3, 2565, 'ภาคฤดูร้อน');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (48277, '6420503680', 194, 680, '01387103', 700, 700, 'A', 4, 3, 1, 3, 3, 2565, 'ภาคฤดูร้อน'),
 (48278, '6420503680', 194, 668, '01403117', 700, 700, 'C', 2, 3, 1, 3, 3, 2565, 'ภาคฤดูร้อน'),
 (48279, '6420503698', 194, 680, '01387103', 700, 700, 'A', 4, 3, 1, 3, 3, 2565, 'ภาคฤดูร้อน'),
@@ -5640,7 +5640,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (48824, '6420502101', 196, 686, '01208111', 700, 700, 'A', 4, 3, 1, 2, 2, 2565, 'ภาคปลาย'),
 (48825, '6420502101', 196, 691, '02204272', 711, 711, 'A', 4, 1, 1, 2, 2, 2565, 'ภาคปลาย'),
 (48826, '6420502101', 196, 690, '02204241', 700, 700, 'B', 3, 3, 1, 2, 2, 2565, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (48827, '6420502101', 196, 687, '02204222', 711, 711, 'B+', 3.5, 1, 1, 2, 2, 2565, 'ภาคปลาย'),
 (48828, '6420502101', 196, 689, '02204232', 700, 700, 'C+', 2.5, 3, 1, 2, 2, 2565, 'ภาคปลาย'),
 (48829, '6420502101', 196, 692, '02204281', 700, 700, 'C+', 2.5, 3, 1, 2, 2, 2565, 'ภาคปลาย'),
@@ -6188,7 +6188,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (49371, '6420503469', 201, 711, '02204224', 712, 712, 'A', 4, 1, 1, 3, 1, 2566, 'ภาคต้น'),
 (49372, '6420503469', 201, 715, '02204361', 700, 700, 'A', 4, 3, 1, 3, 1, 2566, 'ภาคต้น'),
 (49373, '6420503469', 201, 751, '01371111', 700, 700, 'C', 2, 1, 1, 3, 1, 2566, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (49374, '6420503469', 201, 714, '02204351', 700, 700, 'C', 2, 3, 1, 3, 1, 2566, 'ภาคต้น'),
 (49375, '6420503469', 201, 713, '02204321', 700, 700, 'C+', 2.5, 3, 1, 3, 1, 2566, 'ภาคต้น'),
 (49376, '6420503469', 201, 712, '02204311', 700, 700, 'C+', 2.5, 3, 1, 3, 1, 2566, 'ภาคต้น'),
@@ -6742,7 +6742,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (61021, '6520503339', 195, 824, '01999021', 702, 702, 'B', 3, 3, 1, 1, 1, 2565, 'ภาคต้น'),
 (61022, '6520503339', 195, 809, '01355102', 707, 707, 'B+', 3.5, 3, 1, 1, 1, 2565, 'ภาคต้น'),
 (61023, '6520503339', 195, 802, '01417167', 702, 702, 'D+', 1.5, 3, 1, 1, 1, 2565, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (61024, '6520503339', 195, 803, '01420111', 701, 701, 'D+', 1.5, 3, 1, 1, 1, 2565, 'ภาคต้น'),
 (61025, '6520503339', 195, 806, '02204171', 700, 700, 'F', 0, 3, 1, 1, 1, 2565, 'ภาคต้น'),
 (61026, '6520503339', 195, 808, '01355101', 99, 99, 'P', 0, 3, 1, 1, 1, 2565, 'ภาคต้น'),
@@ -7292,7 +7292,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (61570, '6520503495', 196, 832, '02204172', 711, 711, 'B', 3, 1, 1, 1, 2, 2565, 'ภาคปลาย'),
 (61571, '6520503495', 196, 829, '01420114', 717, 717, 'B+', 3.5, 1, 1, 1, 2, 2565, 'ภาคปลาย'),
 (61572, '6520503495', 196, 830, '02204111', 700, 700, 'C', 2, 3, 1, 1, 2, 2565, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (61573, '6520503495', 196, 827, '01417168', 702, 702, 'C', 2, 3, 1, 1, 2, 2565, 'ภาคปลาย'),
 (61574, '6520503495', 196, 828, '01420112', 700, 700, 'D+', 1.5, 3, 1, 1, 2, 2565, 'ภาคปลาย'),
 (61575, '6520503509', 196, 829, '01420114', 717, 717, 'A', 4, 1, 1, 1, 2, 2565, 'ภาคปลาย'),
@@ -7843,7 +7843,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (62120, '6620501397', 201, 802, '01417167', 700, 700, 'W', 0, 3, 1, 1, 1, 2566, 'ภาคต้น'),
 (62121, '6620501401', 201, 804, '01420113', 728, 728, 'A', 4, 1, 1, 1, 1, 2566, 'ภาคต้น'),
 (62122, '6620501401', 201, 805, '01999111', 717, 717, 'A', 4, 2, 1, 1, 1, 2566, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (62123, '6620501401', 201, 824, '01999021', 702, 702, 'B', 3, 3, 1, 1, 1, 2566, 'ภาคต้น'),
 (62124, '6620501401', 201, 802, '01417167', 700, 700, 'B', 3, 3, 1, 1, 1, 2566, 'ภาคต้น'),
 (62125, '6620501401', 201, 808, '01355101', 712, 712, 'C+', 2.5, 3, 1, 1, 1, 2566, 'ภาคต้น'),
@@ -8395,7 +8395,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (77222, '6320501278', 189, 1087, '01417167', 702, 702, 'A', 4, 3, 1, 1, 1, 2563, 'ภาคต้น'),
 (77223, '6320501278', 189, 1086, '01403117', 701, 701, 'B+', 3.5, 3, 1, 1, 1, 2563, 'ภาคต้น'),
 (77224, '6320501278', 189, 1085, '01403114', 719, 719, 'B+', 3.5, 1, 1, 1, 1, 2563, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (77225, '6320501278', 189, 1253, '01355102', 715, 715, 'B+', 3.5, 3, 1, 1, 1, 2563, 'ภาคต้น'),
 (77226, '6320501278', 189, 1444, '02204101', 702, 702, 'C+', 2.5, 3, 1, 1, 1, 2563, 'ภาคต้น'),
 (77227, '6320501278', 189, 1088, '01420111', 700, 700, 'C+', 2.5, 3, 1, 1, 1, 2563, 'ภาคต้น'),
@@ -8939,7 +8939,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (77765, '6320502029', 190, 1102, '01420114', 727, 727, 'F', 0, 1, 1, 1, 2, 2563, 'ภาคปลาย'),
 (77766, '6320502037', 190, 1104, '01175165', 714, 714, 'A', 4, 1, 1, 1, 2, 2563, 'ภาคปลาย'),
 (77767, '6320502037', 190, 1102, '01420114', 728, 728, 'A', 4, 1, 1, 1, 2, 2563, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (77768, '6320502037', 190, 1253, '02727101', 700, 700, 'A', 4, 3, 1, 1, 2, 2563, 'ภาคปลาย'),
 (77769, '6320502037', 190, 1103, '01999021', 700, 700, 'B', 3, 3, 1, 1, 2, 2563, 'ภาคปลาย'),
 (77770, '6320502037', 190, 1084, '01208111', 703, 703, 'C', 2, 3, 1, 1, 2, 2563, 'ภาคปลาย'),
@@ -9482,7 +9482,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (78307, '6320502819', 192, 1123, '01417267', 701, 701, 'A', 4, 3, 1, 2, 1, 2564, 'ภาคต้น'),
 (78308, '6320502819', 192, 1104, '01175165', 713, 713, 'A', 4, 1, 1, 2, 1, 2564, 'ภาคต้น'),
 (78309, '6320502819', 192, 1445, '01203211', 700, 700, 'B', 3, 3, 1, 2, 1, 2564, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (78310, '6320502819', 192, 1122, '01203221', 700, 700, 'B', 3, 3, 1, 2, 1, 2564, 'ภาคต้น'),
 (78311, '6320502819', 192, 1165, '01999141', 702, 702, 'B+', 3.5, 3, 1, 2, 1, 2564, 'ภาคต้น'),
 (78312, '6320502819', 192, 1124, '01213211', 703, 703, 'C+', 2.5, 3, 1, 2, 1, 2564, 'ภาคต้น'),
@@ -10022,7 +10022,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (78846, '6320500425', 195, 1181, '01203323', 700, 700, 'D', 1, 3, 1, 3, 1, 2565, 'ภาคต้น'),
 (78847, '6320500425', 195, 1205, '02708102', 701, 701, 'W', 0, 3, 1, 3, 1, 2565, 'ภาคต้น'),
 (78848, '6320500433', 195, 1205, '02708102', 701, 701, 'B+', 3.5, 3, 1, 3, 1, 2565, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (78849, '6320500433', 195, 1184, '01203381', 711, 711, 'C+', 2.5, 1, 1, 3, 1, 2565, 'ภาคต้น'),
 (78850, '6320500433', 195, 1145, '01203212', 711, 711, 'C+', 2.5, 1, 1, 3, 1, 2565, 'ภาคต้น'),
 (78851, '6320500433', 195, 1181, '01203323', 700, 700, 'D', 1, 3, 1, 3, 1, 2565, 'ภาคต้น'),
@@ -10565,7 +10565,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (79388, '6320502070', 196, 1211, '01203331', 700, 700, 'C', 2, 4, 1, 3, 2, 2565, 'ภาคปลาย'),
 (79389, '6320502070', 196, 1210, '01203251', 700, 700, 'C+', 2.5, 3, 1, 3, 2, 2565, 'ภาคปลาย'),
 (79390, '6320502070', 196, 1181, '01203323', 700, 700, 'D', 1, 3, 1, 3, 2, 2565, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (79391, '6320502070', 196, 1185, '01209211', 702, 702, 'D', 1, 3, 1, 3, 2, 2565, 'ภาคปลาย'),
 (79392, '6320502070', 196, 1235, '01203462', 700, 700, 'D', 1, 3, 1, 3, 2, 2565, 'ภาคปลาย'),
 (79393, '6320502070', 196, 1253, '01209312', 712, 712, 'D+', 1.5, 1, 1, 3, 2, 2565, 'ภาคปลาย'),
@@ -11112,7 +11112,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (79934, '6420500842', 192, 1089, '01420113', 725, 725, 'A', 4, 1, 1, 1, 1, 2564, 'ภาคต้น'),
 (79935, '6420500842', 192, 1088, '01420111', 700, 700, 'B', 3, 3, 1, 1, 1, 2564, 'ภาคต้น'),
 (79936, '6420500842', 192, 1253, '01355101', 714, 714, 'B', 3, 3, 1, 1, 1, 2564, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (79937, '6420500842', 192, 1085, '01403114', 721, 721, 'B', 3, 1, 1, 1, 1, 2564, 'ภาคต้น'),
 (79938, '6420500842', 192, 1086, '01403117', 700, 700, 'C', 2, 3, 1, 1, 1, 2564, 'ภาคต้น'),
 (79939, '6420500842', 192, 1087, '01417167', 702, 702, 'C', 2, 3, 1, 1, 1, 2564, 'ภาคต้น'),
@@ -11657,7 +11657,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (80478, '6420500842', 193, 1100, '01417168', 702, 702, 'D+', 1.5, 3, 1, 1, 2, 2564, 'ภาคปลาย'),
 (80479, '6420501547', 193, 1102, '01420114', 728, 728, 'D', 1, 1, 1, 1, 2, 2564, 'ภาคปลาย'),
 (80480, '6420501547', 193, 1103, '01999021', 700, 700, 'D+', 1.5, 3, 1, 1, 2, 2564, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (80481, '6420501547', 193, 1084, '01208111', 704, 704, 'D+', 1.5, 3, 1, 1, 2, 2564, 'ภาคปลาย'),
 (80482, '6420501547', 193, 1099, '01208221', 701, 701, 'F', 0, 3, 1, 1, 2, 2564, 'ภาคปลาย'),
 (80483, '6420501547', 193, 1100, '01417168', 702, 702, 'F', 0, 3, 1, 1, 2, 2564, 'ภาคปลาย'),
@@ -12199,7 +12199,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (81019, '6420501636', 195, 1122, '01203221', 700, 700, 'C+', 2.5, 3, 1, 2, 1, 2565, 'ภาคต้น'),
 (81020, '6420501636', 195, 1445, '01203211', 700, 700, 'C+', 2.5, 3, 1, 2, 1, 2565, 'ภาคต้น'),
 (81021, '6420501636', 195, 1253, '01355103', 712, 712, 'D+', 1.5, 3, 1, 2, 1, 2565, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (81022, '6420501636', 195, 1123, '01417267', 701, 701, 'F', 0, 3, 1, 2, 1, 2565, 'ภาคต้น'),
 (81023, '6420501644', 195, 1104, '01175121', 712, 712, 'A', 4, 1, 1, 2, 1, 2565, 'ภาคต้น'),
 (81024, '6420501644', 195, 1109, '01200101', 700, 700, 'A', 4, 3, 1, 2, 1, 2565, 'ภาคต้น'),
@@ -12745,7 +12745,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (81564, '6420501741', 196, 1146, '01203222', 700, 700, 'D', 1, 3, 1, 2, 2, 2565, 'ภาคปลาย'),
 (81565, '6420501741', 196, 1445, '01203211', 700, 700, 'D+', 1.5, 3, 1, 2, 2, 2565, 'ภาคปลาย'),
 (81566, '6420501741', 196, 1123, '01417267', 700, 700, 'F', 0, 3, 1, 2, 2, 2565, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (81567, '6420501741', 196, 1147, '01203223', 700, 700, 'W', 0, 3, 1, 2, 2, 2565, 'ภาคปลาย'),
 (81568, '6420501750', 196, 1173, '01371111', 702, 702, 'A', 4, 1, 1, 2, 2, 2565, 'ภาคปลาย'),
 (81569, '6420501750', 196, 1165, '01999141', 700, 700, 'B+', 3.5, 3, 1, 2, 2, 2565, 'ภาคปลาย'),
@@ -13287,7 +13287,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (82105, '6420501598', 201, 1184, '01203381', 711, 711, 'C+', 2.5, 1, 1, 3, 1, 2566, 'ภาคต้น'),
 (82106, '6420501598', 201, 1182, '01203352', 700, 700, 'D', 1, 3, 1, 3, 1, 2566, 'ภาคต้น'),
 (82107, '6420501598', 201, 1181, '01203323', 700, 700, 'D', 1, 3, 1, 3, 1, 2566, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (82108, '6420501598', 201, 1123, '01417267', 701, 701, 'D', 1, 3, 1, 3, 1, 2566, 'ภาคต้น'),
 (82109, '6420501598', 201, 1185, '01209211', 700, 700, 'F', 0, 3, 1, 3, 1, 2566, 'ภาคต้น'),
 (82110, '6420501601', 201, 1139, '02728101', 700, 700, 'A', 4, 3, 1, 3, 1, 2566, 'ภาคต้น'),
@@ -13834,7 +13834,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (82651, '6520501638', 195, 1088, '01420111', 700, 700, 'D+', 1.5, 3, 1, 1, 1, 2565, 'ภาคต้น'),
 (82652, '6520501646', 195, 1090, '01999111', 714, 714, 'A', 4, 2, 1, 1, 1, 2565, 'ภาคต้น'),
 (82653, '6520501646', 195, 1089, '01420113', 723, 723, 'B', 3, 1, 1, 1, 1, 2565, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (82654, '6520501646', 195, 1086, '01403117', 700, 700, 'C', 2, 3, 1, 1, 1, 2565, 'ภาคต้น'),
 (82655, '6520501646', 195, 1085, '01403114', 723, 723, 'C', 2, 1, 1, 1, 1, 2565, 'ภาคต้น'),
 (82656, '6520501646', 195, 1253, '01355101', 715, 715, 'C', 2, 3, 1, 1, 1, 2565, 'ภาคต้น'),
@@ -14379,7 +14379,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (83195, '6520501719', 196, 1087, '01417167', 700, 700, 'D', 1, 3, 1, 1, 2, 2565, 'ภาคปลาย'),
 (83196, '6520501727', 196, 1104, '01175122', 713, 713, 'A', 4, 1, 1, 1, 2, 2565, 'ภาคปลาย'),
 (83197, '6520501727', 196, 1170, '03751111', 701, 701, 'A', 4, 3, 1, 1, 2, 2565, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (83198, '6520501727', 196, 1133, '01999213', 702, 702, 'A', 4, 3, 1, 1, 2, 2565, 'ภาคปลาย'),
 (83199, '6520501727', 196, 1141, '02999044', 700, 700, 'B', 3, 3, 1, 1, 2, 2565, 'ภาคปลาย'),
 (83200, '6520501727', 196, 1103, '01999021', 700, 700, 'C', 2, 3, 1, 1, 2, 2565, 'ภาคปลาย'),
@@ -14922,7 +14922,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (83737, '6520501751', 201, 1148, '01203224', 700, 700, 'F', 0, 2, 1, 2, 1, 2566, 'ภาคต้น'),
 (83738, '6520501760', 201, 1109, '01200101', 700, 700, 'A', 4, 3, 1, 2, 1, 2566, 'ภาคต้น'),
 (83739, '6520501760', 201, 1135, '02032303', 701, 701, 'B', 3, 3, 1, 2, 1, 2566, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (83740, '6520501760', 201, 1134, '02032304', 701, 701, 'C+', 2.5, 2, 1, 2, 1, 2566, 'ภาคต้น'),
 (83741, '6520501760', 201, 1445, '01203211', 700, 700, 'D', 1, 3, 1, 2, 1, 2566, 'ภาคต้น'),
 (83742, '6520501760', 201, 1253, '01355103', 701, 701, 'D', 1, 3, 1, 2, 1, 2566, 'ภาคต้น'),
@@ -15475,7 +15475,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (84289, '6220503287', 202, 630, '02999144', 731, 731, 'A', 4, 1, 1, 1, 1, 2562, 'ภาคต้น'),
 (84290, '6220503287', 202, 628, '01999111', 717, 717, 'A', 4, 2, 1, 1, 1, 2562, 'ภาคต้น'),
 (84291, '6220503287', 202, 640, '01999021', 702, 702, 'B', 3, 3, 1, 1, 1, 2562, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (84292, '6220503287', 202, 627, '01420113', 730, 730, 'D', 1, 1, 1, 1, 1, 2562, 'ภาคต้น'),
 (84293, '6220503287', 202, 629, '02204171', 700, 700, 'D', 1, 3, 1, 1, 1, 2562, 'ภาคต้น'),
 (84294, '6220503287', 202, 626, '01420111', 701, 701, 'F', 0, 3, 1, 1, 1, 2562, 'ภาคต้น'),
@@ -16026,7 +16026,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (84839, '6220503279', 203, 697, '01999033', 703, 703, 'A', 4, 3, 1, 1, 2, 2562, 'ภาคปลาย'),
 (84840, '6220503279', 203, 650, '01175163', 712, 712, 'B+', 3.5, 1, 1, 1, 2, 2562, 'ภาคปลาย'),
 (84841, '6220503279', 203, 649, '02204172', 711, 711, 'B+', 3.5, 1, 1, 1, 2, 2562, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (84842, '6220503279', 203, 646, '02204111', 700, 700, 'C', 2, 3, 1, 1, 2, 2562, 'ภาคปลาย'),
 (84843, '6220503279', 203, 647, '02204121', 700, 700, 'C+', 2.5, 3, 1, 1, 2, 2562, 'ภาคปลาย'),
 (84844, '6220503279', 203, 626, '01420111', 700, 700, 'D+', 1.5, 3, 1, 1, 2, 2562, 'ภาคปลาย'),
@@ -16576,7 +16576,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (85388, '6220503309', 189, 670, '02204221', 700, 700, 'C+', 2.5, 3, 1, 2, 1, 2563, 'ภาคต้น'),
 (85389, '6220503309', 189, 672, '02204271', 700, 700, 'C+', 2.5, 3, 1, 2, 1, 2563, 'ภาคต้น'),
 (85390, '6220503309', 189, 671, '02204231', 700, 700, 'D', 1, 3, 1, 2, 1, 2563, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (85391, '6220503309', 189, 669, '01417267', 700, 700, 'W', 0, 3, 1, 2, 1, 2563, 'ภาคต้น'),
 (85392, '6220503317', 189, 701, '01999213', 701, 701, 'A', 4, 3, 1, 2, 1, 2563, 'ภาคต้น'),
 (85393, '6220503317', 189, 667, '01403114', 722, 722, 'B', 3, 1, 1, 2, 1, 2563, 'ภาคต้น'),
@@ -17125,7 +17125,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (85936, '6220503341', 190, 688, '02204223', 700, 700, 'C', 2, 3, 1, 2, 2, 2563, 'ภาคปลาย'),
 (85937, '6220503341', 190, 686, '01208111', 700, 700, 'C+', 2.5, 3, 1, 2, 2, 2563, 'ภาคปลาย'),
 (85938, '6220503341', 190, 669, '01417267', 700, 700, 'C+', 2.5, 3, 1, 2, 2, 2563, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (85939, '6220503341', 190, 689, '02204232', 700, 700, 'D+', 1.5, 3, 1, 2, 2, 2563, 'ภาคปลาย'),
 (85940, '6220503350', 190, 687, '02204222', 712, 712, 'A', 4, 1, 1, 2, 2, 2563, 'ภาคปลาย'),
 (85941, '6220503350', 190, 758, '03752111', 700, 700, 'A', 4, 1, 1, 2, 2, 2563, 'ภาคปลาย'),
@@ -17673,7 +17673,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (86483, '6220503341', 192, 713, '02204321', 700, 700, 'B', 3, 3, 1, 3, 1, 2564, 'ภาคต้น'),
 (86484, '6220503341', 192, 712, '02204311', 700, 700, 'C', 2, 3, 1, 3, 1, 2564, 'ภาคต้น'),
 (86485, '6220503341', 192, 711, '02204224', 711, 711, 'C', 2, 1, 1, 3, 1, 2564, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (86486, '6220503341', 192, 750, '01355209', 701, 701, 'C', 2, 3, 1, 3, 1, 2564, 'ภาคต้น'),
 (86487, '6220503341', 192, 715, '02204361', 700, 700, 'C', 2, 3, 1, 3, 1, 2564, 'ภาคต้น'),
 (86488, '6220503341', 192, 716, '02204381', 711, 711, 'C', 2, 1, 1, 3, 1, 2564, 'ภาคต้น'),
@@ -18221,7 +18221,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (87030, '6220504704', 193, 732, '02206111', 701, 701, 'D+', 1.5, 3, 1, 3, 2, 2564, 'ภาคปลาย'),
 (87031, '6220504704', 193, 687, '02204222', 711, 711, 'D+', 1.5, 1, 1, 3, 2, 2564, 'ภาคปลาย'),
 (87032, '6220504721', 193, 731, '02204497', 700, 700, 'A', 4, 1, 1, 3, 2, 2564, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (87033, '6220504721', 193, 740, '02714101', 702, 702, 'A', 4, 3, 1, 3, 2, 2564, 'ภาคปลาย'),
 (87034, '6220504721', 193, 692, '02204281', 700, 700, 'B+', 3.5, 3, 1, 3, 2, 2564, 'ภาคปลาย'),
 (87035, '6220504721', 193, 729, '02204371', 700, 700, 'C', 2, 3, 1, 3, 2, 2564, 'ภาคปลาย'),
@@ -18774,7 +18774,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (87582, '6220502191', 196, 534, '01417267', 700, 700, 'D', 1, 3, 1, 4, 2, 2565, 'ภาคปลาย'),
 (87583, '6220502191', 196, 509, '01420112', 700, 700, 'D+', 1.5, 3, 1, 4, 2, 2565, 'ภาคปลาย'),
 (87584, '6220503163', 196, 759, '02204490', 711, 711, 'A', 4, 6, 1, 4, 2, 2565, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (87585, '6220503171', 196, 614, '02738473', 700, 700, 'A', 4, 3, 1, 4, 2, 2565, 'ภาคปลาย'),
 (87586, '6220503171', 196, 529, '02999037', 700, 700, 'A', 4, 3, 1, 4, 2, 2565, 'ภาคปลาย'),
 (87587, '6220503171', 196, 601, '02204461', 700, 700, 'A', 4, 3, 1, 4, 2, 2565, 'ภาคปลาย'),
@@ -19326,7 +19326,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (90035, '6220500601', 190, 551, '02204222', 711, 711, 'B+', 3.5, 1, 1, 2, 2, 2563, 'ภาคปลาย'),
 (90036, '6220500601', 190, 534, '01417267', 700, 700, 'B+', 3.5, 3, 1, 2, 2, 2563, 'ภาคปลาย'),
 (90037, '6220500601', 190, 498, '01355103', 708, 708, 'C', 2, 3, 1, 2, 2, 2563, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (90038, '6220500601', 190, 550, '01208111', 701, 701, 'C+', 2.5, 3, 1, 2, 2, 2563, 'ภาคปลาย'),
 (90039, '6220500601', 190, 514, '02204172', 712, 712, 'D', 1, 1, 1, 2, 2, 2563, 'ภาคปลาย'),
 (90040, '6220500601', 190, 554, '02204241', 700, 700, 'D+', 1.5, 3, 1, 2, 2, 2563, 'ภาคปลาย'),
@@ -19876,7 +19876,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (92921, '6120501711', 208, 640, '01999021', 703, 703, 'C+', 2.5, 3, 1, 1, 1, 2561, 'ภาคต้น'),
 (92922, '6120501711', 208, 626, '01420111', 701, 701, 'F', 0, 3, 1, 1, 1, 2561, 'ภาคต้น'),
 (92923, '6120501711', 208, 625, '01417167', 700, 700, 'F', 0, 3, 1, 1, 1, 2561, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (92924, '6120501711', 208, 781, '01355111', 99, 99, 'P', 0, 3, 1, 1, 1, 2561, 'ภาคต้น'),
 (92925, '6120501720', 208, 630, '02999144', 731, 731, 'A', 4, 1, 1, 1, 1, 2561, 'ภาคต้น'),
 (92926, '6120501720', 208, 628, '01999111', 717, 717, 'A', 4, 2, 1, 1, 1, 2561, 'ภาคต้น'),
@@ -20428,7 +20428,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (93472, '6120501762', 209, 645, '01420114', 725, 725, 'B', 3, 1, 1, 1, 2, 2561, 'ภาคปลาย'),
 (93473, '6120501762', 209, 647, '02204121', 700, 700, 'B', 3, 3, 1, 1, 2, 2561, 'ภาคปลาย'),
 (93474, '6120501762', 209, 782, '01355112', 702, 702, 'B+', 3.5, 3, 1, 1, 2, 2561, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (93475, '6120501762', 209, 643, '01417168', 702, 702, 'C', 2, 3, 1, 1, 2, 2561, 'ภาคปลาย'),
 (93476, '6120501762', 209, 644, '01420112', 700, 700, 'C', 2, 3, 1, 1, 2, 2561, 'ภาคปลาย'),
 (93477, '6120501762', 209, 646, '02204111', 700, 700, 'C+', 2.5, 3, 1, 1, 2, 2561, 'ภาคปลาย'),
@@ -20975,7 +20975,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (94018, '6120502645', 202, 670, '02204221', 700, 700, 'D', 1, 3, 1, 2, 1, 2562, 'ภาคต้น'),
 (94019, '6120502645', 202, 671, '02204231', 700, 700, 'F', 0, 3, 1, 2, 1, 2562, 'ภาคต้น'),
 (94020, '6120502653', 202, 709, '02999044', 701, 701, 'A', 4, 3, 1, 2, 1, 2562, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (94021, '6120502653', 202, 701, '01999213', 701, 701, 'B+', 3.5, 3, 1, 2, 1, 2562, 'ภาคต้น'),
 (94022, '6120502653', 202, 672, '02204271', 700, 700, 'C', 2, 3, 1, 2, 1, 2562, 'ภาคต้น'),
 (94023, '6120502653', 202, 670, '02204221', 700, 700, 'C', 2, 3, 1, 2, 1, 2562, 'ภาคต้น'),
@@ -21524,7 +21524,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (94566, '6120502777', 203, 687, '02204222', 711, 711, 'A', 4, 1, 1, 2, 2, 2562, 'ภาคปลาย'),
 (94567, '6120502777', 203, 689, '02204232', 700, 700, 'B', 3, 3, 1, 2, 2, 2562, 'ภาคปลาย'),
 (94568, '6120502777', 203, 686, '01208111', 705, 705, 'B+', 3.5, 3, 1, 2, 2, 2562, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (94569, '6120502777', 203, 690, '02204241', 700, 700, 'B+', 3.5, 3, 1, 2, 2, 2562, 'ภาคปลาย'),
 (94570, '6120502777', 203, 692, '02204281', 700, 700, 'C+', 2.5, 3, 1, 2, 2, 2562, 'ภาคปลาย'),
 (94571, '6120502785', 203, 701, '01999213', 700, 700, 'A', 4, 3, 1, 2, 2, 2562, 'ภาคปลาย'),
@@ -22072,7 +22072,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (95113, '6120503854', 189, 714, '02204351', 700, 700, 'C+', 2.5, 3, 1, 3, 1, 2563, 'ภาคต้น'),
 (95114, '6120503862', 189, 750, '01999141', 700, 700, 'A', 4, 3, 1, 3, 1, 2563, 'ภาคต้น'),
 (95115, '6120503862', 189, 713, '02204321', 700, 700, 'A', 4, 3, 1, 3, 1, 2563, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (95116, '6120503862', 189, 650, '01175112', 711, 711, 'A', 4, 1, 1, 3, 1, 2563, 'ภาคต้น'),
 (95117, '6120503862', 189, 721, '01200101', 700, 700, 'A', 4, 3, 1, 3, 1, 2563, 'ภาคต้น'),
 (95118, '6120503862', 189, 711, '02204224', 711, 711, 'B', 3, 1, 1, 3, 1, 2563, 'ภาคต้น'),
@@ -22620,7 +22620,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (95660, '6120504010', 190, 730, '02204372', 700, 700, 'D+', 1.5, 3, 1, 3, 2, 2563, 'ภาคปลาย'),
 (95661, '6120504010', 190, 729, '02204371', 700, 700, 'D+', 1.5, 3, 1, 3, 2, 2563, 'ภาคปลาย'),
 (95662, '6120504028', 190, 731, '02204497', 700, 700, 'B', 3, 1, 1, 3, 2, 2563, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (95663, '6120504028', 190, 626, '01420111', 701, 701, 'C', 2, 3, 1, 3, 2, 2563, 'ภาคปลาย'),
 (95664, '6120504028', 190, 625, '01417167', 700, 700, 'C', 2, 3, 1, 3, 2, 2563, 'ภาคปลาย'),
 (95665, '6120504028', 190, 735, '02204412', 700, 700, 'C', 2, 3, 1, 3, 2, 2563, 'ภาคปลาย'),
@@ -23170,7 +23170,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (96209, '6120503935', 193, 585, '01200101', 701, 701, 'A', 4, 3, 1, 4, 2, 2564, 'ภาคปลาย'),
 (96210, '6120503935', 193, 604, '02714101', 702, 702, 'A', 4, 3, 1, 4, 2, 2564, 'ภาคปลาย'),
 (96211, '6120503935', 193, 509, '01420112', 700, 700, 'B+', 3.5, 3, 1, 4, 2, 2564, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (96212, '6120503935', 193, 614, '02204482', 700, 700, 'C', 2, 3, 1, 4, 2, 2564, 'ภาคปลาย'),
 (96213, '6120503935', 193, 598, '02204472', 700, 700, 'C+', 2.5, 3, 1, 4, 2, 2564, 'ภาคปลาย'),
 (96214, '6120503943', 193, 759, '02204490', 711, 711, 'A', 4, 6, 1, 4, 2, 2564, 'ภาคปลาย'),
@@ -23723,7 +23723,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (96761, '6020501281', 206, 646, '02204111', 700, 700, 'C', 2, 3, 1, 1, 2, 2560, 'ภาคปลาย'),
 (96762, '6020501281', 206, 647, '02204121', 700, 700, 'C+', 2.5, 3, 1, 1, 2, 2560, 'ภาคปลาย'),
 (96763, '6020501281', 206, 649, '02204172', 711, 711, 'D', 1, 1, 1, 1, 2, 2560, 'ภาคปลาย');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (96764, '6020501281', 206, 644, '01420112', 700, 700, 'F', 0, 3, 1, 1, 2, 2560, 'ภาคปลาย'),
 (96765, '6020501281', 206, 643, '01417168', 702, 702, 'F', 0, 3, 1, 1, 2, 2560, 'ภาคปลาย'),
 (96766, '6020501299', 206, 650, '01175111', 711, 711, 'A', 4, 1, 1, 1, 2, 2560, 'ภาคปลาย'),
@@ -24270,7 +24270,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (97307, '6020501469', 208, 669, '01417267', 702, 702, 'C+', 2.5, 3, 1, 2, 1, 2561, 'ภาคต้น'),
 (97308, '6020501698', 208, 783, '01355113', 715, 715, 'A', 4, 3, 1, 2, 1, 2561, 'ภาคต้น'),
 (97309, '6020501698', 208, 650, '01175165', 711, 711, 'A', 4, 1, 1, 2, 1, 2561, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (97310, '6020501698', 208, 670, '02204221', 700, 700, 'A', 4, 3, 1, 2, 1, 2561, 'ภาคต้น'),
 (97311, '6020501698', 208, 668, '01403117', 703, 703, 'B', 3, 3, 1, 2, 1, 2561, 'ภาคต้น'),
 (97312, '6020501698', 208, 669, '01417267', 702, 702, 'C', 2, 3, 1, 2, 1, 2561, 'ภาคต้น'),
@@ -24818,7 +24818,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (97854, '6020501302', 202, 750, '01355208', 700, 700, 'B+', 3.5, 3, 1, 3, 1, 2562, 'ภาคต้น'),
 (97855, '6020501302', 202, 713, '02204321', 700, 700, 'B+', 3.5, 3, 1, 3, 1, 2562, 'ภาคต้น'),
 (97856, '6020501302', 202, 718, '01101101', 700, 700, 'B+', 3.5, 3, 1, 3, 1, 2562, 'ภาคต้น');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (97857, '6020501302', 202, 714, '02204351', 700, 700, 'C', 2, 3, 1, 3, 1, 2562, 'ภาคต้น'),
 (97858, '6020501302', 202, 712, '02204311', 700, 700, 'C', 2, 3, 1, 3, 1, 2562, 'ภาคต้น'),
 (97859, '6020501302', 202, 715, '02204361', 700, 700, 'C', 2, 3, 1, 3, 1, 2562, 'ภาคต้น'),
@@ -25367,7 +25367,7 @@ INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, 
 (98402, '6020500373', 204, 750, '01387104', 700, 700, 'A', 4, 3, 1, 5, 3, 2563, 'ภาคฤดูร้อน'),
 (98403, '6020500373', 204, 740, '02714101', 700, 700, 'A', 4, 3, 1, 5, 3, 2563, 'ภาคฤดูร้อน'),
 (98404, '6020500381', 204, 740, '02714101', 700, 700, 'A', 4, 3, 1, 5, 3, 2563, 'ภาคฤดูร้อน');
-INSERT INTO `fact_regis` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
+INSERT INTO `fact_register` (`regisId`, `studentId`, `semesterId`, `courseListId`, `subjectCodeInRegis`, `secLecture`, `secLab`, `gradeCharacter`, `gradeNumber`, `creditRegis`, `typeRegisId`, `studyYearInRegis`, `studyTermInRegis`, `semesterYearInRegis`, `semesterPartInRegis`) VALUES
 (98405, '6020500381', 204, 750, '01387104', 700, 700, 'B+', 3.5, 3, 1, 5, 3, 2563, 'ภาคฤดูร้อน'),
 (98406, '6020500390', 204, 750, '01387104', 700, 700, 'A', 4, 3, 1, 5, 3, 2563, 'ภาคฤดูร้อน'),
 (98407, '6020500390', 204, 740, '02714101', 700, 700, 'B+', 3.5, 3, 1, 5, 3, 2563, 'ภาคฤดูร้อน'),
@@ -31373,9 +31373,9 @@ ALTER TABLE `department`
   ADD PRIMARY KEY (`departmentId`);
 
 --
--- Indexes for table `fact_regis`
+-- Indexes for table `fact_register`
 --
-ALTER TABLE `fact_regis`
+ALTER TABLE `fact_register`
   ADD PRIMARY KEY (`regisId`),
   ADD KEY `typeRegisId` (`typeRegisId`),
   ADD KEY `semesterId` (`semesterId`),
@@ -31591,9 +31591,9 @@ ALTER TABLE `courselist`
 ALTER TABLE `department`
   MODIFY `departmentId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
--- AUTO_INCREMENT for table `fact_regis`
+-- AUTO_INCREMENT for table `fact_register`
 --
-ALTER TABLE `fact_regis`
+ALTER TABLE `fact_register`
   MODIFY `regisId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=99467;
 --
 -- AUTO_INCREMENT for table `fact_term_summary`
@@ -31738,13 +31738,13 @@ ALTER TABLE `courselist`
   ADD CONSTRAINT `courselist_ibfk_2` FOREIGN KEY (`courseGroupId`) REFERENCES `coursegroup` (`courseGroupId`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `fact_regis`
+-- Constraints for table `fact_register`
 --
-ALTER TABLE `fact_regis`
-  ADD CONSTRAINT `fact_regis_ibfk_1` FOREIGN KEY (`typeRegisId`) REFERENCES `typeregis` (`typeRegisId`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fact_regis_ibfk_2` FOREIGN KEY (`semesterId`) REFERENCES `semester` (`semesterId`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fact_regis_ibfk_8` FOREIGN KEY (`studentId`) REFERENCES `student` (`studentId`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fact_regis_ibfk_9` FOREIGN KEY (`courseListId`) REFERENCES `courselist` (`courseListId`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `fact_register`
+  ADD CONSTRAINT `fact_register_ibfk_1` FOREIGN KEY (`typeRegisId`) REFERENCES `typeregis` (`typeRegisId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fact_register_ibfk_2` FOREIGN KEY (`semesterId`) REFERENCES `semester` (`semesterId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fact_register_ibfk_8` FOREIGN KEY (`studentId`) REFERENCES `student` (`studentId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fact_register_ibfk_9` FOREIGN KEY (`courseListId`) REFERENCES `courselist` (`courseListId`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `fact_student`

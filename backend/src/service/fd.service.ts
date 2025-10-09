@@ -44,7 +44,7 @@ export class FdService {
   }
 
   async findOne(id: string) {
-    // ใช้ SQL query เพื่อดึงข้อมูลนิสิตจาก fact_regis
+    // ใช้ SQL query เพื่อดึงข้อมูลนิสิตจาก fact_register
     const sql = `
       SELECT DISTINCT
         fr.studentId,
@@ -55,7 +55,7 @@ export class FdService {
         s.parentTell,
         s.email,
         s.titleTh
-      FROM fact_regis fr
+      FROM fact_register fr
       LEFT JOIN student s ON s.studentId = fr.studentId
       WHERE fr.studentId = ?
       LIMIT 1
@@ -155,7 +155,7 @@ async calculateGradeProgress(studentId: string) {
             (
                 SELECT 
                     ROUND(SUM(f2.creditRegis * f2.gradeNumber) / SUM(f2.creditRegis), 2)
-                FROM fact_regis f2
+                FROM fact_register f2
                 WHERE f2.studentId = fr.studentId
                   AND f2.gradeCharacter != 'P'
                   AND (
@@ -164,7 +164,7 @@ async calculateGradeProgress(studentId: string) {
                        AND f2.semesterPartInRegis <= fr.semesterPartInRegis)
                   )
             ) AS GPAสะสม
-        FROM fact_regis fr
+        FROM fact_register fr
         WHERE fr.studentId = ?
           AND fr.gradeCharacter != 'P'
         GROUP BY fr.studentId, fr.semesterYearInRegis, fr.semesterPartInRegis
@@ -197,11 +197,11 @@ async getStudentProfile(studentId: string) {
       d.departmentName AS major,
       p.langProgram AS programType,
 
--- สถานภาพนักศึกษา และ GPA สะสมคำนวณจาก fact_regis
+-- สถานภาพนักศึกษา และ GPA สะสมคำนวณจาก fact_register
       ss.status AS studentStatus,
       (
         SELECT ROUND(SUM(fr.creditRegis * fr.gradeNumber) / SUM(fr.creditRegis), 2)
-        FROM fact_regis fr
+        FROM fact_register fr
         WHERE fr.studentId = s.studentId
       ) AS gpa,
 
@@ -247,7 +247,7 @@ async getCompletedSemesters(studentId: string) {
           WHEN COUNT(fr.regisId) > 0 THEN 1 
           ELSE 0 
         END AS isCompleted
-    FROM fact_regis fr
+    FROM fact_register fr
     WHERE fr.studentId = ? 
       AND fr.gradeNumber IS NOT NULL
       AND fr.gradeCharacter != 'P'
@@ -287,7 +287,7 @@ async getStudentCoursesBySemester(studentId: string, year: number, semester: str
             WHEN fr.gradeNumber IS NOT NULL AND fr.gradeCharacter != 'P' THEN 'has_grade'
             ELSE 'no_grade'
           END AS gradeStatus
-      FROM fact_regis fr
+      FROM fact_register fr
       LEFT JOIN courselist cl ON fr.courseListId = cl.courseListId
       LEFT JOIN typeregis tr ON fr.typeRegisId = tr.typeRegisId
       WHERE fr.studentId = ? 
@@ -311,9 +311,9 @@ async updateStudentGrade(regisId: number, gradeCharacter: string, gradeNumber: n
   try {
     console.log('updateStudentGrade called with:', { regisId, gradeCharacter, gradeNumber });
     
-    // อัปเดตเกรดใน fact_regis
+    // อัปเดตเกรดใน fact_register
     const sql = `
-      UPDATE fact_regis 
+      UPDATE fact_register 
       SET gradeCharacter = ?, gradeNumber = ?
       WHERE regisId = ?
     `;
@@ -387,7 +387,7 @@ async calculateSemesterGPA(studentId: string, year: number, semester: string) {
     SELECT 
       SUM(creditRegis) as totalCredits,
       SUM(creditRegis * gradeNumber) as weightedGPA
-    FROM fact_regis 
+    FROM fact_register 
     WHERE studentId = ? 
       AND semesterYearInRegis = ? 
       AND semesterPartInRegis = ?
@@ -410,7 +410,7 @@ async calculateCumulativeGPA(studentId: string, year: number, semester: string) 
     SELECT 
       SUM(creditRegis) as totalCredits,
       SUM(creditRegis * gradeNumber) as weightedGPA
-    FROM fact_regis 
+    FROM fact_register 
     WHERE studentId = ? 
       AND gradeCharacter != 'P'
       AND gradeNumber IS NOT NULL
@@ -433,7 +433,7 @@ async calculateCumulativeGPA(studentId: string, year: number, semester: string) 
 async calculateTotalCredits(studentId: string, year: number, semester: string) {
   const sql = `
     SELECT SUM(creditRegis) as totalCredits
-    FROM fact_regis 
+    FROM fact_register 
     WHERE studentId = ? 
       AND semesterYearInRegis = ? 
       AND semesterPartInRegis = ?
@@ -449,7 +449,7 @@ async calculateTotalCredits(studentId: string, year: number, semester: string) {
 async calculateTotalCreditsAll(studentId: string, year: number, semester: string) {
   const sql = `
     SELECT SUM(creditRegis) as totalCredits
-    FROM fact_regis 
+    FROM fact_register 
     WHERE studentId = ? 
       AND gradeCharacter != 'P'
       AND gradeNumber IS NOT NULL
