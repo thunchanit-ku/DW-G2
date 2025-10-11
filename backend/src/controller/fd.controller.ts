@@ -55,13 +55,13 @@ export class FdController {
     return this.fdService.remove(id);
   }
 
-  @Post('data')
-  async getDataFromBody(
-    @Body() body: { semester: string; year: number }
-  ) {
-    const { semester, year } = body;
-    return this.fdService.updatedata(semester, year);
-  }
+  // @Post('data')
+  // async getDataFromBody(
+  //   @Body() body: { semester: string; year: number }
+  // ) {
+  //   const { semester, year } = body;
+  //   return this.fdService.updatedata(semester, year);
+  // }
 
   // ใช้คำนวณ GPA ภาค / GPA สะสม / ผลต่างเกรด
   @Get('grade-progress/:id')

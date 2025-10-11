@@ -68,13 +68,13 @@ export class StudentController {
     return this.studentService.remove(id);
   }
 
- @Post('data')
-  async getDataFromBody(
-    @Body() body: { semester: string; year: number }
-  ) {
-    const { semester, year } = body;
-    return this.studentService.updatedata(semester, year);
-  }
+//  @Post('data')
+//   async getDataFromBody(
+//     @Body() body: { semester: string; year: number }
+//   ) {
+//     const { semester, year } = body;
+//     return this.studentService.updatedata(semester, year);
+//   }
   // ใช้คำนวณ GPA ภาค / GPA สะสม / ผลต่างเกรด
   @Get('grade-progress/:id')
   async getGradeProgress(@Param('id') id: string) {
