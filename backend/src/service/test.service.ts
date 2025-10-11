@@ -155,9 +155,9 @@ async calculateGradeProgress(studentId: string) {
         fr.student_id,
         fr.semester_year_in_regis AS ปีการศึกษา,
         CASE fr.semester_part_in_regis
-          WHEN '1' THEN 'ภาคต้น'
-          WHEN '2' THEN 'ภาคปลาย'
-          ELSE 'ฤดูร้อน'
+          WHEN '0' THEN 'ภาคต้น'
+          WHEN '1' THEN 'ภาคปลาย'
+          WHEN '2' THEN 'ฤดูร้อน'
         END AS ภาคการศึกษา,
         SUM(fr.credit_regis) AS หน่วยกิตรวม,
         -- ต้องคำนวณ GPA_POINTS (แต้มเกรดรวม) เพื่อใช้ในการหา GPA สะสม
