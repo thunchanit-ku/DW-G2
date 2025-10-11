@@ -5,17 +5,20 @@ import {
   IsEmail,
   IsEnum,
   Length,
+  IsNumber,
 } from 'class-validator';
 
 export class CreateStudentDto {
+  @IsNumber()
+  studentId: number;
+
   @IsString()
   @Length(1, 10)
-  studentId: string;
+  studentUsername: string;
 
   @IsOptional()
-  @IsString()
-  @Length(0, 11)
-  studentUsername?: string;
+  @IsEnum(['b', 'g'])
+  stdLevel?: 'b' | 'g';
 
   @IsOptional()
   @IsString()
@@ -24,21 +27,11 @@ export class CreateStudentDto {
 
   @IsString()
   @Length(1, 50)
-  firstNameTh: string;
+  nameTh: string;
 
   @IsString()
   @Length(1, 50)
-  lastNameTh: string;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 50)
-  firstNameEng?: string;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 50)
-  lastNameEng?: string;
+  nameEng: string;
 
   @IsOptional()
   @IsEnum(['ชาย', 'หญิง'])
@@ -48,23 +41,20 @@ export class CreateStudentDto {
   @IsEnum(['Male', 'Female'])
   genderEng?: 'Male' | 'Female';
 
-  @IsOptional()
   @IsEnum(['นาย', 'นางสาว', 'นาง'])
-  titleTh?: 'นาย' | 'นางสาว' | 'นาง';
+  titleTh: 'นาย' | 'นางสาว' | 'นาง';
 
-  @IsOptional()
   @IsEnum(['Mr.', 'Mrs.', 'Miss'])
-  titleEng?: 'Mr.' | 'Mrs.' | 'Miss';
+  titleEng: 'Mr.' | 'Mrs.' | 'Miss';
+
+  @IsString()
+  @Length(1, 10)
+  tell: string;
 
   @IsOptional()
   @IsString()
   @Length(0, 10)
-  tell?: string;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 10)
-  parentTell?: string;
+  parentPhone?: string;
 
   @IsEmail()
   @Length(5, 50)

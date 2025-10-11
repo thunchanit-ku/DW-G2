@@ -10,25 +10,44 @@ import { FactRegis } from 'src/entity/fact-register.entity';
 import { Semester } from 'src/entity/semester.entity';
 import { CourseList } from 'src/entity/courselist.entity';
 import { TypeRegis } from 'src/entity/typeregis.entity';
+import { FactStudent } from 'src/entity/fact-student.entity';
+import { Teacher } from 'src/entity/teacher.entity';
+import { Department } from 'src/entity/department.entity';
+import { Program } from 'src/entity/program.entity';
+import { School } from 'src/entity/school.entity';
+import { Province } from 'src/entity/province.entity';
+import { StudentStatus } from 'src/entity/student-status.entity';
+import { FactTermSummary } from 'src/entity/fact-term-summary.entity';
 
 @Injectable()
 export class StudentService {
   constructor(
     @InjectRepository(Student)
-    private studentRepo: Repository<Student>
-    ,
-     @InjectRepository(FactRegis)
-    private fact_regisRepo: Repository<FactRegis>
-
-    ,
-      @InjectRepository(Semester)
-    private semesterRepo: Repository<Semester>
-    ,
+    private studentRepo: Repository<Student>,
+    @InjectRepository(FactRegis)
+    private fact_regisRepo: Repository<FactRegis>,
+    @InjectRepository(Semester)
+    private semesterRepo: Repository<Semester>,
     @InjectRepository(CourseList)
-    private courseListRepo: Repository<CourseList>
-    ,
+    private courseListRepo: Repository<CourseList>,
     @InjectRepository(TypeRegis)
     private typeRegisRepo: Repository<TypeRegis>,
+    @InjectRepository(FactStudent)
+    private factStudentRepo: Repository<FactStudent>,
+    @InjectRepository(Teacher)
+    private teacherRepo: Repository<Teacher>,
+    @InjectRepository(Department)
+    private departmentRepo: Repository<Department>,
+    @InjectRepository(Program)
+    private programRepo: Repository<Program>,
+    @InjectRepository(School)
+    private schoolRepo: Repository<School>,
+    @InjectRepository(Province)
+    private provinceRepo: Repository<Province>,
+    @InjectRepository(StudentStatus)
+    private studentStatusRepo: Repository<StudentStatus>,
+    @InjectRepository(FactTermSummary)
+    private factTermSummaryRepo: Repository<FactTermSummary>,
   ) {}
 
   async create(data: CreateStudentDto) {
@@ -41,16 +60,16 @@ export class StudentService {
   }
 
   async findOne(id: string) {
-    return await this.studentRepo.findOne({ where: { studentId: id } });
+    return await this.studentRepo.findOne({ where: { studentId: parseInt(id) } });
   }
 
   async update(id: string, data: Partial<CreateStudentDto>) {
-    await this.studentRepo.update(id, data);
+    await this.studentRepo.update(parseInt(id), data);
     return this.findOne(id);
   }
 
   async remove(id: string) {
-    return await this.studentRepo.delete(id);
+    return await this.studentRepo.delete(parseInt(id));
   }
 
 //  async updatedata(semester: string, year: number) {
@@ -173,8 +192,8 @@ async getStudentProfile(studentId: string) {
   const sql = `
   SELECT
   s.student_id AS studentId,
-  CONCAT_WS(' ', s.title_th, s.first_name_th, s.last_name_th) AS nameTh,
-  CONCAT_WS(' ', s.title_eng, s.first_name_eng, s.last_name_eng) AS nameEn,
+  s.name_th AS nameTh,
+  s.name_eng AS nameEn,
   s.person_id AS nationalId,
   s.gender_th AS gender,
   s.tell AS phone,
@@ -182,10 +201,10 @@ async getStudentProfile(studentId: string) {
   s.parent_phone AS parentPhone,
 
   -- มิติการศึกษา
-  CONCAT_WS(' ', t.title_teacher_th, t.first_name_th, t.last_name_th) AS advisor,
-  d.campus AS campus,
-  d.faculty AS faculty,
-  d.department_name AS major,
+  CONCAT_WS(' ', t.teacher_name_th) AS advisor,
+  d.dept_name AS campus,
+  d.dept_name AS faculty,
+  d.dept_name AS major,
   p.lang_program AS programType,
   p.name_program AS programName,
 
@@ -206,30 +225,24 @@ async getStudentProfile(studentId: string) {
 FROM fact_student fs
 JOIN student s          ON s.student_id     = fs.student_id
 LEFT JOIN teacher t     ON t.teacher_id     = fs.teacher_id
-LEFT JOIN department d  ON d.department_id  = fs.department_id
+LEFT JOIN department d  ON d.dept_id        = fs.department_id
 LEFT JOIN program p     ON p.program_id     = fs.program_id
-LEFT JOIN school sch    ON sch.school_id    = fs.school_id
+LEFT JOIN school sch    ON sch.school_id   = fs.school_id
 LEFT JOIN province prov ON prov.province_id = sch.province_id
 LEFT JOIN (
-  SELECT *
-  FROM (
-    SELECT
-      fts.*,
-      ROW_NUMBER() OVER (
-        PARTITION BY fts.student_id
-        ORDER BY fts.semester_year_in_term DESC, fts.semester_part_in_term DESC
-      ) AS rn
-    FROM fact_term_summary fts
-  ) y
-  WHERE y.rn = 1
+  SELECT fts.*
+  FROM fact_term_summary fts
+  WHERE fts.student_id = ?
+  ORDER BY fts.semester_year_in_term DESC, fts.semester_part_in_term DESC
+  LIMIT 1
 ) fts_latest ON fts_latest.student_id = s.student_id
-LEFT JOIN studentstatus ss ON ss.student_status_id = fts_latest.grade_label_id
-WHERE s.student_id = ?
+LEFT JOIN student_status ss ON ss.student_status_id = fts_latest.grade_label_id
+WHERE s.student_username = ?
 LIMIT 1;
 
   `;
 
-  const [row] = await this.fact_regisRepo.query(sql, [studentId]);
+  const [row] = await this.fact_regisRepo.query(sql, [studentId, studentId]);
   return row ?? null;
 }
 
