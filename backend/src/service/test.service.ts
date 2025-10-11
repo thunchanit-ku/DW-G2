@@ -190,7 +190,7 @@ async calculateGradeProgress(studentId: string) {
 async getStudentProfile(studentId: string) {
   const sql = `
   SELECT
-  s.student_id AS studentId,
+  s.student_username AS studentId,
   s.name_th AS nameTh,
   s.name_eng AS nameEn,
   s.person_id AS nationalId,
@@ -201,8 +201,8 @@ async getStudentProfile(studentId: string) {
 
   -- มิติการศึกษา
   CONCAT_WS(' ', t.teacher_name_th) AS advisor,
-  d.dept_name AS campus,
-  d.dept_name AS faculty,
+  'กำแพงแสน' AS campus,
+  'วิศวกรรมศาสตร์' AS faculty,
   d.dept_name AS major,
   p.lang_program AS programType,
   p.name_program AS programName,
@@ -228,20 +228,13 @@ LEFT JOIN department d  ON d.dept_id        = fs.department_id
 LEFT JOIN program p     ON p.program_id     = fs.program_id
 LEFT JOIN school sch    ON sch.school_id   = fs.school_id
 LEFT JOIN province prov ON prov.province_id = sch.province_id
-LEFT JOIN (
-  SELECT fts.*
-  FROM fact_term_summary fts
-  WHERE fts.student_id = ?
-  ORDER BY fts.semester_year_in_term DESC, fts.semester_part_in_term DESC
-  LIMIT 1
-) fts_latest ON fts_latest.student_id = s.student_id
-LEFT JOIN student_status ss ON ss.student_status_id = fts_latest.grade_label_id
+LEFT JOIN student_status ss ON ss.student_status_id = fs.student_status_id
 WHERE s.student_username = ?
 LIMIT 1;
 
   `;
 
-  const [row] = await this.fact_regisRepo.query(sql, [studentId, studentId]);
+  const [row] = await this.fact_regisRepo.query(sql, [studentId]);
   return row ?? null;
 }
 
