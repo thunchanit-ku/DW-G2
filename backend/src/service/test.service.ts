@@ -121,37 +121,49 @@ async calculateGradeProgress(studentId: string) {
       t.ภาคการศึกษา,
       t.หน่วยกิตรวม,
       t.GPAภาค,
-      t.GPAสะสม,
+      
+      -- คำนวณ GPA สะสม (Running Total)
+      -- กำหนดค่าสะสมแต้มเกรด (@running_gpa_points) และหน่วยกิต (@running_credits) พร้อมกับการคำนวณ
+      ROUND((@running_gpa_points := @running_gpa_points + t.GPA_POINTS) / 
+            (@running_credits := @running_credits + t.หน่วยกิตรวม), 2) AS GPAสะสม,
+
+      -- คำนวณ ผลต่างเกรด และอัปเดต GPA ก่อนหน้า
       ROUND(t.GPAภาค - @prev_gpa, 2) AS ผลต่างเกรด,
-      @prev_gpa := t.GPAภาค
+      @prev_gpa := t.GPAภาค AS GPAก่อนหน้า
     FROM (
+      -- Inner Query: กรองข้อมูล, หา GPA ภาค และแต้มเกรดรวมของภาค
       SELECT
         fr.student_id,
         fr.semester_year_in_regis AS ปีการศึกษา,
-        fr.semester_part_in_regis AS ภาคการศึกษา,
+        CASE fr.semester_part_in_regis
+          WHEN '1' THEN 'ภาคต้น'
+          WHEN '2' THEN 'ภาคปลาย'
+          ELSE 'ฤดูร้อน'
+        END AS ภาคการศึกษา,
         SUM(fr.credit_regis) AS หน่วยกิตรวม,
-        ROUND(SUM(fr.credit_regis * fr.grade_number) / NULLIF(SUM(fr.credit_regis), 0), 2) AS GPAภาค,
-        (
-          SELECT
-            ROUND(SUM(f2.credit_regis * f2.grade_number) / NULLIF(SUM(f2.credit_regis), 0), 2)
-          FROM fact_register f2
-          WHERE f2.student_id = fr.student_id
-            AND (
-                 f2.semester_year_in_regis < fr.semester_year_in_regis
-              OR (f2.semester_year_in_regis = fr.semester_year_in_regis
-                  AND f2.semester_part_in_regis <= fr.semester_part_in_regis)
-            )
-            AND f2.grade_number IS NOT NULL
-        ) AS GPAสะสม
+        -- ต้องคำนวณ GPA_POINTS (แต้มเกรดรวม) เพื่อใช้ในการหา GPA สะสม
+        SUM(fr.credit_regis * fr.grade_number) AS GPA_POINTS, 
+        ROUND(SUM(fr.credit_regis * fr.grade_number) / NULLIF(SUM(fr.credit_regis), 0), 2) AS GPAภาค
       FROM fact_register fr
-      WHERE fr.student_id = ?
+      -- JOIN student เพื่อใช้ student_username ในการกรอง
+      JOIN student s ON fr.student_id = s.student_id
+      -- กรองด้วย student_username ซึ่งคาดว่าเป็นค่าที่ส่งมาจากพารามิเตอร์ studentId
+      WHERE s.student_username = ? 
         AND fr.grade_number IS NOT NULL
       GROUP BY fr.student_id, fr.semester_year_in_regis, fr.semester_part_in_regis
+      -- ORDER BY สำคัญมากเพื่อให้ Running Total ถูกต้องตามลำดับเวลา
       ORDER BY fr.semester_year_in_regis, fr.semester_part_in_regis
     ) AS t
-    JOIN (SELECT @prev_gpa := NULL) AS vars;
+    -- กำหนดค่าเริ่มต้นตัวแปรทั้งหมดในคำสั่งเดียว
+    JOIN (
+      SELECT 
+        @prev_gpa := NULL, 
+        @running_credits := 0, 
+        @running_gpa_points := 0
+    ) AS vars;
   `;
-console.log(sql);
+  
+  console.log(sql);
   const result = await this.fact_regisRepo.query(sql, [studentId]);
   return result;
 }
