@@ -1,5 +1,5 @@
 'use client';
-
+import { useSearchParams } from 'next/navigation';
 import { Card, Table, Divider, Input, Button, message } from 'antd';
 import { TrendingUp, TrendingDown, Search } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -38,6 +38,7 @@ export default function HomePage() {
     programName: ''
   });
   const [headerGpa, setHeaderGpa] = useState<number | null>(null);
+  const searchParams = useSearchParams();
 
   // โหลดข้อมูลจาก sessionStorage ถ้ามี
   useEffect(() => {
@@ -45,11 +46,27 @@ export default function HomePage() {
       const savedResult = sessionStorage.getItem('studentResult');
       const savedStudent = sessionStorage.getItem('studentInput');
       const savedGpa = sessionStorage.getItem('headerGpa');
+       SetFinishstu(student);
       if (savedResult) setResult(JSON.parse(savedResult));
       if (savedStudent) SetStudent(savedStudent);
       if (savedGpa) setHeaderGpa(Number(savedGpa));
     }
   }, []);
+
+  useEffect(() => {
+  let id =
+    searchParams.get('id') ||
+    (typeof window !== 'undefined' ? sessionStorage.getItem('selectedStudentId') : null) ||
+    (typeof window !== 'undefined' ? sessionStorage.getItem('studentInput') : null) ||
+    result?.studentId ||
+    '';
+
+  if (id) {
+    SetStudent(id);
+    SetFinishstu(id); 
+  }
+}, [searchParams, result?.studentId]);
+
 
 const handleSubmit = async () => {
     if (!student) {
@@ -129,20 +146,7 @@ const handleSubmit = async () => {
               ส่งข้อมูล
             </Button>
           </div>
-          {/* {result.studentId && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h5 className="text-lg font-semibold text-gray-800 mb-2">ข้อมูลนิสิต:</h5>
-              <p className="text-gray-700">
-                <strong>รหัสนิสิต:</strong> {result.studentId}
-              </p>
-              <p className="text-gray-700">
-                <strong>ชื่อ-นามสกุล:</strong> {result.titleTh} {result.fisrtNameTh} {result.lastNameTh}
-              </p>
-              <p className="text-gray-700">
-                <strong>อีเมล:</strong> {result.email}
-              </p>
-            </div>
-          )} */}
+      
         </Card>
 
 

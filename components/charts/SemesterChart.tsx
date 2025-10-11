@@ -69,14 +69,17 @@ const SemesterResults: React.FC<Props> = ({ studentId }) => {
         setSemesterData([]);
       })
       .finally(() => setLoading(false));
-  }, [studentId]);
+  },[studentId] );
 
+  // sessionStorage.setItem('studentgpa' ,JSON.stringify(semesterData) );
   // ✅ เตรียมข้อมูลสำหรับกราฟ
-  const labels = semesterData.map(
+  // const semesterdata = sessionStorage.getItem('studentgpa');
+  const labels = semesterData?.map(
     (item) => `${item["ภาคการศึกษา"]} ${item["ปีการศึกษา"]}`
   );
   const semesterGPAs = semesterData.map((item) => item["GPAภาค"]);
   const cumulativeGPAs = semesterData.map((item) => item["GPAสะสม"]);
+
 
   // ✅ ฟังก์ชันเลือกสีตามเกรด
   const getGradeColor = (gpa: number) => {
