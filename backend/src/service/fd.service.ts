@@ -1,492 +1,405 @@
-// src/student/student.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Student } from '../entity/student.entity';
-import { CreateStudentDto } from '../dto/test.dto';
-import * as fs from 'fs/promises'; 
-import * as path from 'path';
-import { FactRegis } from 'src/entity/fact-register.entity';
-import { Semester } from 'src/entity/semester.entity';
-import { CourseList } from 'src/entity/courselist.entity';
-import { TypeRegis } from 'src/entity/typeregis.entity';
-import { FactTermSummary } from 'src/entity/fact-term-summary.entity';
+import { FactRegister } from '../entity/fact-register.entity';
+import { Subject } from '../entity/subject.entity';
+import { SubjectType } from '../entity/subject-type.entity';
+import { FactTermSummary } from '../entity/fact-term-summary.entity';
+import { GradeLabel } from '../entity/grade-label.entity';
+
+export interface CompletedSemester {
+  year: number;
+  semester: string;
+  semesterPartInRegis: string;
+  totalCourses: number;
+  totalCredits: number;
+  semesterGPA: number;
+  isCompleted: number;
+}
+
+export interface StudentCourse {
+  regisId: number;
+  studentId: number;
+  subjectCode: string;
+  subjectNameThai: string;
+  subjectNameEng: string;
+  credit: number;
+  gradeCharacter: string;
+  gradeNumber: number;
+  creditRegis: number;
+  semesterYear: number;
+  semesterPart: string;
+  typeRegis: string;
+  secLecture: number;
+  secLab: number;
+  gradeStatus: string;
+}
+
+export interface UpdateGradeResult {
+  success: boolean;
+  affectedRows: number;
+  message: string;
+  updatedCourse?: StudentCourse;
+}
 
 @Injectable()
 export class FdService {
   constructor(
     @InjectRepository(Student)
-    private studentRepo: Repository<Student>
-    ,
-     @InjectRepository(FactRegis)
-    private fact_regisRepo: Repository<FactRegis>
-
-    ,
-      @InjectRepository(Semester)
-    private semesterRepo: Repository<Semester>
-    ,
-    @InjectRepository(CourseList)
-    private courseListRepo: Repository<CourseList>
-    ,
-    @InjectRepository(TypeRegis)
-    private typeRegisRepo: Repository<TypeRegis>,
+    private studentRepo: Repository<Student>,
+    @InjectRepository(FactRegister)
+    private factRegisterRepo: Repository<FactRegister>,
+    @InjectRepository(Subject)
+    private subjectRepo: Repository<Subject>,
     @InjectRepository(FactTermSummary)
     private factTermSummaryRepo: Repository<FactTermSummary>,
+    @InjectRepository(GradeLabel)
+    private gradeLabelRepo: Repository<GradeLabel>,
   ) {}
 
-  async create(data: CreateStudentDto) {
-    const student = this.studentRepo.create(data);
-    return await this.studentRepo.save(student);
+  // ดึงข้อมูลนิสิตจาก student_username
+  async getStudentByUsername(studentUsername: string): Promise<Student | null> {
+    return await this.studentRepo.findOne({
+      where: { studentUsername },
+    });
   }
 
-  async findAll() {
-    return await this.studentRepo.find();
-  }
-
-  async findOne(id: string) {
-    // ใช้ SQL query เพื่อดึงข้อมูลนิสิตจาก fact_register
+  // ดึงข้อมูลภาคการศึกษาที่นิสิตเรียนจบแล้ว
+  async getCompletedSemesters(studentId: number): Promise<CompletedSemester[]> {
     const sql = `
-      SELECT DISTINCT
-        fr.studentId,
-        s.fisrtNameTh,
-        s.lastNameTh,
-        s.fisrtNameEng,
-        s.lastNameEng,
-        s.parentTell,
-        s.email,
-        s.titleTh
-      FROM fact_register fr
-      LEFT JOIN student s ON s.studentId = fr.studentId
-      WHERE fr.studentId = ?
-      LIMIT 1
-    `;
-    
-    const [result] = await this.fact_regisRepo.query(sql, [id]);
-    return result || null;
-  }
-
-  async update(id: string, data: Partial<CreateStudentDto>) {
-    await this.studentRepo.update(id, data);
-    return this.findOne(id);
-  }
-
-  async remove(id: string) {
-    return await this.studentRepo.delete(id);
-  }
-
-//  async updatedata(semester: string, year: number) {
-//   const filePath = path.resolve(__dirname, '../../../register_2students_2terms.json');
-//   const file = await fs.readFile(filePath, 'utf-8');
-//   const allRegis = JSON.parse(file);
-
-//   // ✅ กรองตามเงื่อนไขที่ต้องการ
-//   const filtered = allRegis.filter((item: any) => {
-//     return (
-//       item.semesterPartInRegis === semester &&
-//       item.semesterYearInRegis === year
-//     );
-//   });
-
-//   // ✅ DEBUG: ตรวจสอบว่า semesterId มีอยู่
-//   filtered.forEach((item: any, index: number) => {
-//     if (item.semesterId === undefined) {
-//       console.error(`❌ Record at index ${index} missing semesterId`, item);
-//     }
-//   });
-
-//   const toSave: FactRegis[] = [];
-
-//   for (const item of filtered) {
-//     const semesterEntity = await this.semesterRepo.findOne({ where: { semesterId: item.semesterId } });
-//     const courseListEntity = await this.courseListRepo.findOne({ where: { courseListId: item.courseListId } });
-//     const typeRegisEntity = await this.typeRegisRepo.findOne({ where: { typeRegisId: item.typeRegisId } });
-
-//     if (!semesterEntity || !courseListEntity || !typeRegisEntity) {
-//       console.warn(`❗ ข้อมูลไม่ครบสำหรับ studentId=${item.studentId}, ข้าม`);
-//       continue;
-//     }
-
-//     const newRegis = this.fact_regisRepo.create({
-//       studentId: item.studentId,
-//       subjectCodeInRegis: item.subjectCodeInRegis,
-//       secLecture: item.secLecture,
-//       secLab: item.secLab,
-//       gradeCharacter: item.gradeCharacter,
-//       gradeNumber: item.gradeNumber,
-//       creditRegis: item.creditRegis,
-//       studyYearInRegis: item.studyYearInRegis,
-//       studyTermInRegis: item.studyTermInRegis,
-//       semesterYearInRegis: item.semesterYearInRegis,
-//       semesterPartInRegis: item.semesterPartInRegis,
-
-//       // ✅ ความสัมพันธ์ Foreign Key
-//       semester: semesterEntity,
-//       courseList: courseListEntity,
-//       typeRegis: typeRegisEntity,
-//     });
-
-//     toSave.push(newRegis);
-//   }
-
-//   await this.fact_regisRepo.save(toSave);
-
-//   console.log(`✅ บันทึกข้อมูลสำเร็จ ${toSave.length} รายการ`);
-//   return toSave;
-// }
-
-async calculateGradeProgress(studentId: string) {
-  const sql = `
-    SELECT 
-        t.studentId,
-        t.ปีการศึกษา,
-        t.ภาคการศึกษา,
-        t.หน่วยกิตรวม,
-        t.GPAภาค,
-        t.GPAสะสม,
-        ROUND(t.GPAภาค - @prev_gpa, 2) AS ผลต่างเกรด,
-        @prev_gpa := t.GPAภาค
-    FROM (
-        SELECT 
-            fr.studentId,
-            fr.semesterYearInRegis AS ปีการศึกษา,
-            fr.semesterPartInRegis AS ภาคการศึกษา,
-            SUM(fr.creditRegis) AS หน่วยกิตรวม,
-            ROUND(SUM(fr.creditRegis * fr.gradeNumber) / SUM(fr.creditRegis), 2) AS GPAภาค,
-            (
-                SELECT 
-                    ROUND(SUM(f2.creditRegis * f2.gradeNumber) / SUM(f2.creditRegis), 2)
-                FROM fact_register f2
-                WHERE f2.studentId = fr.studentId
-                  AND f2.gradeCharacter != 'P'
-                  AND (
-                      f2.semesterYearInRegis < fr.semesterYearInRegis OR
-                      (f2.semesterYearInRegis = fr.semesterYearInRegis 
-                       AND f2.semesterPartInRegis <= fr.semesterPartInRegis)
-                  )
-            ) AS GPAสะสม
-        FROM fact_register fr
-        WHERE fr.studentId = ?
-          AND fr.gradeCharacter != 'P'
-        GROUP BY fr.studentId, fr.semesterYearInRegis, fr.semesterPartInRegis
-        ORDER BY fr.semesterYearInRegis, fr.semesterPartInRegis
-    ) AS t
-    JOIN (SELECT @prev_gpa := NULL) AS vars;
-  `;
-
-  try{
-  const result = await this.fact_regisRepo.query(sql, [studentId]);
-  console.log(result);
-  return result;
-
-  }
-  catch(err){
-    console.group(err);
-  }
-}
-
-// ดึงข้อมูลโปรไฟล์นักศึกษาให้ตรงกับหน้าจอข้อมูลส่วนตัว/การศึกษา
-async getStudentProfile(studentId: string) {
-  const sql = `
-    SELECT
-      s.studentId AS studentId,
-      CONCAT_WS(' ', s.titleTh, s.fisrtNameTh, s.lastNameTh) AS nameTh,
-      CONCAT_WS(' ', s.titleEng, s.fisrtNameEng, s.lastNameEng) AS nameEn,
-      s.personId AS nationalId,
-      s.genderTh AS gender,
-      s.tell AS phone,
-      s.email AS email,
-      s.parentTell AS parentPhone,
-
-      -- มิติการศึกษา
-      CONCAT_WS(' ', t.titleTecherTh, t.fisrtNameTh, t.lastNameTh) AS advisor,
-      d.campus AS campus,
-      d.faculty AS faculty,
-      d.departmentName AS major,
-      p.langProgram AS programType,
-
--- สถานภาพนักศึกษา และ GPA สะสมคำนวณจาก fact_register
-      ss.status AS studentStatus,
-      (
-        SELECT ROUND(SUM(fr.creditRegis * fr.gradeNumber) / SUM(fr.creditRegis), 2)
-        FROM fact_register fr
-        WHERE fr.studentId = s.studentId
-      ) AS gpa,
-
-      -- ข้อมูลโรงเรียนเดิม
-      sch.schoolName AS highSchool,
-      prov.provinceName AS highSchoolLocation
-    FROM fact_student fs
-    JOIN student s           ON s.studentId = fs.studentId
-    LEFT JOIN teacher t      ON t.teacherId = fs.teacherId
-    LEFT JOIN department d   ON d.departmentId = fs.departmentId
-    LEFT JOIN program p      ON p.programId = fs.programId
-    LEFT JOIN school sch     ON sch.schoolId = fs.schoolId
-    LEFT JOIN province prov  ON prov.provinceId = sch.provinceId
-    LEFT JOIN (
-      SELECT x.studentId, x.studentStatusId
-      FROM fact_term_summary x
-      JOIN (
-        SELECT studentId, MAX(semesterId) AS maxSem
-        FROM fact_term_summary
-        GROUP BY studentId
-      ) m ON m.studentId = x.studentId AND m.maxSem = x.semesterId
-    ) fts_latest ON fts_latest.studentId = s.studentId
-    LEFT JOIN studentstatus ss ON ss.studentStatusId = fts_latest.studentStatusId
-    WHERE s.studentId = ?
-    LIMIT 1;
-  `;
-
-  const [row] = await this.fact_regisRepo.query(sql, [studentId]);
-  return row || null;
-}
-
-// ดึงข้อมูล semester และ year ที่นิสิตเรียนจบแล้ว
-async getCompletedSemesters(studentId: string) {
-  const sql = `
-    SELECT DISTINCT 
-        fr.semesterYearInRegis AS year,
-        fr.semesterPartInRegis AS semester,
-        fr.semesterId,
-        COUNT(fr.regisId) AS totalCourses,
-        SUM(fr.creditRegis) AS totalCredits,
-        ROUND(SUM(fr.creditRegis * fr.gradeNumber) / SUM(fr.creditRegis), 2) AS semesterGPA,
+      SELECT DISTINCT 
+        fr.semester_year_in_regis AS year,
+        CASE fr.semester_part_in_regis
+          WHEN '0' THEN 'ภาคต้น'
+          WHEN '1' THEN 'ภาคปลาย'
+          WHEN '2' THEN 'ฤดูร้อน'
+        END AS semester,
+        fr.semester_part_in_regis,
+        COUNT(fr.regis_id) AS totalCourses,
+        SUM(fr.credit_regis) AS totalCredits,
+        ROUND(SUM(fr.credit_regis * fr.grade_number) / SUM(fr.credit_regis), 2) AS semesterGPA,
         CASE 
-          WHEN COUNT(fr.regisId) > 0 THEN 1 
+          WHEN COUNT(fr.regis_id) > 0 THEN 1 
           ELSE 0 
         END AS isCompleted
-    FROM fact_register fr
-    WHERE fr.studentId = ? 
-      AND fr.gradeNumber IS NOT NULL
-      AND fr.gradeCharacter != 'P'
-    GROUP BY fr.semesterYearInRegis, fr.semesterPartInRegis, fr.semesterId
-    ORDER BY fr.semesterYearInRegis DESC, 
-             CASE fr.semesterPartInRegis 
-               WHEN 'ภาคต้น' THEN 1
-               WHEN 'ภาคปลาย' THEN 2
-               WHEN 'ภาคฤดูร้อน' THEN 3
-             END DESC
-  `;
+      FROM fact_register fr
+      WHERE fr.student_id = ? 
+        AND fr.grade_number IS NOT NULL
+        AND fr.grade_character != 'P'
+      GROUP BY fr.semester_year_in_regis, fr.semester_part_in_regis
+      ORDER BY fr.semester_year_in_regis DESC, 
+               CASE fr.semester_part_in_regis 
+                 WHEN '0' THEN 1
+                 WHEN '1' THEN 2
+                 WHEN '2' THEN 3
+               END DESC
+    `;
 
-  const result = await this.fact_regisRepo.query(sql, [studentId]);
-  return result;
-}
+    const result = await this.factRegisterRepo.query(sql, [studentId]);
+    return result;
+  }
 
-// ดึงรายวิชาและเกรดของนิสิตตามปีและภาคการศึกษา
-async getStudentCoursesBySemester(studentId: string, year: number, semester: string) {
-  try {
-    console.log('getStudentCoursesBySemester called with:', { studentId, year, semester });
-    
-    const sql = `
-      SELECT 
-          fr.regisId,
-          fr.studentId,
-          fr.subjectCodeInRegis AS subjectCode,
-          cl.subjectNameTh AS subjectNameTh,
-          cl.subjectNameEng AS subjectNameEng,
-          cl.credit AS credit,
-          fr.gradeCharacter AS gradeCharacter,
-          fr.gradeNumber AS gradeNumber,
-          fr.creditRegis AS creditRegis,
-          fr.semesterYearInRegis AS semesterYear,
-          fr.semesterPartInRegis AS semesterPart,
-          tr.type AS typeRegis,
-          CASE 
-            WHEN fr.gradeNumber IS NOT NULL AND fr.gradeCharacter != 'P' THEN 'has_grade'
+  // ดึงรายวิชาและเกรดของนิสิตตามปีและภาคการศึกษา
+  async getStudentCoursesBySemester(
+    studentId: number,
+    year: number,
+    semesterPart: string,
+  ): Promise<StudentCourse[]> {
+    try {
+      console.log('getStudentCoursesBySemester called with:', { studentId, year, semesterPart });
+
+      // ใช้ SQL query เพื่อดึงข้อมูล sec_lecture และ sec_lab โดยตรงจาก fact_register
+      const sql = `
+        SELECT
+          fr.regis_id AS regisId,
+          fr.student_id AS studentId,
+          fr.subject_code_in_regis AS subjectCode,
+          s.name_subject_thai AS subjectNameThai,
+          s.name_subject_eng AS subjectNameEng,
+          st.name_subject_type AS subjectType,
+          fr.credit_regis AS credit,
+          fr.grade_character AS gradeCharacter,
+          fr.grade_number AS gradeNumber,
+          fr.credit_regis AS creditRegis,
+          fr.semester_year_in_regis AS semesterYear,
+          CASE fr.semester_part_in_regis
+            WHEN '0' THEN 'ภาคต้น'
+            WHEN '1' THEN 'ภาคปลาย'
+            WHEN '2' THEN 'ฤดูร้อน'
+          END AS semesterPart,
+          fr.type_regis AS typeRegis,
+          COALESCE(fr.sec_lecture, 0) AS secLecture,
+          COALESCE(fr.sec_lab, 0) AS secLab,
+          CASE
+            WHEN fr.grade_number IS NOT NULL AND fr.grade_character != 'P' THEN 'has_grade'
             ELSE 'no_grade'
           END AS gradeStatus
-      FROM fact_register fr
-      LEFT JOIN courselist cl ON fr.courseListId = cl.courseListId
-      LEFT JOIN typeregis tr ON fr.typeRegisId = tr.typeRegisId
-      WHERE fr.studentId = ? 
-        AND fr.semesterYearInRegis = ?
-        AND fr.semesterPartInRegis = ?
-        AND fr.gradeCharacter != 'P'
-      ORDER BY fr.subjectCodeInRegis
-    `;
+        FROM fact_register fr
+        LEFT JOIN subject_course sc ON fr.subject_course_id = sc.subject_course_id
+        LEFT JOIN subject s ON sc.subject_id = s.subject_id
+        LEFT JOIN subject_type st ON s.subject_type_id = st.subject_type_id
+        WHERE fr.student_id = ?
+          AND fr.semester_year_in_regis = ?
+          AND fr.semester_part_in_regis = ?
+        ORDER BY fr.subject_code_in_regis
+      `;
 
-    const result = await this.fact_regisRepo.query(sql, [studentId, year, semester]);
-    console.log('Student courses result:', result);
-    return result || [];
-  } catch (error) {
-    console.error('Error fetching student courses:', error);
-    return [];
-  }
-}
-
-// อัปเดตเกรดของนิสิต
-async updateStudentGrade(regisId: number, gradeCharacter: string, gradeNumber: number) {
-  try {
-    console.log('updateStudentGrade called with:', { regisId, gradeCharacter, gradeNumber });
-    
-    // อัปเดตเกรดใน fact_register
-    const sql = `
-      UPDATE fact_register 
-      SET gradeCharacter = ?, gradeNumber = ?
-      WHERE regisId = ?
-    `;
-
-    const result = await this.fact_regisRepo.query(sql, [gradeCharacter, gradeNumber, regisId]);
-    console.log('Update grade result:', result);
-
-    // ดึงข้อมูลการลงทะเบียนที่อัปเดต
-    const updatedRegis = await this.fact_regisRepo.findOne({
-      where: { regisId },
-    });
-
-    if (!updatedRegis) {
-      throw new Error('ไม่พบข้อมูลการลงทะเบียน');
+      console.log('SQL Query:', sql);
+      console.log('Parameters:', [studentId, year, semesterPart]);
+      const result = await this.factRegisterRepo.query(sql, [studentId, year, semesterPart]);
+      console.log('Student courses result:', result);
+      
+      // Debug: ตรวจสอบข้อมูล sec_lecture และ sec_lab
+      if (result && result.length > 0) {
+        console.log('First record sec_lecture:', result[0].secLecture);
+        console.log('First record sec_lab:', result[0].secLab);
+        console.log('First record full data:', JSON.stringify(result[0], null, 2));
+      }
+      return result || [];
+    } catch (error) {
+      console.error('Error fetching student courses:', error);
+      return [];
     }
-
-    // คำนวณและอัปเดต GPA ใหม่
-    await this.recalculateAndUpdateGPA(updatedRegis.studentId, updatedRegis.semesterYearInRegis, updatedRegis.semesterPartInRegis);
-
-    return { 
-      success: true, 
-      affectedRows: result.affectedRows,
-      message: 'อัปเดตเกรดและคำนวณ GPA ใหม่สำเร็จ'
-    };
-  } catch (error) {
-    console.error('Error updating student grade:', error);
-    throw error;
   }
-}
 
-// คำนวณและอัปเดต GPA ใหม่
-async recalculateAndUpdateGPA(studentId: string, year: number, semester: string) {
-  try {
-    // คำนวณ GPA ภาคใหม่
-    const semesterGPA = await this.calculateSemesterGPA(studentId, year, semester);
-    
-    // คำนวณ GPA สะสมใหม่
-    const cumulativeGPA = await this.calculateCumulativeGPA(studentId, year, semester);
-    
-    // คำนวณหน่วยกิตรวม
-    const totalCredits = await this.calculateTotalCredits(studentId, year, semester);
-    
-    // คำนวณหน่วยกิตรวมทั้งหมด
-    const totalCreditsAll = await this.calculateTotalCreditsAll(studentId, year, semester);
+  // อัปเดตเกรดของนิสิต
+  async updateStudentGrade(
+    regisId: number,
+    gradeCharacter: string,
+    gradeNumber: number,
+  ): Promise<UpdateGradeResult> {
+    try {
+      console.log('updateStudentGrade called with:', { regisId, gradeCharacter, gradeNumber });
+      
+      // อัปเดตเกรดใน fact_register
+      const sql = `
+        UPDATE fact_register 
+        SET grade_character = ?, grade_number = ?
+        WHERE regis_id = ?
+      `;
 
-    // อัปเดต fact_term_summary
-    await this.updateFactTermSummary(studentId, year, semester, {
-      semesterGPA,
-      cumulativeGPA,
-      totalCredits,
-      totalCreditsAll,
-    });
+      const result = await this.factRegisterRepo.query(sql, [gradeCharacter, gradeNumber, regisId]);
+      console.log('Update grade result:', result);
 
-    console.log(`✅ อัปเดต GPA สำหรับ ${studentId} ภาค ${semester} ${year}: GPA ภาค=${semesterGPA}, GPA สะสม=${cumulativeGPA}`);
-    
-    return {
-      semesterGPA,
-      cumulativeGPA,
-      totalCredits,
-      totalCreditsAll,
-    };
-  } catch (error) {
-    console.error('Error recalculating GPA:', error);
-    throw new Error('ไม่สามารถคำนวณ GPA ใหม่ได้');
+      // ดึงข้อมูลการลงทะเบียนที่อัปเดต
+      const updatedRegis = await this.factRegisterRepo.findOne({
+        where: { regisId },
+      });
+
+      if (!updatedRegis) {
+        throw new Error('ไม่พบข้อมูลการลงทะเบียน');
+      }
+
+      // คำนวณและอัปเดต GPA ใหม่
+      await this.recalculateAndUpdateGPA(
+        updatedRegis.studentId!,
+        updatedRegis.semesterYearInRegis!,
+        updatedRegis.semesterPartInRegis!,
+      );
+
+      // ดึงข้อมูลรายวิชาที่อัปเดตแล้ว
+      const updatedCourse = await this.getUpdatedCourseData(regisId);
+
+      return { 
+        success: true, 
+        affectedRows: result.affectedRows,
+        message: 'อัปเดตเกรดและคำนวณ GPA ใหม่สำเร็จ',
+        updatedCourse: updatedCourse || undefined
+      };
+    } catch (error) {
+      console.error('Error updating student grade:', error);
+      throw error;
+    }
   }
-}
 
-// คำนวณ GPA ภาค
-async calculateSemesterGPA(studentId: string, year: number, semester: string) {
-  const sql = `
-    SELECT 
-      SUM(creditRegis) as totalCredits,
-      SUM(creditRegis * gradeNumber) as weightedGPA
-    FROM fact_register 
-    WHERE studentId = ? 
-      AND semesterYearInRegis = ? 
-      AND semesterPartInRegis = ?
-      AND gradeCharacter != 'P'
-      AND gradeNumber IS NOT NULL
-  `;
-  
-  const [result] = await this.fact_regisRepo.query(sql, [studentId, year, semester]);
-  
-  if (!result || result.totalCredits === 0) {
-    return 0;
+  // ดึงข้อมูลรายวิชาหลังจากอัปเดตเกรด
+  async getUpdatedCourseData(regisId: number): Promise<StudentCourse | null> {
+    try {
+      const sql = `
+        SELECT
+          fr.regis_id AS regisId,
+          fr.student_id AS studentId,
+          fr.subject_code_in_regis AS subjectCode,
+          s.name_subject_thai AS subjectNameThai,
+          s.name_subject_eng AS subjectNameEng,
+          st.name_subject_type AS subjectType,
+          fr.credit_regis AS credit,
+          fr.grade_character AS gradeCharacter,
+          fr.grade_number AS gradeNumber,
+          fr.credit_regis AS creditRegis,
+          fr.semester_year_in_regis AS semesterYear,
+          CASE fr.semester_part_in_regis
+            WHEN '0' THEN 'ภาคต้น'
+            WHEN '1' THEN 'ภาคปลาย'
+            WHEN '2' THEN 'ฤดูร้อน'
+          END AS semesterPart,
+          fr.type_regis AS typeRegis,
+          COALESCE(fr.sec_lecture, 0) AS secLecture,
+          COALESCE(fr.sec_lab, 0) AS secLab,
+          CASE
+            WHEN fr.grade_number IS NOT NULL AND fr.grade_character != 'P' THEN 'has_grade'
+            ELSE 'no_grade'
+          END AS gradeStatus
+        FROM fact_register fr
+        LEFT JOIN subject_course sc ON fr.subject_course_id = sc.subject_course_id
+        LEFT JOIN subject s ON sc.subject_id = s.subject_id
+        LEFT JOIN subject_type st ON s.subject_type_id = st.subject_type_id
+        WHERE fr.regis_id = ?
+      `;
+
+      const [result] = await this.factRegisterRepo.query(sql, [regisId]);
+      console.log('Updated course data:', result);
+      return result || null;
+    } catch (error) {
+      console.error('Error fetching updated course data:', error);
+      return null;
+    }
   }
-  
-  return Number((result.weightedGPA / result.totalCredits).toFixed(2));
-}
 
-// คำนวณ GPA สะสม
-async calculateCumulativeGPA(studentId: string, year: number, semester: string) {
-  const sql = `
-    SELECT 
-      SUM(creditRegis) as totalCredits,
-      SUM(creditRegis * gradeNumber) as weightedGPA
-    FROM fact_register 
-    WHERE studentId = ? 
-      AND gradeCharacter != 'P'
-      AND gradeNumber IS NOT NULL
-      AND (
-        semesterYearInRegis < ? OR
-        (semesterYearInRegis = ? AND semesterPartInRegis <= ?)
-      )
-  `;
-  
-  const [result] = await this.fact_regisRepo.query(sql, [studentId, year, year, semester]);
-  
-  if (!result || result.totalCredits === 0) {
-    return 0;
+  // คำนวณและอัปเดต GPA ใหม่
+  async recalculateAndUpdateGPA(
+    studentId: number,
+    year: number,
+    semesterPart: string,
+  ): Promise<void> {
+    try {
+      // คำนวณ GPA ภาคใหม่
+      const semesterGPA = await this.calculateSemesterGPA(studentId, year, semesterPart);
+      
+      // คำนวณ GPA สะสมใหม่
+      const cumulativeGPA = await this.calculateCumulativeGPA(studentId, year, semesterPart);
+      
+      // คำนวณหน่วยกิตรวม
+      const totalCredits = await this.calculateTotalCredits(studentId, year, semesterPart);
+      
+      // คำนวณหน่วยกิตรวมทั้งหมด
+      const totalCreditsAll = await this.calculateTotalCreditsAll(studentId, year, semesterPart);
+
+      // อัปเดต fact_term_summary
+      await this.updateFactTermSummary(studentId, year, semesterPart, {
+        semesterGPA,
+        cumulativeGPA,
+        totalCredits,
+        totalCreditsAll,
+      });
+
+      console.log(`✅ อัปเดต GPA สำหรับ ${studentId} ภาค ${semesterPart} ${year}: GPA ภาค=${semesterGPA}, GPA สะสม=${cumulativeGPA}`);
+      
+    } catch (error) {
+      console.error('Error recalculating GPA:', error);
+      throw new Error('ไม่สามารถคำนวณ GPA ใหม่ได้');
+    }
   }
-  
-  return Number((result.weightedGPA / result.totalCredits).toFixed(2));
-}
 
-// คำนวณหน่วยกิตรวมของภาค
-async calculateTotalCredits(studentId: string, year: number, semester: string) {
-  const sql = `
-    SELECT SUM(creditRegis) as totalCredits
-    FROM fact_register 
-    WHERE studentId = ? 
-      AND semesterYearInRegis = ? 
-      AND semesterPartInRegis = ?
-      AND gradeCharacter != 'P'
-      AND gradeNumber IS NOT NULL
-  `;
-  
-  const [result] = await this.fact_regisRepo.query(sql, [studentId, year, semester]);
-  return result?.totalCredits || 0;
-}
+  // คำนวณ GPA ภาค
+  async calculateSemesterGPA(studentId: number, year: number, semesterPart: string): Promise<number> {
+    const sql = `
+      SELECT 
+        SUM(credit_regis) as totalCredits,
+        SUM(credit_regis * grade_number) as weightedGPA
+      FROM fact_register 
+      WHERE student_id = ? 
+        AND semester_year_in_regis = ? 
+        AND semester_part_in_regis = ?
+        AND grade_character != 'P'
+        AND grade_number IS NOT NULL
+    `;
+    
+    const [result] = await this.factRegisterRepo.query(sql, [studentId, year, semesterPart]);
+    
+    if (!result || result.totalCredits === 0) {
+      return 0;
+    }
+    
+    return Number((result.weightedGPA / result.totalCredits).toFixed(2));
+  }
 
-// คำนวณหน่วยกิตรวมทั้งหมด
-async calculateTotalCreditsAll(studentId: string, year: number, semester: string) {
-  const sql = `
-    SELECT SUM(creditRegis) as totalCredits
-    FROM fact_register 
-    WHERE studentId = ? 
-      AND gradeCharacter != 'P'
-      AND gradeNumber IS NOT NULL
-      AND (
-        semesterYearInRegis < ? OR
-        (semesterYearInRegis = ? AND semesterPartInRegis <= ?)
-      )
-  `;
-  
-  const [result] = await this.fact_regisRepo.query(sql, [studentId, year, year, semester]);
-  return result?.totalCredits || 0;
-}
+  // คำนวณ GPA สะสม
+  async calculateCumulativeGPA(studentId: number, year: number, semesterPart: string): Promise<number> {
+    const sql = `
+      SELECT 
+        SUM(credit_regis) as totalCredits,
+        SUM(credit_regis * grade_number) as weightedGPA
+      FROM fact_register 
+      WHERE student_id = ? 
+        AND grade_character != 'P'
+        AND grade_number IS NOT NULL
+        AND (
+          semester_year_in_regis < ? OR
+          (semester_year_in_regis = ? AND semester_part_in_regis <= ?)
+        )
+    `;
+    
+    const [result] = await this.factRegisterRepo.query(sql, [studentId, year, year, semesterPart]);
+    
+    if (!result || result.totalCredits === 0) {
+      return 0;
+    }
+    
+    return Number((result.weightedGPA / result.totalCredits).toFixed(2));
+  }
 
-// อัปเดต fact_term_summary
-async updateFactTermSummary(studentId: string, year: number, semester: string, gpaData: any) {
-  const updateData = {
-    gpaTerm: gpaData.semesterGPA,
-    gpaAll: gpaData.cumulativeGPA,
-    creditTerm: gpaData.totalCredits,
-    creditAll: gpaData.totalCreditsAll,
-  };
+  // คำนวณหน่วยกิตรวมของภาค
+  async calculateTotalCredits(studentId: number, year: number, semesterPart: string): Promise<number> {
+    const sql = `
+      SELECT SUM(credit_regis) as totalCredits
+      FROM fact_register 
+      WHERE student_id = ? 
+        AND semester_year_in_regis = ? 
+        AND semester_part_in_regis = ?
+        AND grade_character != 'P'
+        AND grade_number IS NOT NULL
+    `;
+    
+    const [result] = await this.factRegisterRepo.query(sql, [studentId, year, semesterPart]);
+    return result?.totalCredits || 0;
+  }
 
-  await this.factTermSummaryRepo.update(
-    {
-      studentId,
-      semesterYearInTerm: year,
-      semesterPartInTerm: semester,
+  // คำนวณหน่วยกิตรวมทั้งหมด
+  async calculateTotalCreditsAll(studentId: number, year: number, semesterPart: string): Promise<number> {
+    const sql = `
+      SELECT SUM(credit_regis) as totalCredits
+      FROM fact_register 
+      WHERE student_id = ? 
+        AND grade_character != 'P'
+        AND grade_number IS NOT NULL
+        AND (
+          semester_year_in_regis < ? OR
+          (semester_year_in_regis = ? AND semester_part_in_regis <= ?)
+        )
+    `;
+    
+    const [result] = await this.factRegisterRepo.query(sql, [studentId, year, year, semesterPart]);
+    return result?.totalCredits || 0;
+  }
+
+  // อัปเดต fact_term_summary
+  async updateFactTermSummary(
+    studentId: number,
+    year: number,
+    semesterPart: string,
+    gpaData: {
+      semesterGPA: number;
+      cumulativeGPA: number;
+      totalCredits: number;
+      totalCreditsAll: number;
     },
-    updateData
-  );
-}
+  ): Promise<void> {
+    const updateData = {
+      gpa: gpaData.semesterGPA,
+      gpax: gpaData.cumulativeGPA,
+      creditTerm: gpaData.totalCredits,
+      creditAll: gpaData.totalCreditsAll,
+    };
 
+    await this.factTermSummaryRepo.update(
+      {
+        studentId,
+        semesterYearInTerm: year,
+        semesterPartInTerm: semesterPart,
+      },
+      updateData,
+    );
+  }
 }

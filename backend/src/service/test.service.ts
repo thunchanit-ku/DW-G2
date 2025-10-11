@@ -6,7 +6,7 @@ import { Student } from '../entity/student.entity';
 import { CreateStudentDto } from '../dto/test.dto';
 import * as fs from 'fs/promises'; 
 import * as path from 'path';
-import { FactRegis } from 'src/entity/fact-register.entity';
+import { FactRegister } from 'src/entity/fact-register.entity';
 import { Semester } from 'src/entity/semester.entity';
 import { CourseList } from 'src/entity/courselist.entity';
 import { TypeRegis } from 'src/entity/typeregis.entity';
@@ -24,8 +24,8 @@ export class StudentService {
   constructor(
     @InjectRepository(Student)
     private studentRepo: Repository<Student>,
-    @InjectRepository(FactRegis)
-    private fact_regisRepo: Repository<FactRegis>,
+    @InjectRepository(FactRegister)
+    private fact_regisRepo: Repository<FactRegister>,
     @InjectRepository(Semester)
     private semesterRepo: Repository<Semester>,
     @InjectRepository(CourseList)

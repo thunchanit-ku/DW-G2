@@ -24,6 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th">
+      <head>
+        <meta charSet="utf-8" />
+      </head>
       <body className={kanit.variable}>
         <AntdRegistry>
           <ConfigProvider theme={themeConfig}>

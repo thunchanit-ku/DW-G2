@@ -1,21 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, Input, Button, Select, Table, message, Spin, Alert, Tag, Row, Col } from 'antd';
+import { Card, Input, Button, Select, Table, message, Alert, Tag, Row, Col } from 'antd';
 import { RefreshCw, Search, AlertCircle, BookOpen } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
-import { Console } from 'node:console';
 
 interface StudentInfo {
-  studentId: string;
-  fisrtNameTh: string;
-  lastNameTh: string;
-  fisrtNameEng?: string;
-  lastNameEng?: string;
-  parentTell?: string;
+  studentId: number;
+  studentUsername: string;
+  nameTh: string;
+  nameEng: string;
+  titleTh: string;
+  titleEng: string;
+  genderTh: string;
+  genderEng: string;
+  tell: string;
+  parentPhone?: string;
   email: string;
-  titleTh?: string;
 }
 
 interface CompletedSemester {
@@ -29,10 +31,11 @@ interface CompletedSemester {
 
 interface CourseData {
   regisId: number;
-  studentId: string;
+  studentId: number;
   subjectCode: string;
   subjectNameTh: string;
   subjectNameEng: string;
+  subjectType: string;
   credit: number;
   gradeCharacter: string;
   gradeNumber: number;
@@ -40,6 +43,8 @@ interface CourseData {
   semesterYear: number;
   semesterPart: string;
   typeRegis: string;
+  secLecture: string;
+  secLab: string;
   gradeStatus: string;
 }
 
@@ -50,39 +55,46 @@ export default function UpdateGradesPage() {
   const [selectedSemester, setSelectedSemester] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [courseData, setCourseData] = useState<CourseData[]>([]);
-  const [editingGrades, setEditingGrades] = useState<{[key: number]: {gradeCharacter: string, gradeNumber: number}}>({});
-
-  // กำหนดค่าเกรด A-F และ 4-0
-  const gradeOptions = [
-    { value: 'A', label: 'A (4.0)', gradeNumber: 4.0 },
-    { value: 'B+', label: 'B+ (3.5)', gradeNumber: 3.5 },
-    { value: 'B', label: 'B (3.0)', gradeNumber: 3.0 },
-    { value: 'C+', label: 'C+ (2.5)', gradeNumber: 2.5 },
-    { value: 'C', label: 'C (2.0)', gradeNumber: 2.0 },
-    { value: 'D+', label: 'D+ (1.5)', gradeNumber: 1.5 },
-    { value: 'D', label: 'D (1.0)', gradeNumber: 1.0 },
-    { value: 'F', label: 'F (0.0)', gradeNumber: 0.0 },
-  ];
   const [loading, setLoading] = useState(false);
   const [courseLoading, setCourseLoading] = useState(false);
-  const [updatingGrade, setUpdatingGrade] = useState<number | null>(null);
 
-  // ค้นหาข้อมูลนิสิต
-  const handleSearchStudent = async () => {
-    if (!student) {
-      message.error('กรุณากรอกรหัสนิสิต');
-      return;
+  // โหลดข้อมูลจาก sessionStorage เมื่อ component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedStudent = sessionStorage.getItem('studentInput');
+      const savedResult = sessionStorage.getItem('studentResult');
+      
+      if (savedStudent) {
+        setStudent(savedStudent);
+        // ดึงข้อมูลนิสิตและ semester อัตโนมัติ
+        loadStudentData(savedStudent);
+      }
+      
+      if (savedResult) {
+        const parsedResult = JSON.parse(savedResult);
+        setStudentInfo({
+          studentId: parsedResult.studentId,
+          studentUsername: parsedResult.studentUsername || savedStudent,
+          nameTh: parsedResult.nameTh || parsedResult.fisrtNameTh + ' ' + parsedResult.lastNameTh,
+          nameEng: parsedResult.fisrtNameEng + ' ' + parsedResult.lastNameEng,
+          titleTh: parsedResult.titleTh,
+          titleEng: parsedResult.titleEng,
+          genderTh: parsedResult.genderTh || '',
+          genderEng: parsedResult.genderEng || '',
+          tell: parsedResult.phone || '',
+          parentPhone: parsedResult.parentTell || '',
+          email: parsedResult.email || '',
+        });
+      }
     }
+  }, []);
 
+  // ฟังก์ชันสำหรับโหลดข้อมูลนิสิต
+  const loadStudentData = async (studentUsername: string) => {
     setLoading(true);
     try {
-      // ตรวจสอบว่า backend ทำงานอยู่หรือไม่
-      // const healthCheck = await fetch('http://localhost:4000/api/');
-      // if (!healthCheck.ok) {
-      //   throw new Error('Backend server ไม่ทำงาน');
-      // }
-      console.log("studenttttttttt" ,student);
-      const res = await fetch(`http://localhost:4000/api/fd/${student}`);
+      console.log("Loading student data for:", studentUsername);
+      const res = await fetch(`http://localhost:4000/api/fd/student/${studentUsername}`);
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'ไม่พบข้อมูลนิสิต');
@@ -91,7 +103,7 @@ export default function UpdateGradesPage() {
       setStudentInfo(data);
       
       // ดึงข้อมูล semester ที่นิสิตเรียนจบแล้ว
-      const semesterRes = await fetch(`http://localhost:4000/api/fd/completed-semesters/${student}`);
+      const semesterRes = await fetch(`http://localhost:4000/api/fd/completed-semesters/${studentUsername}`);
       if (!semesterRes.ok) {
         const errorData = await semesterRes.json();
         throw new Error(errorData.message || 'ไม่สามารถดึงข้อมูล semester ได้');
@@ -105,13 +117,23 @@ export default function UpdateGradesPage() {
       setSelectedSemester('');
       setCourseData([]);
       
-      message.success('ค้นหาข้อมูลนิสิตสำเร็จ');
+      message.success('โหลดข้อมูลนิสิตสำเร็จ');
     } catch (err: any) {
       console.error('เกิดข้อผิดพลาด:', err);
       message.error(err.message || 'ไม่สามารถเรียกข้อมูลได้');
     } finally {
       setLoading(false);
     }
+  };
+
+  // ค้นหาข้อมูลนิสิต
+  const handleSearchStudent = async () => {
+    if (!student) {
+      message.error('กรุณากรอกรหัสนิสิต');
+      return;
+    }
+
+    await loadStudentData(student);
   };
 
   // ดึงข้อมูลรายวิชาและเกรด
@@ -128,10 +150,26 @@ export default function UpdateGradesPage() {
     setCourseLoading(true);
     try {
       const encodedSemester = encodeURIComponent(selectedSemester);
-      const res = await fetch(`http://localhost:4000/api/fd/courses/${student}?year=${selectedYear}&semester=${encodedSemester}`);
+      const res = await fetch(`http://localhost:4000/api/fd/courses/${student}?year=${selectedYear}&semester=${encodedSemester}`, {
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+      });
       const data = await res.json();
       console.log('Course data:', data);
-      setCourseData(Array.isArray(data) ? data : []);
+      console.log('First course subjectNameThai:', data[0]?.subjectNameThai);
+      console.log('First course subjectNameEng:', data[0]?.subjectNameEng);
+      console.log('First course full data:', JSON.stringify(data[0], null, 2));
+      
+      // แปลงข้อมูลให้ตรงกับ interface
+      const mappedData = Array.isArray(data) ? data.map(item => ({
+        ...item,
+        subjectNameTh: item.subjectNameThai || item.subjectNameTh,
+        subjectNameEng: item.subjectNameEng || item.subjectNameEng,
+      })) : [];
+      
+      console.log('Mapped data:', mappedData);
+      setCourseData(mappedData);
       
       if (Array.isArray(data) && data.length > 0) {
         message.success(`พบรายวิชา ${data.length} วิชา`);
@@ -168,10 +206,22 @@ export default function UpdateGradesPage() {
       // ถ้ามีการเลือกปีและภาคการศึกษาแล้ว ให้ดึงข้อมูลรายวิชาด้วย
       if (selectedYear && selectedSemester) {
         const encodedSemester = encodeURIComponent(selectedSemester);
-        const res = await fetch(`http://localhost:4000/api/fd/courses/${student}?year=${selectedYear}&semester=${encodedSemester}`);
+        const res = await fetch(`http://localhost:4000/api/fd/courses/${student}?year=${selectedYear}&semester=${encodedSemester}`, {
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        });
         const data = await res.json();
         console.log('Refreshed course data:', data);
-        setCourseData(Array.isArray(data) ? data : []);
+        
+        // แปลงข้อมูลให้ตรงกับ interface
+        const mappedData = Array.isArray(data) ? data.map(item => ({
+          ...item,
+          subjectNameTh: item.subjectNameThai || item.subjectNameTh,
+          subjectNameEng: item.subjectNameEng || item.subjectNameEng,
+        })) : [];
+        
+        setCourseData(mappedData);
         
         if (Array.isArray(data) && data.length > 0) {
           message.success(`อัปเดตข้อมูลรายวิชาสำเร็จ - พบรายวิชา ${data.length} วิชา`);
@@ -191,94 +241,6 @@ export default function UpdateGradesPage() {
     }
   };
 
-  // อัปเดตเกรดเฉพาะวิชา
-  const handleUpdateGrade = async (regisId: number, gradeCharacter: string, gradeNumber: number) => {
-    setUpdatingGrade(regisId);
-    try {
-      const res = await fetch(`http://localhost:4000/api/fd/grade/${regisId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ gradeCharacter, gradeNumber }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'ไม่สามารถอัปเดตเกรดได้');
-      }
-
-      const data = await res.json();
-      message.success('อัปเดตเกรดและคำนวณ GPA ใหม่สำเร็จ');
-
-      // อัปเดตข้อมูลใน state
-      setCourseData(prev => prev.map(course =>
-        course.regisId === regisId
-          ? { ...course, gradeCharacter, gradeNumber }
-          : course
-      ));
-
-      // อัปเดตข้อมูลภาคการศึกษาสำหรับตารางสรุป GPA
-      if (student) {
-        try {
-          const semesterRes = await fetch(`http://localhost:4000/api/fd/completed-semesters/${student}`);
-          if (semesterRes.ok) {
-            const semesterData = await semesterRes.json();
-            setCompletedSemesters(Array.isArray(semesterData) ? semesterData : []);
-          }
-        } catch (err) {
-          console.error('Error refreshing semester data:', err);
-        }
-      }
-
-      // ลบข้อมูลการแก้ไข
-      setEditingGrades(prev => {
-        const newEditing = { ...prev };
-        delete newEditing[regisId];
-        return newEditing;
-      });
-
-    } catch (err: any) {
-      console.error('เกิดข้อผิดพลาดในการอัปเดตเกรด:', err);
-      message.error(err.message || 'เกิดข้อผิดพลาดในการอัปเดตเกรด');
-    } finally {
-      setUpdatingGrade(null);
-    }
-  };
-
-  // เริ่มแก้ไขเกรด
-  const handleStartEditGrade = (regisId: number, currentGradeCharacter: string, currentGradeNumber: number) => {
-    setEditingGrades(prev => ({
-      ...prev,
-      [regisId]: {
-        gradeCharacter: currentGradeCharacter,
-        gradeNumber: currentGradeNumber
-      }
-    }));
-  };
-
-  // เปลี่ยนเกรด (อัปเดตทั้งตัวอักษรและตัวเลขพร้อมกัน)
-  const handleGradeChange = (regisId: number, gradeCharacter: string) => {
-    const selectedGrade = gradeOptions.find(option => option.value === gradeCharacter);
-    if (selectedGrade) {
-      setEditingGrades(prev => ({
-        ...prev,
-        [regisId]: {
-          gradeCharacter: selectedGrade.value,
-          gradeNumber: selectedGrade.gradeNumber
-        }
-      }));
-    }
-  };
-
-  // ยกเลิกการแก้ไข
-  const handleCancelEditGrade = (regisId: number) => {
-    setEditingGrades(prev => {
-      const newEditing = { ...prev };
-      delete newEditing[regisId];
-      return newEditing;
-    });
-  };
 
   // กรอง semester options ตามปีที่เลือก
   const filteredSemesters = Array.isArray(completedSemesters) 
@@ -322,18 +284,37 @@ export default function UpdateGradesPage() {
       key: 'subjectCode',
       align: 'center' as const,
       width: 120,
+      render: (text: string) => (
+        <div className="text-base font-semibold text-gray-800">
+          {text}
+        </div>
+      ),
     },
     {
       title: 'ชื่อวิชา (ไทย)',
       dataIndex: 'subjectNameTh',
       key: 'subjectNameTh',
-      width: 200,
+      width: 250,
+      render: (text: string, record: CourseData) => {
+        console.log('Rendering subjectNameTh:', text, 'for record:', record);
+        console.log('Full record data:', JSON.stringify(record, null, 2));
+        return (
+          <div className="text-base font-semibold text-gray-800" style={{ fontFamily: 'Kanit, sans-serif' }}>
+            {text || record.subjectNameTh || 'ไม่พบชื่อวิชา'}
+          </div>
+        );
+      },
     },
     {
       title: 'ชื่อวิชา (อังกฤษ)',
       dataIndex: 'subjectNameEng',
       key: 'subjectNameEng',
-      width: 200,
+      width: 250,
+      render: (text: string) => (
+        <div className="text-base text-gray-600 italic">
+          {text || 'No English name'}
+        </div>
+      ),
     },
     {
       title: 'หน่วยกิต',
@@ -341,63 +322,85 @@ export default function UpdateGradesPage() {
       key: 'credit',
       align: 'center' as const,
       width: 80,
+      render: (credit: number) => (
+        <div className="text-center font-semibold text-gray-700">
+          {credit}
+        </div>
+      ),
     },
     {
       title: 'เกรด',
-      key: 'grade',
+      dataIndex: 'gradeCharacter',
+      key: 'gradeCharacter',
       align: 'center' as const,
-      width: 200,
-      render: (record: CourseData) => {
-        const isEditing = editingGrades[record.regisId];
-        const editingData = isEditing || { gradeCharacter: record.gradeCharacter, gradeNumber: record.gradeNumber };
+      width: 100,
+      render: (grade: string) => {
+        const getGradeColor = (grade: string) => {
+          switch (grade) {
+            case 'A':
+              return 'bg-green-100 text-green-800 border-green-300';
+            case 'B+':
+              return 'bg-blue-100 text-blue-800 border-blue-300';
+            case 'B':
+              return 'bg-blue-100 text-blue-800 border-blue-300';
+            case 'C+':
+              return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+            case 'C':
+              return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+            case 'D+':
+              return 'bg-orange-100 text-orange-800 border-orange-300';
+            case 'D':
+              return 'bg-orange-100 text-orange-800 border-orange-300';
+            case 'F':
+              return 'bg-red-100 text-red-800 border-red-300';
+            case 'P':
+              return 'bg-purple-100 text-purple-800 border-purple-300';
+            case 'W':
+              return 'bg-gray-100 text-gray-800 border-gray-300';
+            case 'I':
+              return 'bg-gray-100 text-gray-800 border-gray-300';
+            default:
+              return 'bg-gray-100 text-gray-800 border-gray-300';
+          }
+        };
 
         return (
           <div className="text-center">
-            {isEditing ? (
-              <div className="space-y-2">
-                <div className="flex justify-center">
-                  <Select
-                    size="small"
-                    value={editingData.gradeCharacter}
-                    onChange={(value) => handleGradeChange(record.regisId, value)}
-                    options={gradeOptions}
-                    className="w-24"
-                    placeholder="เลือกเกรด"
-                  />
-                </div>
-                <div className="flex gap-1 justify-center">
-                  <Button
-                    size="small"
-                    type="primary"
-                    loading={updatingGrade === record.regisId}
-                    onClick={() => handleUpdateGrade(record.regisId, editingData.gradeCharacter, editingData.gradeNumber)}
-                    className="text-xs"
-                  >
-                    บันทึก
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={() => handleCancelEditGrade(record.regisId)}
-                    className="text-xs"
-                  >
-                    ยกเลิก
-                  </Button>
-                </div>
+            <div className={`inline-block px-3 py-1 rounded-lg border-2 text-lg font-bold ${getGradeColor(grade)}`}>
+              {grade || '-'}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: 'Section',
+      key: 'section',
+      align: 'center' as const,
+      width: 150,
+      render: (record: CourseData) => {
+        const hasLecture = record.secLecture && record.secLecture !== 0 && record.secLecture !== '0';
+        const hasLab = record.secLab && record.secLab !== 0 && record.secLab !== '0';
+        
+        return (
+          <div className="space-y-1">
+            {hasLecture && (
+              <div className="text-xs">
+                <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-blue-500 text-white">
+                  Lec: {record.secLecture}
+                </span>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center space-y-2">
-                <Tag
-                  color={record.gradeNumber >= 3.5 ? 'green' : record.gradeNumber >= 2.5 ? 'blue' : record.gradeNumber >= 2 ? 'orange' : 'red'}
-                  className="text-lg font-bold cursor-pointer px-3 py-1"
-                  onClick={() => handleStartEditGrade(record.regisId, record.gradeCharacter, record.gradeNumber)}
-                >
-                  {record.gradeCharacter}
-                </Tag>
-                <div className="text-sm font-semibold text-gray-700">{record.gradeNumber}</div>
-                <div className="text-xs text-blue-500 cursor-pointer hover:underline"
-                     onClick={() => handleStartEditGrade(record.regisId, record.gradeCharacter, record.gradeNumber)}>
-                  แก้ไข
-                </div>
+            )}
+            {hasLab && (
+              <div className="text-xs">
+                <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-orange-500 text-white">
+                  Lab: {record.secLab}
+                </span>
+              </div>
+            )}
+            {!hasLecture && !hasLab && (
+              <div className="text-xs text-gray-500">
+                -
               </div>
             )}
           </div>
@@ -411,16 +414,20 @@ export default function UpdateGradesPage() {
       align: 'center' as const,
       width: 100,
       render: (type: string) => (
-        <Tag color={type === 'Credit' ? 'blue' : 'default'}>
-          {type}
-        </Tag>
+        <div className="text-center">
+          <span className={`inline-block px-2 py-1 rounded text-xs font-medium text-white ${
+            type === '1' ? 'bg-purple-500' : 'bg-gray-500'
+          }`}>
+            {type === '1' ? 'Credit' : 'Audit'}
+          </span>
+        </div>
       ),
     },
   ];
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-6" style={{ fontFamily: 'Kanit, sans-serif' }}>
         <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
           <RefreshCw className="w-6 h-6 mr-2 text-purple-500" />
           อัปเดตผลการเรียน
@@ -429,41 +436,30 @@ export default function UpdateGradesPage() {
                {/* Navigation Menu */}
                <DashboardNavCards />
 
-        {/* Search Student Section */}
-        <Card title="ค้นหานิสิต" className="mb-6 shadow-md">
-          <div className="flex items-center gap-4 mb-4">
-            <Input
-              type="text"
-              placeholder="กรุณาใส่รหัสนิสิต"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-              value={student}
-              onChange={(e) => setStudent(e.target.value)}
-            />
-            <Button
-              type="primary"
-              icon={<Search className="w-5 h-5" />}
-              size="large"
-              onClick={handleSearchStudent}
-              loading={loading}
-            >
-              ค้นหา
-            </Button>
-          </div>
-          {studentInfo && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h5 className="text-lg font-semibold text-gray-800 mb-2">ข้อมูลนิสิต:</h5>
-              <p className="text-gray-700">
-                <strong>รหัสนิสิต:</strong> {studentInfo.studentId}
-              </p>
-              <p className="text-gray-700">
-                <strong>ชื่อ-นามสกุล:</strong> {studentInfo.titleTh} {studentInfo.fisrtNameTh} {studentInfo.lastNameTh}
-              </p>
-              <p className="text-gray-700">
-                <strong>อีเมล:</strong> {studentInfo.email}
-              </p>
+        {/* Search Student Section - แสดงเฉพาะเมื่อไม่มีข้อมูลนิสิต */}
+        {!studentInfo && (
+          <Card title="ค้นหานิสิต" className="mb-6 shadow-md">
+            <div className="flex items-center gap-4 mb-4">
+              <Input
+                type="text"
+                placeholder="กรุณาใส่รหัสนิสิต"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+                value={student}
+                onChange={(e) => setStudent(e.target.value)}
+              />
+              <Button
+                type="primary"
+                icon={<Search className="w-5 h-5" />}
+                size="large"
+                onClick={handleSearchStudent}
+                loading={loading}
+              >
+                ค้นหา
+              </Button>
             </div>
-          )}
-        </Card>
+          </Card>
+        )}
+
 
         {/* Filter and Course Display Section */}
         <Card title="กรองและแสดงผลการเรียน" className="mb-6">
@@ -577,6 +573,7 @@ export default function UpdateGradesPage() {
               pagination={false}
               rowKey="regisId"
               className="mb-4"
+              style={{ fontFamily: 'Kanit, sans-serif' }}
             />
           </Card>
         )}

@@ -45,6 +45,10 @@ import { join } from 'path';
           logging: false,
           retryAttempts: 10,
           retryDelay: 3000,
+          charset: 'utf8mb4',
+          extra: {
+            charset: 'utf8mb4_unicode_ci',
+          },
         };
       },
     }),
