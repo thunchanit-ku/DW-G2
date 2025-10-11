@@ -11,6 +11,7 @@ import SemesterResults from '@/components/charts/SemesterChart';
 import { getStudent } from '../service/home.service';
 export default function HomePage() {
   const [student, SetStudent] = useState('');
+  const [finishstu , SetFinishstu] = useState('');
   const [result, setResult] = useState({ 
     email: '', 
     fisrtNameEng: '', 
@@ -56,6 +57,8 @@ const handleSubmit = async () => {
       return;
     }
 
+    SetFinishstu(student);
+
     try {
 
       const res = await getStudent(student);
@@ -77,7 +80,7 @@ const handleSubmit = async () => {
           setHeaderGpa(typeof cumulative === 'number' ? cumulative : null);
           // เก็บ GPA ลง sessionStorage
           if (typeof window !== 'undefined') {
-            sessionStorage.setItem('headerGpa', String(cumulative));
+            sessionStorage.setItem('headerGpa', String(cumulative));  
           }
         }
       } catch (gpaErr) {
@@ -101,210 +104,6 @@ const handleSubmit = async () => {
     }
   };
 
-  // ข้อมูลนักศึกษา
-  const studentInfo = {
-    studentId: '6020500357',
-    nameTH: 'ภัทรพร ปัญญาอุดมพร',
-    nameEN: 'Phattaraporn panyaaudomporn',
-    phone: '0950427705',
-    email: 'phattaraporn.sa@ku.th',
-    faculty: 'วิศวกรรมศาสตร์',
-    program: 'วิศวกรรมคอมพิวเตอร์',
-    curriculum: 'ภาษาไทย (ภาคปกติ)',
-    advisor: 'รศ.ดร.ฐิติพงษ์ สถิรเมธีกุล',
-    gpa: 3.38,
-  };
-
-  // ข้อมูลผลการเรียนแต่ละภาคเรียน
-  const semesterData = [
-    {
-      key: '1',
-      year: '2563',
-      semester: 'ภาคต้น',
-      credits: 19,
-      semesterGPA: 2.13,
-      cumulativeGPA: 2.13,
-      change: null,
-    },
-    {
-      key: '2',
-      year: '2563',
-      semester: 'ภาคปลาย',
-      credits: 22,
-      semesterGPA: 3.34,
-      cumulativeGPA: 2.63,
-      change: '+0.50',
-      trend: 'up',
-    },
-    {
-      key: '3',
-      year: '2564',
-      semester: 'ภาคต้น',
-      credits: 19,
-      semesterGPA: 2.60,
-      cumulativeGPA: 2.62,
-      change: '-0.01',
-      trend: 'down',
-    },
-    {
-      key: '4',
-      year: '2564',
-      semester: 'ภาคปลาย',
-      credits: 22,
-      semesterGPA: 3.33,
-      cumulativeGPA: 2.78,
-      change: '+0.16',
-      trend: 'up',
-    },
-  ];
-
-  // ข้อมูลหมวดวิชา
-  const categoryData = [
-    {
-      key: '1',
-      category: 'หมวดวิชาศึกษาทั่วไป',
-      completed: 30,
-      remaining: 0,
-      total: 30,
-      gpa: 3.13,
-    },
-    {
-      key: '2',
-      category: 'หมวดวิชาเสรี',
-      completed: 6,
-      remaining: 0,
-      total: 6,
-      gpa: 3.23,
-    },
-    {
-      key: '3',
-      category: 'หมวดวิชาเฉพาะบังคับ',
-      completed: 98,
-      remaining: 6,
-      total: 104,
-      gpa: 3.33,
-    },
-    {
-      key: '4',
-      category: 'หมวดวิชาเฉพาะเลือก',
-      completed: 98,
-      remaining: 6,
-      total: 104,
-      gpa: 3.38,
-    },
-    {
-      key: '5',
-      category: 'หมวดวิชาเสรี',
-      completed: 36,
-      remaining: 0,
-      total: 36,
-      gpa: 3.40,
-    },
-  ];
-
-  const semesterColumns = [
-    {
-      title: 'ปีการศึกษา',
-      dataIndex: 'year',
-      key: 'year',
-      align: 'center' as const,
-    },
-    {
-      title: 'ภาคการศึกษา',
-      dataIndex: 'semester',
-      key: 'semester',
-      align: 'center' as const,
-    },
-    {
-      title: 'หน่วยกิต',
-      dataIndex: 'credits',
-      key: 'credits',
-      align: 'center' as const,
-    },
-    {
-      title: 'ผลการเรียน',
-      dataIndex: 'semesterGPA',
-      key: 'semesterGPA',
-      align: 'center' as const,
-      render: (gpa: number) => (
-        <span className="font-bold">{gpa.toFixed(2)}</span>
-      ),
-    },
-    {
-      title: 'GPA',
-      dataIndex: 'cumulativeGPA',
-      key: 'cumulativeGPA',
-      align: 'center' as const,
-      render: (gpa: number | null) => (
-        gpa !== null ? <span className="font-bold">{gpa.toFixed(2)}</span> : null
-      ),
-    },
-    {
-      title: '#',
-      dataIndex: 'change',
-      key: 'change',
-      align: 'center' as const,
-      render: (change: string | null, record: any) => {
-        if (!change) return null;
-        return (
-          <span className={record.trend === 'up' ? 'text-green-600' : 'text-red-600'}>
-            {record.trend === 'up' ? <TrendingUp className="inline w-4 h-4" /> : <TrendingDown className="inline w-4 h-4" />}
-            {change}
-          </span>
-        );
-      },
-    },
-  ];
-
-  const categoryColumns = [
-    {
-      title: 'หมวดวิชา',
-      dataIndex: 'category',
-      key: 'category',
-      width: 200,
-      align: 'center' as const,
-    },
-    {
-      title: <div className="whitespace-nowrap">จำนวนหน่วยกิตที่<span className="text-green-600">เรียนไปแล้ว</span></div>,
-      dataIndex: 'completed',
-      key: 'completed',
-      align: 'center' as const,
-      width: 180,
-      render: (value: number) => (
-        <span className="font-bold text-green-600">{value}</span>
-      ),
-    },
-    {
-      title: <div className="whitespace-nowrap">จำนวนหน่วยกิตที่<span className="text-red-600">ยังไม่เรียน</span></div>,
-      dataIndex: 'remaining',
-      key: 'remaining',
-      align: 'center' as const,
-      width: 180,
-      render: (value: number) => (
-        <span className="font-bold text-red-600">{value}</span>
-      ),
-    },
-    {
-      title: <div className="whitespace-nowrap">หน่วยกิตทั้งหมด</div>,
-      dataIndex: 'total',
-      key: 'total',
-      align: 'center' as const,
-      width: 150,
-      render: (value: number) => (
-        <span className="font-bold">{value}</span>
-      ),
-    },
-    {
-      title: 'เกรด',
-      dataIndex: 'gpa',
-      key: 'gpa',
-      align: 'center' as const,
-      width: 100,
-      render: (value: number) => (
-        <span className="font-bold">{value.toFixed(2)}</span>
-      ),
-    },
-  ];
 
   return (
     <DashboardLayout>
@@ -411,7 +210,7 @@ const handleSubmit = async () => {
         </div>
 
         {/* Semester Results */}
-        <SemesterResults studentId={student}/>
+        <SemesterResults studentId={finishstu}/>
 
         {/* Donut Charts Section */}
         <Card title="รายงานหน่วยกิตที่ลงทะเบียนแบ่งตามหมวดวิชา (%)" className="shadow-md">
