@@ -182,7 +182,6 @@ async calculateGradeProgress(studentId: string) {
     ) AS vars;
   `;
   
-  console.log(sql);
   const result = await this.fact_regisRepo.query(sql, [studentId]);
   return result;
 }
@@ -312,7 +311,6 @@ LIMIT 1;
     });
 
 
-    console.log("finish" , mergedData);
     // ✅ แยกข้อมูลตามสถานะ (ผ่าน / ไม่ผ่าน)
     const passedCourses = mergedData.filter((i) => i.isPass);
     const failedCourses = mergedData.filter((i) => !i.isPass);
