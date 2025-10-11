@@ -65,10 +65,11 @@ const handleSubmit = async () => {
       setResult(res);
 
       // เก็บข้อมูลลง sessionStorage
-      if (typeof window !== 'undefined') {
+      // if (typeof window !== 'undefined') {
         sessionStorage.setItem('studentResult', JSON.stringify(res));
         sessionStorage.setItem('studentInput', student);
-      }
+       
+      // }
 
       // คำนวณ GPA สะสมเพื่อแสดงบนหัวเรื่อง
       try {
