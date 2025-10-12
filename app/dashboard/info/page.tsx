@@ -199,18 +199,6 @@ export default function InfoPage() {
           </div>
         </div>
 
-        {/* Edit Button */}
-        <div className="text-center my-8">
-          <Button
-            type="primary"
-            size="large"
-            className="bg-yellow-500 hover:bg-yellow-600 border-yellow-500 hover:border-yellow-600 text-black font-medium"
-            onClick={() => router.push('/dashboard/info/edit')}
-          >
-            แก้ไข
-          </Button>
-        </div>
-
       </div>
     </DashboardLayout>
   );
