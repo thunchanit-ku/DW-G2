@@ -12,6 +12,7 @@ export default function ReportPage() {
   const [studentInfo, setStudentInfo] = useState<any>(null);
   const [failedCourses, setFailedCourses] = useState<any[]>([]);
   const [passedCourses, setPassedCourses] = useState<any[]>([]);
+  const [categoryData, setCategoryData] = useState<Record<string, any[]>>({});
   // โหลด studentId จาก sessionStorage หรือกำหนดเอง
   useEffect(() => {
     async function fetchData() {
@@ -53,7 +54,40 @@ export default function ReportPage() {
 
     fetchData();
   }, []);
+  useEffect(() => {
+  async function fetchCategoryData() {
+    try {
+      const username = sessionStorage.getItem("selectedStudentId");
+      if (!username) return;
 
+      const res = await fetch(`http://localhost:4000/api/student/category-subject/${username}`);
+      if (!res.ok) throw new Error("Cannot fetch category subject data");
+      const data = await res.json();
+
+      // ✅ group ข้อมูลตามหมวด (mainCategory)
+      const grouped = data.reduce((acc: Record<string, any[]>, item: any) => {
+        const cat = item.mainCategory || "ไม่ระบุหมวด";
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push({
+          year: item.studyYear,
+          semester: item.semesterPart,
+          courseCode: item.subjectCode,
+          courseName: item.subjectName,
+          category: item.mainCategory,
+          grade: item.grade,
+          credits: item.credit,
+        });
+        return acc;
+      }, {});
+
+      setCategoryData(grouped);
+    } catch (error) {
+      console.error("Error loading category subject data:", error);
+    }
+  }
+
+  fetchCategoryData();
+}, []);
   // ตารางวิชาที่ไม่ผ่านตามแผน (mock เหมือนเดิม)
   const failedCoursesColumns = [
     {
@@ -406,77 +440,23 @@ export default function ReportPage() {
 
         {/* Courses by Category Tabs */}
         <Card className="shadow-md">
-          <Tabs
-            defaultActiveKey="1"
-            items={[
-              {
-                key: '1',
-                label: 'หมวดวิชาแกน',
-                children: (
-                  <Table
-                    columns={coursesColumns}
-                    dataSource={coursesByCategory}
-                    pagination={false}
-                    size="small"
-                    bordered
-                  />
-                ),
-              },
-              {
-                key: '2',
-                label: 'หมวดวิชาศึกษาทั่วไป',
-                children: (
-                  <Table
-                    columns={coursesColumns}
-                    dataSource={coursesByCategory}
-                    pagination={false}
-                    size="small"
-                    bordered
-                  />
-                ),
-              },
-              {
-                key: '3',
-                label: 'หมวดวิชาเฉพาะบังคับ',
-                children: (
-                  <Table
-                    columns={coursesColumns}
-                    dataSource={coursesByCategory}
-                    pagination={false}
-                    size="small"
-                    bordered
-                  />
-                ),
-              },
-              {
-                key: '4',
-                label: 'หมวดวิชาเฉพาะเลือก',
-                children: (
-                  <Table
-                    columns={coursesColumns}
-                    dataSource={coursesByCategory}
-                    pagination={false}
-                    size="small"
-                    bordered
-                  />
-                ),
-              },
-              {
-                key: '5',
-                label: 'หมวดวิชาเสรี',
-                children: (
-                  <Table
-                    columns={coursesColumns}
-                    dataSource={coursesByCategory}
-                    pagination={false}
-                    size="small"
-                    bordered
-                  />
-                ),
-              },
-            ]}
-          />
-        </Card>
+        <Tabs
+          defaultActiveKey="หมวดวิชาแกน"
+          items={Object.keys(categoryData).map((catName) => ({
+            key: catName,
+            label: catName,
+            children: (
+              <Table
+                columns={coursesColumns}
+                dataSource={categoryData[catName] || []}
+                pagination={false}
+                size="small"
+                bordered
+              />
+            ),
+          }))}
+        />
+      </Card>
       </div>
     </DashboardLayout>
   );

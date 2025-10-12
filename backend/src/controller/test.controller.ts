@@ -95,6 +95,14 @@ export class StudentController {
     return data;
   }
 
+@Get('category-subject/:username')
+async getCategorySubject(
+  @Param('username') username: string,
+  @Query('category') category?: string,
+) {
+  return await this.studentService.getCategorySubject(username, category);
+}
+
 }
   
 
