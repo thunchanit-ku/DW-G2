@@ -42,7 +42,7 @@ interface SemesterResult {
 interface Props {
   studentId: string;
 }
-
+import 'chart.js/auto';
 const SemesterResults: React.FC<Props> = ({ studentId }) => {
   const [semesterData, setSemesterData] = useState<SemesterResult[]>([]);
   const [loading, setLoading] = useState(true);

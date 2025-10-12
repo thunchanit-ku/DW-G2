@@ -1,5 +1,5 @@
 'use client';
-
+import 'chart.js/auto';
 import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
