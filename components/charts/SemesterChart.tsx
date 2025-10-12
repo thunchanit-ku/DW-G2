@@ -53,7 +53,7 @@ const SemesterResults: React.FC<Props> = ({ studentId }) => {
     if (!studentId) return;
     setLoading(true);
 
-    fetch(`http://localhost:4000/api/student/grade-progress/${studentId}`)
+    fetch(`http://localhost:3002/api/student/grade-progress/${studentId}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {

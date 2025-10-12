@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Student } from '../entity/student.entity';
 import { CreateStudentDto } from '../dto/test.dto';
-import * as fs from 'fs/promises'; 
+import * as fs from 'fs'; 
 import * as path from 'path';
 import { FactRegister } from 'src/entity/fact-register.entity';
 import { Semester } from 'src/entity/semester.entity';
@@ -247,17 +247,14 @@ LIMIT 1;
     
 
     // 2️⃣ ตรวจสอบว่ามีไฟล์อยู่ไหม
-    const fileExists = await fs
-      .access(filePath)
-      .then(() => true)
-      .catch(() => false);
+    const fileExists = fs.existsSync(filePath);
 
     if (!fileExists) {
       throw new Error(`File not found: ${filePath}`);
     }
 
     // 3️⃣ อ่านไฟล์ JSON
-    const fileData = await fs.readFile(filePath, 'utf-8');
+    const fileData = fs.readFileSync(filePath, 'utf-8');
     const jsonData = JSON.parse(fileData);
 
     // 4️⃣ ดึง subjectCourseId ทั้งหมดจาก JSON
@@ -399,6 +396,27 @@ ORDER BY
   `;
 
   return await this.fact_regisRepo.query(sql, [studentUsername]);
+}
+
+async getIncompleteCoursesService(studentId: string) {
+  try {
+    // สร้าง path ไปยังไฟล์ JSON ที่อยู่ใน root directory
+    const filePath = path.resolve(__dirname, '../../../response_1760281753840.json');
+
+    // อ่านไฟล์แบบ synchronous แล้วแปลงเป็น object
+    const fileData = fs.readFileSync(filePath, 'utf-8');
+    const jsonData = JSON.parse(fileData);
+
+    // กรองข้อมูลตาม studentId
+    const studentCourses = jsonData.filter(
+      (item) => item.studentId === parseInt(studentId),
+    );
+
+    return studentCourses;
+  } catch (err) {
+    console.error('Error reading JSON file:', err);
+    return [];
+  }
 }
 
 }
