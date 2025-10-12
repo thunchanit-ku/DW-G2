@@ -33,3 +33,19 @@ export async function getcategory_require(id: string) {
   }
   return res.json();
 }
+  export async function getGrade_progress(id: string) {
+  const base = API_BASE_URL.replace(/\/+$/, ''); 
+  const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
+  const url = `${base}${prefix}/student/grade-progress/${id}`;
+  console.log("url" , url);
+
+ 
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to fetch student ${id}: ${res.status} ${text}`);
+  }
+  return res.json();
+  
+}

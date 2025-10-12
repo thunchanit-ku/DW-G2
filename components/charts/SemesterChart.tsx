@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { getGrade_progress } from "../../app/dashboard/service/home.service";
 
 // ✅ Register chart.js modules
 ChartJS.register(
@@ -28,9 +29,6 @@ ChartJS.register(
   Legend
 );
 
-// ======================
-//   MAIN COMPONENT
-// ======================
 interface SemesterResult {
   studentId: string;
   "ปีการศึกษา": number;
@@ -53,9 +51,9 @@ const SemesterResults: React.FC<Props> = ({ studentId }) => {
     if (!studentId) return;
     setLoading(true);
 
-    fetch(`http://localhost:3002/api/student/grade-progress/${studentId}`)
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchData = async () => {
+      try {
+        const data = await getGrade_progress(studentId);
         if (Array.isArray(data)) {
           setSemesterData(data);
         } else if (data) {
@@ -63,13 +61,17 @@ const SemesterResults: React.FC<Props> = ({ studentId }) => {
         } else {
           setSemesterData([]);
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Error fetching semester data:", err);
         setSemesterData([]);
-      })
-      .finally(() => setLoading(false));
-  },[studentId] );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [studentId]);
+
 
   // sessionStorage.setItem('studentgpa' ,JSON.stringify(semesterData) );
   // ✅ เตรียมข้อมูลสำหรับกราฟ

@@ -7,7 +7,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
 import DonutChart from '@/components/charts/DonutChart';
 import SemesterResults from '@/components/charts/SemesterChart';
-import { getcategory_require, getStudent } from '../service/home.service';
+import { getcategory_require, getGrade_progress, getStudent } from '../service/home.service';
 import { useEffect, useState } from 'react';
 
 export default function HomeClient() {
@@ -116,8 +116,8 @@ export default function HomeClient() {
         sessionStorage.removeItem('headerGpa');
         return;
       }
-      const gpaRes = await fetch(`http://localhost:3002/api/student/grade-progress/${id}`);
-      const gpaData = await gpaRes.json();
+      const gpaRes = getGrade_progress(id);
+      const gpaData = gpaRes;
       if (Array.isArray(gpaData) && gpaData.length > 0) {
         const last = gpaData[gpaData.length - 1];
         const cumulative = last['GPAสะสม'];
