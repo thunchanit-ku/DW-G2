@@ -7,7 +7,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
 import DonutChart from '@/components/charts/DonutChart';
 import SemesterResults from '@/components/charts/SemesterChart';
-import { getStudent } from '../service/home.service';
+import { getcategory_require, getStudent } from '../service/home.service';
 import { useEffect, useState } from 'react';
 
 export default function HomeClient() {
@@ -81,8 +81,9 @@ export default function HomeClient() {
         sessionStorage.removeItem('categoryProgress');
         return;
       }
-      const res = await fetch(`http://localhost:3002/api/student/category-require/${id}`);
-      const data = await res.json();
+    //   const res = await fetch(`http://localhost:3002/api/student/category-require/${id}`);
+    const res = getcategory_require(id);
+      const data = res;
       if (Array.isArray(data)) {
         const transformed = data.map((item: any) => ({
           name: item.SubCategoryName?.trim?.() ?? '',
