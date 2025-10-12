@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.next
+    restart: always
+    ports:
+      - "8002:3000"                 
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:3002"
+      NEXT_PUBLIC_API_PORT: "3002"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.nest
+    restart: always
+    ports:
+      - "3002:3000"                  
+    environment:
+      DB_HOST: "10.35.144.38"
+      DB_PORT: "3306"
+      DB_USER: "dw_student"
+      DB_PASS: "dw_student"
+      DB_NAME: "DW-student"
+      DB_SYNC: "false"
+      PORT: "3000"
+      API_PREFIX: "api"

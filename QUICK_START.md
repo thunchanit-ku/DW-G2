@@ -8,7 +8,7 @@
 npm run dev
 ```
 
-เปิดเบราว์เซอร์ที่: **http://localhost:3000**
+เปิดเบราว์เซอร์ที่: **http://localhost:8002**
 
 ### 2. คำสั่งที่สำคัญ
 
@@ -73,7 +73,7 @@ export default function AboutPage() {
 }
 ```
 
-เข้าดูที่: http://localhost:3000/about
+เข้าดูที่: http://localhost:8002/about
 
 #### ✅ สร้าง API Endpoint ใหม่
 
@@ -96,7 +96,7 @@ export async function GET() {
 }
 ```
 
-ทดสอบที่: http://localhost:3000/api/users
+ทดสอบที่: http://localhost:8002/api/users
 
 ### 4. โครงสร้างโปรเจค
 

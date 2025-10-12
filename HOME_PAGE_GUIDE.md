@@ -75,8 +75,8 @@ import DashboardNavCards from '@/components/DashboardNavCards';
 ## 🎯 การเข้าถึง
 
 ### URL:
-- **Root:** `http://localhost:3000` → redirect ไป `/dashboard/home`
-- **Home:** `http://localhost:3000/dashboard/home`
+- **Root:** `http://localhost:8002` → redirect ไป `/dashboard/home`
+- **Home:** `http://localhost:8002/dashboard/home`
 
 ### Navigation:
 จากหน้า Home คลิก Navigation Cards เพื่อไปยัง:
@@ -197,8 +197,8 @@ DW-G2/
 npm run dev
 ```
 
-เปิด: **http://localhost:3000**  
-→ จะ redirect ไปที่ **http://localhost:3000/dashboard/home** อัตโนมัติ
+เปิด: **http://localhost:8002**  
+→ จะ redirect ไปที่ **http://localhost:8002/dashboard/home** อัตโนมัติ
 
 ---
 

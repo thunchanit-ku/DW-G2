@@ -3,6 +3,10 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "builder": "swc",
+    "assets": ["**/*.hbs", "**/*.sql"],   
+    "watchAssets": true
   }
 }
+
+

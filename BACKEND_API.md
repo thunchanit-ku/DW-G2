@@ -8,7 +8,7 @@
 
 ## 📍 Next.js API Routes (Port 3000)
 
-### Base URL: `http://localhost:3000/api`
+### Base URL: `http://localhost:8002/api`
 
 ### 1. Example API
 ```bash
