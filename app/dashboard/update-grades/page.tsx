@@ -43,8 +43,8 @@ interface CourseData {
   semesterYear: number;
   semesterPart: string;
   typeRegis: string;
-  secLecture: string;
-  secLab: string;
+  secLecture: number;
+  secLab: number;
   gradeStatus: string;
 }
 
@@ -379,30 +379,40 @@ export default function UpdateGradesPage() {
       align: 'center' as const,
       width: 150,
       render: (record: CourseData) => {
-        const hasLecture = record.secLecture && record.secLecture !== 0 && record.secLecture !== '0';
-        const hasLab = record.secLab && record.secLab !== 0 && record.secLab !== '0';
+        // ตรวจสอบ subjectType เพื่อแสดง section ที่เหมาะสม
+        const isLectureOnly = record.subjectType === 'บรรยาย';
+        const isLabOnly = record.subjectType === 'ปฎิบัติ';
+        const isBoth = record.subjectType === 'บรรยายและปฏิบัติ';
+        
+        const hasLecture = record.secLecture && record.secLecture !== 0;
+        const hasLab = record.secLab && record.secLab !== 0;
         
         return (
           <div className="space-y-1">
-            {hasLecture && (
+            {/* แสดง Lecture สำหรับวิชาบรรยาย หรือบรรยายและปฏิบัติ */}
+            {(isLectureOnly || isBoth) && hasLecture && (
               <div className="text-xs">
                 <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-blue-500 text-white">
                   Lec: {record.secLecture}
                 </span>
               </div>
             )}
-            {hasLab && (
+            
+            {/* แสดง Lab สำหรับวิชาปฏิบัติ หรือบรรยายและปฏิบัติ */}
+            {(isLabOnly || isBoth) && hasLab && (
               <div className="text-xs">
                 <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-orange-500 text-white">
                   Lab: {record.secLab}
                 </span>
               </div>
             )}
-            {!hasLecture && !hasLab && (
+            
+            {/* แสดง - ถ้าไม่มี section หรือไม่ตรงกับประเภทวิชา */}
+            {(!hasLecture && !hasLab) || (!isLectureOnly && !isLabOnly && !isBoth) ? (
               <div className="text-xs text-gray-500">
                 -
               </div>
-            )}
+            ) : null}
           </div>
         );
       },

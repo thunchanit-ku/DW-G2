@@ -14,3 +14,4 @@ export class GradeLabel {
   @Column({ name: 'grade_max_status', type: 'float', nullable: true })
   gradeMaxStatus?: number;
 }
+

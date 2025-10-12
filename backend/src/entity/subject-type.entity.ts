@@ -11,3 +11,4 @@ export class SubjectType {
   @Column({ name: 'is_visible', type: 'tinyint', default: 1 })
   isVisible: number;
 }
+

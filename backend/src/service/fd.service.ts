@@ -24,6 +24,7 @@ export interface StudentCourse {
   subjectCode: string;
   subjectNameThai: string;
   subjectNameEng: string;
+  subjectType: string;
   credit: number;
   gradeCharacter: string;
   gradeNumber: number;
@@ -109,7 +110,7 @@ export class FdService {
     try {
       console.log('getStudentCoursesBySemester called with:', { studentId, year, semesterPart });
 
-      // ใช้ SQL query เพื่อดึงข้อมูล sec_lecture และ sec_lab โดยตรงจาก fact_register
+      // ใช้ SQL query เพื่อดึงข้อมูลจาก subject_type และ sec_lecture/sec_lab
       const sql = `
         SELECT
           fr.regis_id AS regisId,
@@ -129,8 +130,8 @@ export class FdService {
             WHEN '2' THEN 'ฤดูร้อน'
           END AS semesterPart,
           fr.type_regis AS typeRegis,
-          COALESCE(fr.sec_lecture, 0) AS secLecture,
-          COALESCE(fr.sec_lab, 0) AS secLab,
+          fr.sec_lecture AS secLecture,
+          fr.sec_lab AS secLab,
           CASE
             WHEN fr.grade_number IS NOT NULL AND fr.grade_character != 'P' THEN 'has_grade'
             ELSE 'no_grade'
@@ -154,6 +155,7 @@ export class FdService {
       if (result && result.length > 0) {
         console.log('First record sec_lecture:', result[0].secLecture);
         console.log('First record sec_lab:', result[0].secLab);
+        console.log('First record subjectType:', result[0].subjectType);
         console.log('First record full data:', JSON.stringify(result[0], null, 2));
       }
       return result || [];
