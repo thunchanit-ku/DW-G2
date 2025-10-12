@@ -12,6 +12,7 @@ import { getStudent } from '../service/home.service';
 export default function HomePage() {
   const [student, SetStudent] = useState('');
   const [finishstu , SetFinishstu] = useState('');
+  const [categoryProgress, setCategoryProgress] = useState([]);
   const [result, setResult] = useState({ 
     email: '', 
     fisrtNameEng: '', 
@@ -122,6 +123,31 @@ const handleSubmit = async () => {
     }
   };
 
+  useEffect(() => {
+    const fetchCategoryProgress = async () => {
+      try {
+        const res = await fetch(`http://localhost:4000/api/student/category-require/${finishstu}`);
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          // ✅ เพิ่มฟิลด์ CreditEarned / TotalCreditRequire
+          const transformed = data.map((item) => ({
+            name: item.SubCategoryName.trim(),
+            mainCategory: item.MainCategoryName.trim(),
+            percent: (item.CreditEarned / item.TotalCreditRequire) * 100,
+            CreditEarned: item.CreditEarned,               // ✅ เพิ่มตรงนี้
+            TotalCreditRequire: item.TotalCreditRequire,   // ✅ และตรงนี้
+            gpa: null,                                     // ถ้ายังไม่มีข้อมูล GPA
+          }));
+          setCategoryProgress(transformed);
+        }
+      } catch (err) {
+        console.error('ไม่สามารถดึงข้อมูลหมวดวิชาได้:', err);
+      }
+    };
+  
+    if (finishstu) fetchCategoryProgress();
+  }, [finishstu]);
+  
 
   return (
     <DashboardLayout>
@@ -220,27 +246,31 @@ const handleSubmit = async () => {
         {/* Donut Charts Section */}
         <Card title="รายงานหน่วยกิตที่ลงทะเบียนแบ่งตามหมวดวิชา (%)" className="shadow-md">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              { name: 'หมวดวิชาศึกษาทั่วไป', percent: 100, gpa: 3.12 },
-              { name: 'หมวดวิชาเสรี', percent: 80, gpa: 3.45 },
-              { name: 'หมวดวิชาเฉพาะบังคับ', percent: 90, gpa: 3.00 },
-              { name: 'หมวดวิชาเฉพาะเลือก', percent: 90, gpa: 1.25 },
-              { name: 'หมวดวิชาเสรี', percent: 100, gpa: 3.40 },
-            ].map((item, index) => (
-              <Card key={index} className="text-center flex flex-col">
-                <p className="text-xs mb-2">
-                  หน่วยกิตการเรียน<br />
-                  <span className="text-blue-800 font-medium">{item.name}</span>
-                </p>
-                <div className="flex-1 flex items-center justify-center py-2">
-                  <div className="w-full h-32">
-                    <DonutChart percent={item.percent} gpa={item.gpa} />
+            {categoryProgress.length > 0 ? (
+              categoryProgress.map((item, index) => (
+                <Card key={index} className="text-center flex flex-col">
+                  <p className="text-xs mb-2">
+                    <span className="text-blue-800 font-medium">{item.mainCategory}</span><br />
+                    {item.name}
+                  </p>
+                  <div className="flex-1 flex items-center justify-center py-2">
+                    <div className="w-full h-32">
+                      <DonutChart
+                        percent={item.percent}
+                        gpa={item.gpa ?? null}                           // ✅ ถ้ามี GPA ก็ส่งไปด้วย
+                        creditEarned={item.CreditEarned ?? null}          // ✅ ส่งหน่วยกิตที่เรียนแล้ว
+                        totalCreditRequire={item.TotalCreditRequire ?? null} // ✅ ส่งหน่วยกิตทั้งหมดที่ต้องเรียน
+                      />
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            ) : (
+              <p className="text-center text-gray-500">ไม่มีข้อมูลหมวดวิชา</p>
+            )}
           </div>
         </Card>
+
       </div>
     </DashboardLayout>
   );
