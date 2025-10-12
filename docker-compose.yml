@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile.nest
     restart: always
     ports:
-      - "3002:3000"                  
+      - "3002:3000"                 
     environment:
       DB_HOST: "10.35.144.38"
       DB_PORT: "3306"
