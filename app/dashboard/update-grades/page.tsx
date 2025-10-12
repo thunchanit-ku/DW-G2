@@ -94,7 +94,7 @@ export default function UpdateGradesPage() {
     setLoading(true);
     try {
       console.log("Loading student data for:", studentUsername);
-      const res = await fetch(`http://localhost:4000/api/fd/student/${studentUsername}`);
+      const res = await fetch(`http://localhost:8002/api/fd/student/${studentUsername}`);
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'ไม่พบข้อมูลนิสิต');
@@ -103,7 +103,7 @@ export default function UpdateGradesPage() {
       setStudentInfo(data);
       
       // ดึงข้อมูล semester ที่นิสิตเรียนจบแล้ว
-      const semesterRes = await fetch(`http://localhost:4000/api/fd/completed-semesters/${studentUsername}`);
+      const semesterRes = await fetch(`http://localhost:8002/api/fd/completed-semesters/${studentUsername}`);
       if (!semesterRes.ok) {
         const errorData = await semesterRes.json();
         throw new Error(errorData.message || 'ไม่สามารถดึงข้อมูล semester ได้');
@@ -149,8 +149,13 @@ export default function UpdateGradesPage() {
 
     setCourseLoading(true);
     try {
-      const encodedSemester = encodeURIComponent(selectedSemester);
-      const res = await fetch(`http://localhost:4000/api/fd/courses/${student}?year=${selectedYear}&semester=${encodedSemester}`, {
+      // แปลงภาคการศึกษาเป็นตัวเลข
+      let semesterNum = selectedSemester;
+      if (selectedSemester === 'ภาคต้น') semesterNum = '0';
+      else if (selectedSemester === 'ภาคปลาย') semesterNum = '1';
+      else if (selectedSemester === 'ฤดูร้อน') semesterNum = '2';
+      
+      const res = await fetch(`http://localhost:8002/api/fd/courses/${student}?year=${selectedYear}&semester=${semesterNum}`, {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
         },
@@ -194,7 +199,7 @@ export default function UpdateGradesPage() {
     setCourseLoading(true);
     try {
       // รีเฟรชข้อมูล semester และ year ก่อน
-      const semesterRes = await fetch(`http://localhost:4000/api/fd/completed-semesters/${student}`);
+      const semesterRes = await fetch(`http://localhost:8002/api/fd/completed-semesters/${student}`);
       if (semesterRes.ok) {
         const semesterData = await semesterRes.json();
         setCompletedSemesters(Array.isArray(semesterData) ? semesterData : []);
@@ -205,8 +210,13 @@ export default function UpdateGradesPage() {
 
       // ถ้ามีการเลือกปีและภาคการศึกษาแล้ว ให้ดึงข้อมูลรายวิชาด้วย
       if (selectedYear && selectedSemester) {
-        const encodedSemester = encodeURIComponent(selectedSemester);
-        const res = await fetch(`http://localhost:4000/api/fd/courses/${student}?year=${selectedYear}&semester=${encodedSemester}`, {
+        // แปลงภาคการศึกษาเป็นตัวเลข
+        let semesterNum = selectedSemester;
+        if (selectedSemester === 'ภาคต้น') semesterNum = '0';
+        else if (selectedSemester === 'ภาคปลาย') semesterNum = '1';
+        else if (selectedSemester === 'ฤดูร้อน') semesterNum = '2';
+        
+        const res = await fetch(`http://localhost:8002/api/fd/courses/${student}?year=${selectedYear}&semester=${semesterNum}`, {
           headers: {
             'Content-Type': 'application/json; charset=utf-8',
           },

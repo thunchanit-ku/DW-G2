@@ -18,7 +18,7 @@ import * as path from 'path';
 
 @Controller('student')
 export class StudentController {
-  constructor(private readonly studentService: StudentService , private readonly studenasdftService: StudentService  ) {}
+  constructor(private readonly studentService: StudentService) {}
 
   // POST /student
   @Post()
@@ -109,6 +109,14 @@ async getCategoryRequire(
 ) {
   return await this.studentService.getCategoryRequire(username);
 }
+
+@Get('/v1/student-plans/:studentId')
+async getIncompleteCoursesService(
+  @Param('studentId') studentId: string,
+) {
+  return await this.studentService.getIncompleteCoursesService(studentId);
+}
+
 }
   
 
