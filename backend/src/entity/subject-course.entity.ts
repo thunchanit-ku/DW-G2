@@ -20,3 +20,4 @@ export class SubjectCourse {
   @Column({ name: 'std_term', type: 'int' })
   stdTerm: number;
 }
+
