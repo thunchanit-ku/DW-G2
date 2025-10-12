@@ -45,6 +45,6 @@ npm run start:dev
 Backend จะเชื่อมต่อกับ MySQL Database แล้ว
 
 ทดสอบได้ที่:
-- http://localhost:4000/api/users
-- http://localhost:4000/api/products
+- http://localhost:3002/api/users
+- http://localhost:3002/api/products
 
