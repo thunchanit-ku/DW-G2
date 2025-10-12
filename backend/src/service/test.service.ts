@@ -328,8 +328,8 @@ async getCategorySubject(studentUsername: string, categoryFilter?: string) {
       st.student_username AS studentUsername,
       fr.semester_year_in_regis AS studyYear,
       CASE fr.semester_part_in_regis
-        WHEN '1' THEN 'ภาคต้น'
-        WHEN '2' THEN 'ภาคปลาย'
+        WHEN '0' THEN 'ภาคต้น'
+        WHEN '1' THEN 'ภาคปลาย'
         ELSE 'ฤดูร้อน'
       END AS semesterPart,
       s.subject_code AS subjectCode,
