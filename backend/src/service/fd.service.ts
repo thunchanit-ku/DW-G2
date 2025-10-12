@@ -124,6 +124,8 @@ export class FdService {
           fr.grade_number AS gradeNumber,
           fr.credit_regis AS creditRegis,
           fr.semester_year_in_regis AS semesterYear,
+          fr.study_year_in_regis AS studyYearInRegis,
+          fr.study_term_in_regis AS studyTermInRegis,
           CASE fr.semester_part_in_regis
             WHEN '0' THEN 'ภาคต้น'
             WHEN '1' THEN 'ภาคปลาย'
