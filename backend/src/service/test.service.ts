@@ -364,5 +364,41 @@ async getCategorySubject(studentUsername: string, categoryFilter?: string) {
 
   return await this.fact_regisRepo.query(sql, [studentUsername]);
 }
+async getCategoryRequire(studentUsername: string) {
+  const sql = `
+    SELECT
+    -- 1. ดึงชื่อหมวดหมู่หลัก (MainCategory) โดยใช้ตาราง parent
+    COALESCE(parent.category_name, 'ไม่มีหมวดหลัก') AS MainCategoryName, 
+    -- 2. ดึงชื่อหมวดหมู่ย่อย (SubCategory)
+    subcat.category_name AS SubCategoryName,
+    -- 3. หน่วยกิตที่เรียนแล้ว
+    SUM(fr.credit_regis) AS CreditEarned,
+    -- 4. หน่วยกิตที่ต้องเรียน
+    MAX(cr.credit_require) AS TotalCreditRequire
+FROM fact_register fr
+JOIN fact_student fs ON fs.student_id = fr.student_id
+JOIN student s ON fr.student_id = s.student_id
+JOIN subject sub ON sub.subject_code = fr.subject_code_in_regis
+JOIN course_plan cp ON cp.course_plan_id = fs.course_plan_id
+JOIN course c ON c.course_id = cp.course_id
+JOIN subject_category subcat ON subcat.course_id = c.course_id AND sub.subject_category_id = subcat.subject_category_id
+-- **จุดที่แก้ไข: Self-Join เพื่อดึงชื่อหมวดหมู่หลัก**
+LEFT JOIN subject_category parent 
+    ON subcat.master_category = parent.subject_category_id
+-- **สิ้นสุดจุดที่แก้ไข**
+JOIN credit_require cr ON cr.course_plan_id = cp.course_plan_id AND subcat.subject_category_id = cr.subject_category_id
+WHERE 
+    s.student_username = ? 
+    AND fr.grade_character NOT IN ('F', 'W')
+GROUP BY 
+    MainCategoryName, 
+    SubCategoryName
+ORDER BY 
+    MainCategoryName, 
+    SubCategoryName;
+  `;
+
+  return await this.fact_regisRepo.query(sql, [studentUsername]);
+}
 
 }

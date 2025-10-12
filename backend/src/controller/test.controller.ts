@@ -103,6 +103,12 @@ async getCategorySubject(
   return await this.studentService.getCategorySubject(username, category);
 }
 
+@Get('category-require/:username')
+async getCategoryRequire(
+  @Param('username') username: string,
+) {
+  return await this.studentService.getCategoryRequire(username);
+}
 }
   
 
