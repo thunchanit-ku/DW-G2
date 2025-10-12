@@ -322,4 +322,47 @@ LIMIT 1;
     throw new Error('Cannot process course plan data: ' + error.message);
   }
 }
+async getCategorySubject(studentUsername: string, categoryFilter?: string) {
+  const sql = `
+    SELECT 
+      st.student_username AS studentUsername,
+      fr.semester_year_in_regis AS studyYear,
+      CASE fr.semester_part_in_regis
+        WHEN '1' THEN 'ภาคต้น'
+        WHEN '2' THEN 'ภาคปลาย'
+        ELSE 'ฤดูร้อน'
+      END AS semesterPart,
+      s.subject_code AS subjectCode,
+      s.name_subject_thai AS subjectName,
+      parent.category_name AS mainCategory,
+      fr.grade_character AS grade,
+      fr.credit_regis AS credit,
+      fs.course_plan_id AS coursePlanId,
+      cp.course_id AS courseId
+    FROM fact_register fr
+    JOIN student st 
+      ON fr.student_id = st.student_id
+    JOIN fact_student fs 
+      ON fs.student_id = st.student_id
+    JOIN course_plan cp 
+      ON fs.course_plan_id = cp.course_plan_id
+    JOIN subject_course sc 
+      ON fr.subject_course_id = sc.subject_course_id
+    JOIN subject s 
+      ON sc.subject_id = s.subject_id
+    JOIN subject_category cat  
+      ON s.subject_category_id = cat.subject_category_id
+    LEFT JOIN subject_category parent 
+      ON cat.master_category = parent.subject_category_id
+    WHERE st.student_username = ?
+      AND cat.course_id = cp.course_id  -- ✅ หมวดรายวิชาต้องอยู่ในหลักสูตรเดียวกัน
+      ${categoryFilter ? 
+        `AND (parent.category_name = '${categoryFilter}' OR cat.category_name = '${categoryFilter}')`
+        : ''}
+    ORDER BY fr.semester_year_in_regis, fr.semester_part_in_regis, s.subject_code;
+  `;
+
+  return await this.fact_regisRepo.query(sql, [studentUsername]);
+}
+
 }
