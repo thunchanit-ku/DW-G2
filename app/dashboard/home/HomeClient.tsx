@@ -82,8 +82,9 @@ export default function HomeClient() {
         return;
       }
     //   const res = await fetch(`http://localhost:3002/api/student/category-require/${id}`);
-    const res = getcategory_require(id);
+    const res = await getcategory_require(id);
       const data = res;
+      console.log('Category require data:', data);
       if (Array.isArray(data)) {
         const transformed = data.map((item: any) => ({
           name: item.SubCategoryName?.trim?.() ?? '',
@@ -96,6 +97,7 @@ export default function HomeClient() {
           TotalCreditRequire: item.TotalCreditRequire ?? 0,
           gpa: null
         }));
+        console.log('Transformed category data:', transformed);
         setCategoryProgress(transformed);
         sessionStorage.setItem('categoryProgress', JSON.stringify(transformed));
       } else {
@@ -116,7 +118,7 @@ export default function HomeClient() {
         sessionStorage.removeItem('headerGpa');
         return;
       }
-      const gpaRes = getGrade_progress(id);
+      const gpaRes = await getGrade_progress(id);
       const gpaData = gpaRes;
       if (Array.isArray(gpaData) && gpaData.length > 0) {
         const last = gpaData[gpaData.length - 1];
