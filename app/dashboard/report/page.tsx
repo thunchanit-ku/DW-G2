@@ -28,7 +28,7 @@ export default function ReportPage() {
           setStudentInfo(profileData);
 
           // โหลดข้อมูล courseplan checking
-          const courseplanRes = await fetch(`http://localhost:4000/api/student/courseplan-checking`);
+          const courseplanRes = await fetch(`http://localhost:3002/api/student/courseplan-checking`);
           if (!courseplanRes.ok) throw new Error('Cannot fetch courseplan data');
           const courseplanData = await courseplanRes.json();
 
@@ -60,7 +60,7 @@ export default function ReportPage() {
       const username = sessionStorage.getItem("selectedStudentId");
       if (!username) return;
 
-      const res = await fetch(`http://localhost:4000/api/student/category-subject/${username}`);
+      const res = await fetch(`http://localhost:3002/api/student/category-subject/${username}`);
       if (!res.ok) throw new Error("Cannot fetch category subject data");
       const data = await res.json();
 

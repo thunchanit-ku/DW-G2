@@ -81,7 +81,7 @@ export default function HomePage() {
         sessionStorage.removeItem('categoryProgress');
         return;
       }
-      const res = await fetch(`http://localhost:4000/api/student/category-require/${id}`);
+      const res = await fetch(`http://localhost:3002/api/student/category-require/${id}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         const transformed = data.map((item) => ({
@@ -115,7 +115,7 @@ export default function HomePage() {
         sessionStorage.removeItem('headerGpa');
         return;
       }
-      const gpaRes = await fetch(`http://localhost:4000/api/student/grade-progress/${id}`);
+      const gpaRes = await fetch(`http://localhost:3002/api/student/grade-progress/${id}`);
       const gpaData = await gpaRes.json();
       if (Array.isArray(gpaData) && gpaData.length > 0) {
         const last = gpaData[gpaData.length - 1];
