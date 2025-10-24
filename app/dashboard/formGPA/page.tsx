@@ -1,17 +1,18 @@
 'use client';
 
 import { Button, Select } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
+import { getcategory_require } from '../service/home.service';
 
 const { Option } = Select;
 
 export default function CalGpaPage() {
   const router = useRouter();
   const [courses, setCourses] = useState(Array(9).fill({ course: '', grade: '' }));
-
+  const [categoryProgress, setCategoryProgress] = useState<any[]>([]);
   const courseOptions = [
     { value: '', label: '--กรุณาเลือกวิชา--' },
     { value: '01999021', label: '01999021 Thai Language for Communication [3 หน่วยกิต]' },
@@ -29,6 +30,49 @@ export default function CalGpaPage() {
     { value: '1', label: 'D' },
     { value: '0', label: 'F' },
   ];
+
+
+  useEffect(() => {
+    // ดึง studentId จาก sessionStorage
+    let studentId: string | null = null;
+
+    const fetchCategoryProgress = async (id: string) => {
+    try {
+      if (!id) {
+        setCategoryProgress([]);
+        sessionStorage.removeItem('categoryProgress');
+        return;
+      }
+    //   const res = await fetch(`http://localhost:3002/api/student/category-require/${id}`);
+    const res = await getcategory_require(id);
+      const data = res;
+      console.log('Category require data:', data);
+      if (Array.isArray(data)) {
+        const transformed = data.map((item: any) => ({
+          name: item.SubCategoryName?.trim?.() ?? '',
+          mainCategory: item.MainCategoryName?.trim?.() ?? '',
+          percent:
+            item.TotalCreditRequire && item.TotalCreditRequire !== 0
+              ? (item.CreditEarned / item.TotalCreditRequire) * 100
+              : 0,
+          CreditEarned: item.CreditEarned ?? 0,
+          TotalCreditRequire: item.TotalCreditRequire ?? 0,
+          gpa: null
+        }));
+        console.log('Transformed category data:', transformed);
+        setCategoryProgress(transformed);
+        sessionStorage.setItem('categoryProgress', JSON.stringify(transformed));
+      } else {
+        setCategoryProgress([]);
+        sessionStorage.removeItem('categoryProgress');
+      }
+    } catch (err) {
+      console.error('ไม่สามารถดึงข้อมูลหมวดวิชาได้:', err);
+      setCategoryProgress([]);
+      sessionStorage.removeItem('categoryProgress');
+    }
+  };
+  }, []);
 
   const handleCourseChange = (index: number, field: string, value: string) => {
     const newCourses = [...courses];

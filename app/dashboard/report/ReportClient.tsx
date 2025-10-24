@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, Table, Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { getStudentProfile } from '../service/student.service';
-import { fetchCategoryDataService  } from '../service/report.service';
-import { getCoursePlanRes } from '../service/report.service';
+import { fetchCategoryDataService, getStudent_coursePlan } from '../service/report.service';
 
 // ฟังก์ชันสำหรับคำนวณหน่วยกิตรวม
 const calculateTotalCredits = (courses: any[]): number => {
@@ -18,7 +17,30 @@ export default function ReportClient() {
   const [failedCourses, setFailedCourses] = useState<any[]>([]);
   const [passedCourses, setPassedCourses] = useState<any[]>([]);
   const [categoryData, setCategoryData] = useState<Record<string, any[]>>({});
-  
+
+  type RawCourse = {
+    isPass?: boolean;
+    passYear?: number;
+    passTerm?: number;
+    lastRegisterYear?: number;
+    lastRegisterTerm?: number;
+    stdGrade?: number | null;
+    gradeDetails?: string | null;
+    credits?: number;
+    status?: string;
+    subject?: {
+      subjectId?: number;
+      subjectCategoryId?: number;
+      subjectCode?: string;
+      nameSubjectThai?: string;
+      nameSubjectEng?: string;
+      categoryName?: string;
+      credits?: number;
+    };
+  };
+
+
+
   // โหลด studentId จาก sessionStorage หรือกำหนดเอง
   useEffect(() => {
     async function fetchData() {
@@ -30,21 +52,39 @@ export default function ReportClient() {
       if (studentId) {
         try {
           // โหลดข้อมูลนักศึกษา
+
           const profileData = await getStudentProfile(studentId);
           setStudentInfo(profileData || null);
 
           // โหลดข้อมูล courseplan checking
-          const courseplanRes = getCoursePlanRes(studentId);
-          const courseplanData = await courseplanRes;
+          const courseplanRes = await getStudent_coursePlan(studentId);
+          // API อาจคืนเป็น array โดยตรง หรืออยู่ใน .data
+          const rawCourses = Array.isArray(courseplanRes) ? courseplanRes : (Array.isArray(courseplanRes?.data) ? courseplanRes.data : []);
+          console.log("courseplan raw", rawCourses);
 
-          console.log("dataaaaaaaaaaa", courseplanData);
+          // แยก passed / failed โดยดูจากฟิลด์ isPass และ normalize ฟิลด์ให้ตรงกับที่ UI คาดหวัง
+          const normalize = (c: any) => ({
+            subjectCode: c.subject?.subjectCode || c.subjectCode || '',
+            courseName: c.subject?.nameSubjectThai || c.subject?.nameSubjectEng || c.courseName || '',
+            credits: c.subject?.credits ?? c.credits ?? 0,
+            category: c.subject?.categoryName || c.category || '',
+            semester: c.passYear ?? c.lastRegisterYear ?? c.semester ?? null,
+            semesterPartInYear: c.passTerm ?? c.lastRegisterTerm ?? c.semesterPartInYear ?? null,
+            status: c.gradeDetails ?? (c.stdGrade != null ? String(c.stdGrade) : undefined),
+          });
 
-          // ข้อมูลที่มาจาก API ควรจะแยกเป็น passedCourses และ failedCourses ไว้แล้ว
-          const passed = Array.isArray(courseplanData.passedCourses) ? courseplanData.passedCourses : [];
-          const failed = Array.isArray(courseplanData.failedCourses) ? courseplanData.failedCourses : [];
-          
-          console.log("datapass", passed);
-          console.log("datafail", failed);
+          const passed = rawCourses.filter((r: any) => r.isPass === true).map(normalize);
+          // แค่เอาที่ isPass === false และเกรดเป็น F หรือ W เท่านั้น (case-insensitive)
+          const failed = rawCourses
+            .filter((r: any) => {
+              if (r.isPass !== false) return false;
+              const grade = String(r.gradeDetails ?? r.gradeLabelId ?? r.status ?? '').toUpperCase();
+              return ['F', 'W'].includes(grade);
+            })
+            .map(normalize);
+
+           console.log("datapass", passed);
+           console.log("datafail", failed);
 
           setFailedCourses(failed);
           setPassedCourses(passed);

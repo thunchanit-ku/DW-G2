@@ -81,7 +81,6 @@ export default function HomeClient() {
         sessionStorage.removeItem('categoryProgress');
         return;
       }
-    //   const res = await fetch(`http://localhost:3002/api/student/category-require/${id}`);
     const res = await getcategory_require(id);
       const data = res;
       console.log('Category require data:', data);
