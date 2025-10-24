@@ -166,28 +166,30 @@ export default function HomeClient() {
   return (
     <DashboardLayout>
       <div className="container mx-auto p-6">
-        <Card title="ค้นหานิสิต" className="mb-6 shadow-md">
-          <div className="flex items-center gap-4 mb-4">
-            <Input
-              type="text"
-              placeholder="กรุณาใส่รหัสนิสิต"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-              value={studentInput}
-              onChange={(e) => setStudentInput(e.target.value)}
-              onPressEnter={handleSubmit}
-            />
-            <Button
-              type="primary"
-              size="large"
-              onClick={handleSubmit}
-              icon={<Search className="w-5 h-5" />}
-            >
-              ส่งข้อมูล
-            </Button>
-          </div>
-        </Card>
+        <Card title="ค้นหานิสิต" className="mt-6 mb-12 shadow-md">
+           <div className="flex items-center gap-4 mb-4">
+             <Input
+               type="text"
+               placeholder="กรุณาใส่รหัสนิสิต"
+               className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+               value={studentInput}
+               onChange={(e) => setStudentInput(e.target.value)}
+               onPressEnter={handleSubmit}
+             />
+             <Button
+               type="primary"
+               size="large"
+               onClick={handleSubmit}
+               icon={<Search className="w-5 h-5" />}
+             >
+               ส่งข้อมูล
+             </Button>
+           </div>
+         </Card>
 
-        <DashboardNavCards />
+         <div className="mt-6">
+          <DashboardNavCards />
+         </div>
 
         <Divider />
 
