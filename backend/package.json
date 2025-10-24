@@ -31,7 +31,6 @@
     "mysql2": "^3.15.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "tsconfig-paths": "^4.2.0",
     "typeorm": "^0.3.27"
   },
   "devDependencies": {
@@ -44,7 +43,7 @@
     "@swc/core": "^1.13.5",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.18.12",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -57,8 +56,9 @@
     "ts-jest": "^29.2.5",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
-    "tsc-alias": "^1.8.10",
-    "typescript": "^5.7.3",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
