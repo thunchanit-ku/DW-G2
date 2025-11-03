@@ -10,6 +10,9 @@ interface Props {
 
 const MODES = ['ภาคบรรยาย', 'ปฏิบัติ', 'บรรยายและปฏิบัติ', 'อื่นๆ'];
 
+const TEXT_COLOR_DARK = '#111827'; 
+const TEXT_COLOR_LIGHT = '#fff';
+
 export default function CategoryTeachingHeatmap({ data }: Props) {
   if (!data || data.length === 0) return <div className="text-gray-500 p-4">ไม่มีข้อมูล Heatmap</div>;
 
@@ -17,76 +20,109 @@ export default function CategoryTeachingHeatmap({ data }: Props) {
   const byKey = new Map<string, Row>();
   data.forEach((d) => byKey.set(`${d.category}|${d.mode}`, d));
 
-  // Color scale (critical): <2 red → 2..3 yellow/amber → >=3 green
-  // Smooth interpolation within segments for better perception
+  // Color scale function (เหมือนเดิม)
   const colorFor = (gpa: number | null) => {
     if (gpa == null) return '#F3F4F6';
     const v = Math.max(0, Math.min(4, gpa));
+    
     if (v < 2) {
-      // red (#ef4444) → amber (#f59e0b) from 0..2
-      const t = v / 2; // 0..1
+      const t = v / 2;
       const r = Math.round(0xef * (1 - t) + 0xf5 * t);
       const g = Math.round(0x44 * (1 - t) + 0x9e * t);
       const b = Math.round(0x44 * (1 - t) + 0x0b * t);
       return `rgb(${r}, ${g}, ${b})`;
     } else if (v < 3) {
-      // amber (#f59e0b) → yellow-green (#a3e635) from 2..3
-      const t = v - 2; // 0..1
+      const t = v - 2;
       const r = Math.round(0xf5 * (1 - t) + 0xa3 * t);
       const g = Math.round(0x9e * (1 - t) + 0xe6 * t);
       const b = Math.round(0x0b * (1 - t) + 0x35 * t);
       return `rgb(${r}, ${g}, ${b})`;
+    } else {
+      const t = v - 3;
+      const r = Math.round(0xa3 * (1 - t) + 0x22 * t);
+      const g = Math.round(0xe6 * (1 - t) + 0xc5 * t);
+      const b = Math.round(0x35 * (1 - t) + 0x5e * t);
+      return `rgb(${r}, ${g}, ${b})`;
     }
-    // green scale >=3: yellow-green (#a3e635) → green (#22c55e) → teal (#14b8a6) by 3..4
-    const t = v - 3; // 0..1
-    const r = Math.round(0xa3 * (1 - t) + 0x22 * t);
-    const g = Math.round(0xe6 * (1 - t) + 0xc5 * t);
-    const b = Math.round(0x35 * (1 - t) + 0x5e * t);
-    return `rgb(${r}, ${g}, ${b})`;
   };
+  
+  const MAX_BODY_HEIGHT = '380px'; 
+  const CATEGORY_COLUMN_WIDTH = '180px'; // 🚨 เพิ่มความกว้างของคอลัมน์หมวดวิชาให้รองรับข้อความยาว
+  const MODE_COLUMN_WIDTH = '120px';     // 🚨 กำหนดความกว้างมาตรฐานให้คอลัมน์ข้อมูล
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-[720px] w-full border-collapse">
+    <div className="w-full relative"> 
+      
+      {/* 🚨 Container สำหรับ Header: ปล่อยให้ความกว้าง 100% */}
+      <table className="min-w-full border-collapse w-full"> 
         <thead>
           <tr>
-            <th className="sticky left-0 bg-white z-10 border p-2 text-left">หมวดวิชา</th>
+            {/* Header: Sticky Column */}
+            <th className="sticky left-0 bg-white z-20 border-b border-r p-2 text-left font-semibold text-gray-800" style={{ width: CATEGORY_COLUMN_WIDTH, minWidth: CATEGORY_COLUMN_WIDTH }}>
+              หมวดวิชา
+            </th>
+            {/* Header: Mode Columns */}
             {MODES.map((m) => (
-              <th key={m} className="border p-2 text-sm font-medium text-gray-700">{m}</th>
+              <th key={m} className="border-b border-r p-2 text-sm font-semibold text-gray-700" style={{ width: MODE_COLUMN_WIDTH, minWidth: MODE_COLUMN_WIDTH }}>{m}</th>
             ))}
+            {/* 💡 TH ช่องว่างเพื่อจองพื้นที่ Scrollbar Gutter (ขนาดมาตรฐาน 12px) */}
+            <th className="border-b bg-white p-0" style={{ width: '12px', minWidth: '12px' }}></th> 
           </tr>
         </thead>
-        <tbody>
-          {categories.map((cat) => (
-            <tr key={cat}>
-              <td className="sticky left-0 bg-white z-10 border p-2 text-sm text-gray-800">{cat}</td>
-              {MODES.map((m) => {
-                const row = byKey.get(`${cat}|${m}`);
-                const gpa = row?.avgGpa ?? null;
-                return (
-                  <td key={m} className="border p-0">
-                    <div className="h-10 flex items-center justify-center text-xs font-medium" style={{ backgroundColor: colorFor(gpa), color: gpa != null && gpa < 2 ? '#fff' : '#111827' }} title={gpa != null ? `GPA ${gpa.toFixed(2)} (${row?.studentCount ?? 0})` : 'ไม่มีข้อมูล'}>
-                      {gpa != null ? gpa.toFixed(2) : '-'}
-                    </div>
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
       </table>
-      <div className="mt-3 text-xs text-gray-600 flex items-center gap-3">
+
+      {/* 🚨 Container สำหรับ Body: มี Scroll ในแนวดิ่ง */}
+      <div 
+        className="w-full overflow-y-scroll" 
+        style={{ maxHeight: MAX_BODY_HEIGHT }}
+      >
+        <table className="min-w-full border-collapse w-full"> 
+          <tbody>
+            {categories.map((cat) => {
+                const isLastRow = cat === categories[categories.length - 1];
+                return (
+                    <tr key={cat}>
+                        {/* Body: Sticky Column (ใช้ความกว้างเดียวกับ Header) */}
+                        <td className={`sticky left-0 bg-white z-10 border-r p-2 text-sm text-gray-800 font-medium ${!isLastRow ? 'border-b' : ''}`} style={{ width: CATEGORY_COLUMN_WIDTH, minWidth: CATEGORY_COLUMN_WIDTH }}>
+                            {cat}
+                        </td>
+                        {/* Body: Data Cells (ใช้ความกว้างเดียวกับ Header) */}
+                        {MODES.map((m) => {
+                            const row = byKey.get(`${cat}|${m}`);
+                            const gpa = row?.avgGpa ?? null;
+                            const color = colorFor(gpa);
+                            const textColor = gpa != null && gpa < 2 ? TEXT_COLOR_LIGHT : TEXT_COLOR_DARK;
+                            
+                            return (
+                                <td key={m} className={`border-r p-0 ${!isLastRow ? 'border-b' : ''}`} style={{ width: MODE_COLUMN_WIDTH, minWidth: MODE_COLUMN_WIDTH }}>
+                                    <div 
+                                        className="h-10 flex items-center justify-center text-xs font-semibold transition-colors duration-300" 
+                                        style={{ backgroundColor: color, color: textColor }} 
+                                        title={gpa != null ? `GPA ${gpa.toFixed(2)} (N=${row?.studentCount ?? 0})` : 'ไม่มีข้อมูล'}
+                                    >
+                                        {gpa != null ? gpa.toFixed(2) : '-'}
+                                    </div>
+                                </td>
+                            );
+                        })}
+                    </tr>
+                );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Color Scale Legend (เหมือนเดิม) */}
+      <div className="mt-4 text-xs text-gray-600 flex items-center gap-3">
         <span>Critical scale:</span>
         <div className="flex items-center gap-1">
-          <span className="w-6 h-3 inline-block" style={{ background: '#ef4444' }} />
-          <span className="w-6 h-3 inline-block" style={{ background: '#f59e0b' }} />
-          <span className="w-6 h-3 inline-block" style={{ background: '#a3e635' }} />
-          <span className="w-6 h-3 inline-block" style={{ background: '#22c55e' }} />
+          <span className="w-6 h-3 inline-block bg-red-500" style={{ background: '#ef4444' }} />
+          <span className="w-6 h-3 inline-block bg-amber-500" style={{ background: '#f59e0b' }} />
+          <span className="w-6 h-3 inline-block bg-lime-400" style={{ background: '#a3e635' }} />
+          <span className="w-6 h-3 inline-block bg-green-600" style={{ background: '#22c55e' }} />
         </div>
         <span className="ml-1">แดง &lt; 2 • เหลือง 2–3 • เขียว ≥ 3</span>
       </div>
     </div>
   );
 }
-
-
