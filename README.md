@@ -210,8 +210,8 @@ npm install @nestjs/typeorm typeorm mysql2
    cd backend
    npm run start:dev
    ```
-   - `http://localhost:4000/api/users`
-   - `http://localhost:4000/api/products`
+   - `http://localhost:3002/api/users`
+   - `http://localhost:3002/api/products`
 
 ดูรายละเอียดใน [BACKEND_API.md](./BACKEND_API.md)
 

@@ -5,6 +5,7 @@ import { Card, Input, Button, Select, Table, message, Alert, Tag, Row, Col } fro
 import { RefreshCw, Search, AlertCircle, BookOpen } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import DashboardNavCards from '@/components/DashboardNavCards';
+import { getStudentInfo, getCompletedSemesters, getCourses } from '../service/update-grades.service';
 
 interface StudentInfo {
   studentId: number;
@@ -23,10 +24,11 @@ interface StudentInfo {
 interface CompletedSemester {
   year: number;
   semester: string;
-  semesterId: number;
-  totalCourses: number;
-  totalCredits: number;
+  semester_part_in_regis: string;
+  totalCourses: string;
+  totalCredits: string;
   semesterGPA: number;
+  isCompleted: string;
 }
 
 interface CourseData {
@@ -94,21 +96,11 @@ export default function UpdateGradesPage() {
     setLoading(true);
     try {
       console.log("Loading student data for:", studentUsername);
-      const res = await fetch(`http://localhost:4000/api/fd/student/${studentUsername}`);
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'ไม่พบข้อมูลนิสิต');
-      }
-      const data = await res.json();
+      const data = await getStudentInfo(studentUsername);
       setStudentInfo(data);
       
       // ดึงข้อมูล semester ที่นิสิตเรียนจบแล้ว
-      const semesterRes = await fetch(`http://localhost:4000/api/fd/completed-semesters/${studentUsername}`);
-      if (!semesterRes.ok) {
-        const errorData = await semesterRes.json();
-        throw new Error(errorData.message || 'ไม่สามารถดึงข้อมูล semester ได้');
-      }
-      const semesterData = await semesterRes.json();
+      const semesterData = await getCompletedSemesters(studentUsername);
       console.log('Completed semesters data:', semesterData);
       setCompletedSemesters(Array.isArray(semesterData) ? semesterData : []);
       
@@ -136,6 +128,14 @@ export default function UpdateGradesPage() {
     await loadStudentData(student);
   };
 
+  // จัดการการเปลี่ยนปีการศึกษา
+  const handleYearChange = (year: number | null) => {
+    setSelectedYear(year);
+    // รีเซ็ตภาคการศึกษาเมื่อเปลี่ยนปี
+    setSelectedSemester('');
+    setCourseData([]);
+  };
+
   // ดึงข้อมูลรายวิชาและเกรด
   const handleFetchCourses = async () => {
     if (!student) {
@@ -149,13 +149,13 @@ export default function UpdateGradesPage() {
 
     setCourseLoading(true);
     try {
-      const encodedSemester = encodeURIComponent(selectedSemester);
-      const res = await fetch(`http://localhost:4000/api/fd/courses/${student}?year=${selectedYear}&semester=${encodedSemester}`, {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-        },
-      });
-      const data = await res.json();
+      // แปลงภาคการศึกษาเป็นตัวเลข
+      let semesterNum = 0;
+      if (selectedSemester === 'ภาคต้น') semesterNum = 0;
+      else if (selectedSemester === 'ภาคปลาย') semesterNum = 1;
+      else if (selectedSemester === 'ฤดูร้อน') semesterNum = 2;
+      
+      const data = await getCourses(student, selectedYear, semesterNum);
       console.log('Course data:', data);
       console.log('First course subjectNameThai:', data[0]?.subjectNameThai);
       console.log('First course subjectNameEng:', data[0]?.subjectNameEng);
@@ -164,8 +164,10 @@ export default function UpdateGradesPage() {
       // แปลงข้อมูลให้ตรงกับ interface
       const mappedData = Array.isArray(data) ? data.map(item => ({
         ...item,
-        subjectNameTh: item.subjectNameThai || item.subjectNameTh,
-        subjectNameEng: item.subjectNameEng || item.subjectNameEng,
+        subjectNameTh: item.subjectNameThai || item.subjectNameTh || '',
+        subjectNameEng: item.subjectNameEng || item.subjectNameEng || '',
+        semesterYear: item.semesterYear || item.studyYearInRegis || item.year,
+        semesterPart: item.semesterPart || item.semester || '',
       })) : [];
       
       console.log('Mapped data:', mappedData);
@@ -194,31 +196,28 @@ export default function UpdateGradesPage() {
     setCourseLoading(true);
     try {
       // รีเฟรชข้อมูล semester และ year ก่อน
-      const semesterRes = await fetch(`http://localhost:4000/api/fd/completed-semesters/${student}`);
-      if (semesterRes.ok) {
-        const semesterData = await semesterRes.json();
-        setCompletedSemesters(Array.isArray(semesterData) ? semesterData : []);
-        message.success('อัปเดตข้อมูลภาคการศึกษาสำเร็จ');
-      } else {
-        message.warning('ไม่สามารถอัปเดตข้อมูลภาคการศึกษาได้');
-      }
+      const semesterData = await getCompletedSemesters(student);
+      setCompletedSemesters(Array.isArray(semesterData) ? semesterData : []);
+      message.success('อัปเดตข้อมูลภาคการศึกษาสำเร็จ');
 
       // ถ้ามีการเลือกปีและภาคการศึกษาแล้ว ให้ดึงข้อมูลรายวิชาด้วย
       if (selectedYear && selectedSemester) {
-        const encodedSemester = encodeURIComponent(selectedSemester);
-        const res = await fetch(`http://localhost:4000/api/fd/courses/${student}?year=${selectedYear}&semester=${encodedSemester}`, {
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-          },
-        });
-        const data = await res.json();
+        // แปลงภาคการศึกษาเป็นตัวเลข
+        let semesterNum = 0;
+        if (selectedSemester === 'ภาคต้น') semesterNum = 0;
+        else if (selectedSemester === 'ภาคปลาย') semesterNum = 1;
+        else if (selectedSemester === 'ฤดูร้อน') semesterNum = 2;
+        
+        const data = await getCourses(student, selectedYear, semesterNum);
         console.log('Refreshed course data:', data);
         
         // แปลงข้อมูลให้ตรงกับ interface
         const mappedData = Array.isArray(data) ? data.map(item => ({
           ...item,
-          subjectNameTh: item.subjectNameThai || item.subjectNameTh,
-          subjectNameEng: item.subjectNameEng || item.subjectNameEng,
+          subjectNameTh: item.subjectNameThai || item.subjectNameTh || '',
+          subjectNameEng: item.subjectNameEng || item.subjectNameEng || '',
+          semesterYear: item.semesterYear || item.studyYearInRegis || item.year,
+          semesterPart: item.semesterPart || item.semester || '',
         })) : [];
         
         setCourseData(mappedData);
@@ -256,6 +255,32 @@ export default function UpdateGradesPage() {
         .map(sem => sem.year)
         .filter((year, index, arr) => arr.indexOf(year) === index)
         .sort((a, b) => b - a)
+    : [];
+
+  // สร้าง options สำหรับปีการศึกษา (เรียงจากใหม่ไปเก่า)
+  const yearOptions = Array.isArray(completedSemesters)
+    ? [...new Set(completedSemesters.map(sem => sem.year))]
+        .sort((a, b) => b - a)
+        .map(year => ({
+          value: year,
+          label: `ปีการศึกษา ${year}`
+        }))
+    : [];
+
+  // สร้าง options สำหรับภาคการศึกษา (เรียงตามลำดับ) - เฉพาะที่มีข้อมูลและกรองตามปีที่เลือก
+  const semesterOptions = Array.isArray(completedSemesters)
+    ? [...new Set(completedSemesters
+        .filter(sem => selectedYear ? sem.year === selectedYear : true) // กรองตามปีที่เลือก
+        .map(sem => sem.semester))]
+        .filter(semester => semester && semester.trim() !== '') // กรองเฉพาะที่มีข้อมูล
+        .sort((a, b) => {
+          const order = ['ภาคต้น', 'ภาคปลาย', 'ฤดูร้อน'];
+          return order.indexOf(a) - order.indexOf(b);
+        })
+        .map(semester => ({
+          value: semester,
+          label: semester
+        }))
     : [];
 
   // คำนวณ GPA ภาค (ไม่รวมเกรด P)
@@ -491,12 +516,9 @@ export default function UpdateGradesPage() {
                     placeholder="เลือกปีการศึกษา"
                     className="w-full"
                     value={selectedYear}
-                    onChange={setSelectedYear}
-                    options={filteredYears.map(year => ({
-                      value: year,
-                      label: `ปีการศึกษา ${year}`
-                    }))}
-                    disabled={filteredYears.length === 0}
+                    onChange={handleYearChange}
+                    options={yearOptions}
+                    disabled={yearOptions.length === 0}
                   />
                 </Col>
                 
@@ -509,11 +531,8 @@ export default function UpdateGradesPage() {
                     className="w-full"
                     value={selectedSemester}
                     onChange={setSelectedSemester}
-                    options={filteredSemesters.map(sem => ({
-                      value: sem.semester,
-                      label: sem.semester
-                    }))}
-                    disabled={filteredSemesters.length === 0}
+                    options={semesterOptions}
+                    disabled={semesterOptions.length === 0}
                   />
                 </Col>
 
@@ -558,6 +577,44 @@ export default function UpdateGradesPage() {
                 type="info"
                 icon={<AlertCircle className="w-5 h-5" />}
               />
+              
+              {/* แสดงข้อมูลภาคการศึกษาที่มี */}
+              {completedSemesters.length > 0 && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    ภาคการศึกษาที่มีข้อมูล{selectedYear ? ` (ปีการศึกษา ${selectedYear})` : ''}:
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {completedSemesters
+                      .filter(sem => selectedYear ? sem.year === selectedYear : true)
+                      .map((sem, index) => (
+                        <div key={index} className="text-xs bg-white p-2 rounded border">
+                          <span className="font-medium">ปีการศึกษา {sem.year}</span> - 
+                          <span className="ml-1">{sem.semester}</span>
+                          <div className="text-gray-500">
+                            วิชา: {sem.totalCourses} | หน่วยกิต: {sem.totalCredits} | GPA: {sem.semesterGPA}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                  
+                  {/* แสดงข้อมูลภาคการศึกษาที่สามารถเลือกได้ */}
+                  {selectedYear && semesterOptions.length > 0 && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded border border-blue-200">
+                      <h5 className="text-xs font-medium text-blue-800 mb-1">
+                        ภาคการศึกษาที่สามารถเลือกได้ในปีการศึกษา {selectedYear}:
+                      </h5>
+                      <div className="flex flex-wrap gap-1">
+                        {semesterOptions.map((option, index) => (
+                          <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            {option.label}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
         </Card>

@@ -7,7 +7,7 @@ async function bootstrap() {
   
   // Enable CORS for Next.js frontend
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001' ,  'http://localhost:8002'],
+    origin: true,
     credentials: true,
   });
 
@@ -22,7 +22,7 @@ async function bootstrap() {
   // Set global prefix
   app.setGlobalPrefix('api');
 
-  const port = process.env.PORT ?? 4000;
+  const port = process.env.PORT ?? 3002;
   await app.listen(port);
   console.log(`🚀 NestJS Backend running on: http://localhost:${port}`);
   console.log(`📚 API Documentation: http://localhost:${port}/api`);

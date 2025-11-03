@@ -30,14 +30,6 @@ const navCards = [
     textColor: 'text-cyan-500',
   },
   {
-    title: 'CALCULATE ACADEMIC RESULTS',
-    subtitle: 'คำนวณผลการเรียน',
-    icon: <Calculator className="w-10 h-10" />,
-    href: '/dashboard/formGPA',
-    borderColor: 'border-l-4 border-yellow-500',
-    textColor: 'text-yellow-500',
-  },
-  {
     title: 'UPDATE GRADES',
     subtitle: 'อัปเดตผลการเรียน',
     icon: <RefreshCw className="w-10 h-10" />,

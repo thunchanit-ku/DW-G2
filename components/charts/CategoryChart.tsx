@@ -1,80 +1,50 @@
 'use client';
-
+import 'chart.js/auto';
 import { Bar } from 'react-chartjs-2';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ChartOptions,
+  Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ChartOptions,
 } from 'chart.js';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-interface CategoryChartProps {
-  labels: string[];
-  gpas: number[];
-}
+type Props = { labels: string[]; gpas: Array<number | null | undefined> };
 
-export default function CategoryChart({ labels, gpas }: CategoryChartProps) {
-  // กำหนดสีตาม GPA
-  const getBarColor = (gpa: number) => {
-    if (gpa >= 0 && gpa <= 1.74) return 'rgba(255, 105, 98, 0.8)';
-    if (gpa >= 1.75 && gpa <= 1.99) return 'rgba(245, 123, 57, 0.8)';
-    if (gpa >= 2.0 && gpa <= 3.24) return 'rgba(153, 204, 153, 0.8)';
-    return 'rgba(134, 188, 247, 0.8)';
-  };
+export default function CategoryChart({ labels, gpas }: Props) {
+  // กัน length ไม่เท่ากัน/ค่าไม่ใช่ number
+  const safe = (n: any) => (typeof n === 'number' && isFinite(n) ? n : 0);
+  const dataGpas = labels.map((_, i) => safe(gpas[i]));
 
-  const backgroundColors = gpas.map(gpa => getBarColor(gpa));
+  const getBarColor = (gpa: number) =>
+    gpa <= 1.74 ? 'rgba(255,105,98,0.8)'
+    : gpa <= 1.99 ? 'rgba(245,123,57,0.8)'
+    : gpa <= 3.24 ? 'rgba(153,204,153,0.8)'
+    : 'rgba(134,188,247,0.8)';
+
+  const backgroundColors = dataGpas.map(getBarColor);
 
   const data = {
     labels,
-    datasets: [
-      {
-        data: gpas,
-        backgroundColor: backgroundColors,
-        borderWidth: 0,
-      },
-    ],
+    datasets: [{ data: dataGpas, backgroundColor: backgroundColors, borderWidth: 0 }],
   };
 
   const options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: true,
     scales: {
-      y: {
-        beginAtZero: true,
-        max: 4,
-        min: 0,
-        ticks: {
-          stepSize: 1,
+      y: { beginAtZero: true, min: 0, max: 4, ticks: { stepSize: 1 } },
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => `GPA: ${safe(ctx.parsed?.y).toFixed(2)}`,
         },
       },
     },
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            return 'GPA: ' + context.parsed.y.toFixed(2);
-          }
-        }
-      }
-    },
   };
+
+  // กันเคสไม่มีข้อมูล
+  if (!labels?.length) return <div className="text-gray-500">ไม่มีข้อมูลกราฟ</div>;
 
   return <Bar data={data} options={options} />;
 }
-

@@ -2,12 +2,20 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
+# บังคับให้รวม devDependencies ตอนติดตั้ง
+ENV NODE_ENV=development \
+    NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_FUND=false
+
 COPY package*.json ./
 RUN npm ci
-COPY . .
 
-# เรียก TypeScript compiler โดยตรง (ไม่พึ่ง nest cli)
-RUN npx --yes tsc -p tsconfig.build.json
+COPY . .
+# (ถ้าต้องการเช็คเวอร์ชัน: RUN npx tsc -v && npx tsc-alias --version)
+RUN npm run build
+
+# หลัง build เสร็จ ตัด devDeps ทิ้ง ให้เหลือเฉพาะของ production
+RUN npm prune --omit=dev
 
 # --- Runtime stage ---
 FROM node:22-alpine AS runner
@@ -15,9 +23,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-COPY package*.json ./
-RUN npm ci --omit=dev
+# ใช้ node_modules ที่ prune แล้ว + โค้ดที่ build แล้ว
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY package*.json ./
 
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD ["node","dist/main.js"]

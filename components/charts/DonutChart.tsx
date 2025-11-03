@@ -1,5 +1,5 @@
 'use client';
-
+import 'chart.js/auto';
 import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -21,6 +21,9 @@ interface DonutChartProps {
 export default function DonutChart({ percent, gpa, creditEarned, totalCreditRequire }: DonutChartProps) {
   // ✅ ป้องกันค่าเกินหรือติดลบ
   const safePercent = Math.max(0, Math.min(percent, 100));
+  
+  // Debug logging
+  console.log('DonutChart props:', { percent, gpa, creditEarned, totalCreditRequire, safePercent });
 
   // ✅ ฟังก์ชันเลือกสีตามเปอร์เซ็นต์ความคืบหน้า
   const getColorByPercent = (percent: number) => {
@@ -30,6 +33,7 @@ export default function DonutChart({ percent, gpa, creditEarned, totalCreditRequ
   };
 
   const data = {
+    labels: ['Completed', 'Remaining'],
     datasets: [
       {
         data: [safePercent, 100 - safePercent],
@@ -41,13 +45,31 @@ export default function DonutChart({ percent, gpa, creditEarned, totalCreditRequ
 
   const options: ChartOptions<'doughnut'> = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     cutout: '70%',
     plugins: {
       legend: { display: false },
       tooltip: { enabled: false },
     },
+    elements: {
+      arc: {
+        borderWidth: 0,
+      },
+    },
   };
+
+  // Show fallback if no valid data
+  if (isNaN(safePercent) || safePercent === 0) {
+    return (
+      <div className="relative w-full h-full flex items-center justify-center">
+        <div className="relative w-full max-w-[120px] mx-auto">
+          <div className="w-full h-32 flex items-center justify-center bg-gray-100 rounded-full">
+            <span className="text-xs text-gray-500">ไม่มีข้อมูล</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">

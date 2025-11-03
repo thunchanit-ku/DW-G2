@@ -65,7 +65,7 @@ Body: {
 
 ## 🏗️ NestJS Backend (Port 4000)
 
-### Base URL: `http://localhost:4000/api`
+### Base URL: `http://localhost:3002/api`
 
 ### การรัน NestJS
 
@@ -85,13 +85,13 @@ npm run start:prod
 
 ```bash
 # Get all users (with pagination)
-GET  http://localhost:4000/api/users?page=1&limit=10
+GET  http://localhost:3002/api/users?page=1&limit=10
 
 # Get user by ID
-GET  http://localhost:4000/api/users/:id
+GET  http://localhost:3002/api/users/:id
 
 # Create user
-POST http://localhost:4000/api/users
+POST http://localhost:3002/api/users
 Body: {
   "name": "สมชาย ใจดี",
   "email": "somchai@example.com",
@@ -99,26 +99,26 @@ Body: {
 }
 
 # Update user
-PUT  http://localhost:4000/api/users/:id
+PUT  http://localhost:3002/api/users/:id
 Body: {
   "name": "ชื่อใหม่"
 }
 
 # Delete user
-DELETE http://localhost:4000/api/users/:id
+DELETE http://localhost:3002/api/users/:id
 ```
 
 #### 2. Products Module
 
 ```bash
 # Get all products (with filters)
-GET  http://localhost:4000/api/products?category=electronics&search=laptop
+GET  http://localhost:3002/api/products?category=electronics&search=laptop
 
 # Get product by ID
-GET  http://localhost:4000/api/products/:id
+GET  http://localhost:3002/api/products/:id
 
 # Create product
-POST http://localhost:4000/api/products
+POST http://localhost:3002/api/products
 Body: {
   "name": "แล็ปท็อป",
   "price": 45900,
@@ -128,13 +128,13 @@ Body: {
 }
 
 # Update product
-PUT  http://localhost:4000/api/products/:id
+PUT  http://localhost:3002/api/products/:id
 Body: {
   "price": 42900
 }
 
 # Delete product
-DELETE http://localhost:4000/api/products/:id
+DELETE http://localhost:3002/api/products/:id
 ```
 
 ---
@@ -153,7 +153,7 @@ const data = await response.json();
 
 ```tsx
 // lib/api.ts
-const API_URL = 'http://localhost:4000/api';
+const API_URL = 'http://localhost:3002/api';
 
 export async function getUsers() {
   const response = await fetch(`${API_URL}/users`);
@@ -183,13 +183,13 @@ export default function UsersPage() {
 
   useEffect(() => {
     // เรียก NestJS API
-    fetch('http://localhost:4000/api/users')
+    fetch('http://localhost:3002/api/users')
       .then((res) => res.json())
       .then((data) => setUsers(data.data));
   }, []);
 
   const createUser = async () => {
-    const response = await fetch('http://localhost:4000/api/users', {
+    const response = await fetch('http://localhost:3002/api/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -281,10 +281,10 @@ npm install @nestjs/typeorm typeorm mysql2
 
 ```bash
 # Get users
-curl http://localhost:4000/api/users
+curl http://localhost:3002/api/users
 
 # Create user
-curl -X POST http://localhost:4000/api/users \
+curl -X POST http://localhost:3002/api/users \
   -H "Content-Type: application/json" \
   -d '{"name":"Test User","email":"test@example.com"}'
 ```

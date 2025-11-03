@@ -8,9 +8,7 @@ services:
     restart: always
     ports:
       - "8002:3000"                 
-    environment:
-      NEXT_PUBLIC_API_BASE_URL: "http://localhost:3002"
-      NEXT_PUBLIC_API_PORT: "3002"
+
     depends_on:
       - backend
 
@@ -20,9 +18,9 @@ services:
       dockerfile: Dockerfile.nest
     restart: always
     ports:
-      - "3002:3000"                  
+      - "3002:3000"                 
     environment:
-      DB_HOST: "10.35.144.38"
+      DB_HOST: "158.108.207.232"
       DB_PORT: "3306"
       DB_USER: "dw_student"
       DB_PASS: "dw_student"
