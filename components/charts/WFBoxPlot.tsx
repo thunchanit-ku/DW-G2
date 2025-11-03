@@ -19,10 +19,11 @@ export default function WFBoxPlot({ data }: Props) {
   const minY = Math.floor(Math.min(...allValues));
   const maxY = Math.ceil(Math.max(...allValues));
 
-  const width = 900;
   const height = 360;
-  const margin = { top: 20, right: 20, bottom: 50, left: 50 };
-  const innerW = width - margin.left - margin.right;
+  const margin = { top: 20, right: 20, bottom: 90, left: 50 };
+  const perCategoryWidth = 170; // a bit wider for two boxes (W/F)
+  const innerW = perCategoryWidth * data.length;
+  const width = margin.left + innerW + margin.right;
   const innerH = height - margin.top - margin.bottom;
 
   const xStep = innerW / data.length;
@@ -42,8 +43,29 @@ export default function WFBoxPlot({ data }: Props) {
     </g>
   );
 
+  // Wrap labels to avoid overlap
+  const wrapLabel = (label: string, maxChars = 16, maxLines = 2): string[] => {
+    const words = String(label).split(/\s+/).filter(Boolean);
+    const lines: string[] = [];
+    let current = '';
+    for (const w of words) {
+      const tentative = current ? current + ' ' + w : w;
+      if (tentative.length <= maxChars) {
+        current = tentative;
+      } else {
+        if (current) lines.push(current);
+        current = w;
+      }
+      if (lines.length >= maxLines) break;
+    }
+    if (lines.length < maxLines && current) lines.push(current);
+    if (lines.length === 0) lines.push(String(label));
+    return lines.slice(0, maxLines);
+  };
+
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
+    <div className="w-full h-full overflow-x-auto">
+    <svg viewBox={`0 0 ${width} ${height}`} style={{ width, height }}>
       {/* y axis ticks */}
       {Array.from({ length: 5 }).map((_, i) => {
         const v = minY + ((maxY - minY) * i) / 4;
@@ -64,11 +86,23 @@ export default function WFBoxPlot({ data }: Props) {
             <BoxPlot x={cx - 20} box={d.W} color="#FFCE56" />
             {/* F (red) right */}
             <BoxPlot x={cx + 20} box={d.F} color="#FF6384" />
-            <text x={cx} y={height - 10} textAnchor="middle" className="fill-gray-600 text-xs">{d.category}</text>
+            <text
+              x={cx}
+              y={height - 14}
+              textAnchor="end"
+              className="fill-gray-600 text-[9px]"
+              transform={`rotate(35, ${cx}, ${height - 14})`}
+            >
+              <title>{d.category}</title>
+              {wrapLabel(d.category).map((line, idx) => (
+                <tspan key={idx} x={cx} dy={idx === 0 ? 0 : 12}>{line}</tspan>
+              ))}
+            </text>
           </g>
         );
       })}
     </svg>
+    </div>
   );
 }
 
