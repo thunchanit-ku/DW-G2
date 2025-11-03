@@ -192,20 +192,31 @@ export class ReportService {
 
   // ========================== LIST PROGRAMS ==========================
   async listPrograms() {
-    // left join เพื่อให้โชว์ทุกหลักสูตร แม้ไม่มีข้อมูลใน fact_student และนับจำนวนถ้ามี
-    const rows = await this.progRepo
-      .createQueryBuilder('p')
-      .leftJoin(FactStudent, 'fs', 'fs.program_id = p.program_id')
-      .select([
-        'p.program_id AS id',
-        'p.name_program AS name',
-        'COUNT(DISTINCT fs.student_id) AS studentCount',
-      ])
-      .groupBy('p.program_id')
-      .addGroupBy('p.name_program')
-      .orderBy('name', 'ASC')
-      .getRawMany();
-    return rows.map((r) => ({ id: Number(r.id), name: String(r.name), studentCount: Number(r.studentCount) }));
+    // เปลี่ยนเป็นดึงข้อมูลจากตาราง course โดยนับจำนวนนิสิตผ่าน course_plan -> fact_student
+    const rows = await this.progRepo.manager.query(
+      `
+      SELECT
+        c.course_id AS id,
+        c.name_course_use AS name,
+        COUNT(DISTINCT fs.student_id) AS studentCount
+      FROM course c
+      LEFT JOIN course_plan cp ON cp.course_id = c.course_id
+      LEFT JOIN fact_student fs ON fs.course_plan_id = cp.course_plan_id
+      GROUP BY c.course_id, c.name_course_use
+      ORDER BY name ASC
+      `
+    );
+    return rows.map((r: any) => ({ id: Number(r.id), name: String(r.name), studentCount: Number(r.studentCount) }));
+  }
+
+  // ========================== LIST SEMESTERS ==========================
+  async listSemesters() {
+    // คืนค่าทุกภาคการศึกษาเสมอ โดยไม่ขึ้นกับข้อมูลในตาราง
+    return [
+      { value: 1, label: 'ภาคต้น' },
+      { value: 2, label: 'ภาคปลาย' },
+      { value: 0, label: 'ฤดูร้อน' },
+    ];
   }
 
   // ========================== AVG GPA BY CATEGORY ==========================
@@ -330,6 +341,78 @@ export class ReportService {
     return Object.entries(byCat).map(([category, values]) => ({
       category,
       GPA: quantiles(values),
+    }));
+  }
+
+  // ========================== GPA SCATTER BY TIME ==========================
+  async getAvgGpaScatter(filters: {
+    departmentId?: number;
+    programId?: number;
+    yearStart: number;
+    yearEnd: number;
+    semesterParts?: number[]; // 0,1,2
+  }) {
+    const params: any[] = [];
+    const where: string[] = [];
+
+    where.push(`fr.study_year_in_regis BETWEEN ? AND ?`);
+    params.push(filters.yearStart, filters.yearEnd);
+
+    if (filters.departmentId) {
+      where.push(`fs.department_id = ?`);
+      params.push(filters.departmentId);
+    }
+    if (filters.programId) {
+      where.push(`fs.program_id = ?`);
+      params.push(filters.programId);
+    }
+    if (filters.semesterParts && filters.semesterParts.length) {
+      where.push(`fr.semester_part_in_regis IN (${filters.semesterParts.map(() => '?').join(',')})`);
+      params.push(...filters.semesterParts);
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+    // Select avg GPA per subject/year/semester/class with any available classtime info
+    const sql = `
+      SELECT
+        fr.subject_code_in_regis       AS subjectCode,
+        fr.study_year_in_regis         AS year,
+        fr.semester_part_in_regis      AS semesterPart,
+        fr.class_id                    AS classId,
+        AVG(fr.grade_number)           AS avgGpa,
+        MIN(fru.classtime1)            AS classtime1,
+        MIN(fru.class_hr)              AS classHr
+      FROM fact_register fr
+      LEFT JOIN fact_student fs ON fs.student_id = fr.student_id
+      LEFT JOIN fact_room_usage fru ON fru.class_id = fr.class_id
+      ${whereSql}
+      GROUP BY fr.subject_code_in_regis, fr.study_year_in_regis, fr.semester_part_in_regis, fr.class_id
+    `;
+
+    const rows: any[] = await this.progRepo.manager.query(sql, params);
+
+    // Assumptions for decoding classtime1 bitstring
+    const SLOT_MIN = 30; // minutes per slot
+    const BASE_HOUR = 8; // first slot starts at 08:00
+
+    function computeMeanHour(bitString?: string | null, classHr?: number | null): number | null {
+      if (!bitString || !/1/.test(bitString)) return null;
+      const idx = bitString.indexOf('1');
+      if (idx < 0) return null;
+      const startHour = BASE_HOUR + (idx * SLOT_MIN) / 60;
+      const dur = typeof classHr === 'number' ? classHr : 0;
+      if (!dur) return startHour; // fallback to start if duration unknown
+      return startHour + dur / 2;
+    }
+
+    return rows.map((r) => ({
+      subjectCode: String(r.subjectCode),
+      year: Number(r.year),
+      semesterPart: Number(r.semesterPart),
+      classId: r.classId != null ? Number(r.classId) : null,
+      avgGpa: r.avgGpa != null ? Number(r.avgGpa) : null,
+      meanHour: computeMeanHour(r.classtime1 as string | null, r.classHr != null ? Number(r.classHr) : null),
     }));
   }
 

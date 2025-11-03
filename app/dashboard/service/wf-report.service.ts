@@ -177,4 +177,38 @@ export async function fetchCategoryTeachingHeatmap(params: {
   return res.json();
 }
 
+export type GpaScatterPoint = {
+  subjectCode: string;
+  year: number;
+  semesterPart: 0 | 1 | 2;
+  classId: number | null;
+  avgGpa: number | null;
+  periodTime?: string | null; // optional legacy
+  meanHour?: number | null;   // computed on server
+};
+
+export async function fetchAvgGpaScatter(params: {
+  yearStart: number;
+  yearEnd: number;
+  departmentId?: number;
+  programId?: number;
+  semesterParts?: (0 | 1 | 2)[];
+}): Promise<GpaScatterPoint[]> {
+  const base = API_BASE_URL.replace(/\/+$/, '');
+  const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
+  const search = new URLSearchParams();
+  search.set('yearStart', String(params.yearStart));
+  search.set('yearEnd', String(params.yearEnd));
+  if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
+  if (params.programId != null) search.set('programId', String(params.programId));
+  if (params.semesterParts?.length) search.set('semesterParts', params.semesterParts.join(','));
+  const url = `${base}${prefix}/report/avg-gpa-scatter?${search.toString()}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to fetch GPA scatter: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
 

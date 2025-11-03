@@ -1,6 +1,7 @@
 import { API_BASE_URL, API_PREFIX } from './config';
 
 export type LookupItem = { id: number; name: string; studentCount?: number };
+export type OptionItem = { value: number; label: string };
 
 async function getJson<T>(path: string): Promise<T> {
   const base = API_BASE_URL.replace(/\/+$/, '');
@@ -20,6 +21,10 @@ export function fetchDepartments(): Promise<LookupItem[]> {
 
 export function fetchPrograms(): Promise<LookupItem[]> {
   return getJson('/report/programs');
+}
+
+export function fetchSemesters(): Promise<OptionItem[]> {
+  return getJson('/report/semesters');
 }
 
 
