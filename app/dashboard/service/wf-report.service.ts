@@ -211,4 +211,38 @@ export async function fetchAvgGpaScatter(params: {
   return res.json();
 }
 
+export type SubjectGradeCount = {
+  subjectCode: string;
+  year: number;
+  semesterPart: 0 | 1 | 2;
+  total: number;
+  countF: number;
+  countW: number;
+  countP: number;
+};
+
+export async function fetchSubjectGradeCounts(params: {
+  yearStart: number;
+  yearEnd: number;
+  departmentId?: number;
+  programId?: number;
+  semesterParts?: (0 | 1 | 2)[];
+}): Promise<SubjectGradeCount[]> {
+  const base = API_BASE_URL.replace(/\/+$/, '');
+  const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
+  const search = new URLSearchParams();
+  search.set('yearStart', String(params.yearStart));
+  search.set('yearEnd', String(params.yearEnd));
+  if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
+  if (params.programId != null) search.set('programId', String(params.programId));
+  if (params.semesterParts?.length) search.set('semesterParts', params.semesterParts.join(','));
+  const url = `${base}${prefix}/report/subject-grade-counts?${search.toString()}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to fetch subject grade counts: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
 

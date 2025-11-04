@@ -71,6 +71,28 @@ export class ReportController {
     return this.reportService.listSemesters();
   }
 
+  @Get('subject-grade-counts')
+  async getSubjectGradeCounts(
+    @Query('yearStart') yearStart: string,
+    @Query('yearEnd') yearEnd: string,
+    @Query('departmentId') departmentId?: string,
+    @Query('programId') programId?: string,
+    @Query('semesterParts') semesterParts?: string,
+  ) {
+    const ys = parseInt(yearStart, 10);
+    const ye = parseInt(yearEnd, 10);
+    const depId = departmentId ? parseInt(departmentId, 10) : undefined;
+    const progId = programId ? parseInt(programId, 10) : undefined;
+    const parts = semesterParts ? semesterParts.split(',').map((v) => parseInt(v.trim(), 10)).filter(n => [0,1,2].includes(n)) : undefined;
+    return this.reportService.getSubjectGradeCounts({
+      yearStart: ys,
+      yearEnd: ye,
+      departmentId: depId,
+      programId: progId,
+      semesterParts: parts,
+    });
+  }
+
   @Get('avg-gpa-category')
   async getAvgGpaCategory(
     @Query('yearStart') yearStart: string,

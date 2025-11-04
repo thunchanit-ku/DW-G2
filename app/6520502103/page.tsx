@@ -14,7 +14,7 @@ import {
   fetchSemesters,
   type OptionItem 
 } from '@/app/dashboard/service/lookup.service';
-import { fetchSubjectGpaTable, type SubjectGpaRow, fetchAvgGpaScatter, type GpaScatterPoint, fetchWFByCategory, type WFCategoryRow } from '@/app/dashboard/service/wf-report.service';
+import { fetchSubjectGpaTable, type SubjectGpaRow, fetchAvgGpaScatter, type GpaScatterPoint, fetchWFByCategory, type WFCategoryRow, fetchSubjectGradeCounts, type SubjectGradeCount } from '@/app/dashboard/service/wf-report.service';
 
 // ประเภทข้อมูลตารางเรียน (placeholder)
 type TimetableRow = {
@@ -53,6 +53,12 @@ function ScatterChart({ points, height = 260 }: { points: Array<{ x: number; y: 
   );
   const ticksY = [0, 1, 2, 3, 4];
 
+  // แปลงปี ค.ศ. เป็น พ.ศ. สำหรับแสดงผล
+  const toBEYear = (year: number): number => {
+    // ถ้า year < 2200 แสดงว่าเป็น ค.ศ. ต้องแปลงเป็น พ.ศ.
+    return year < 2200 ? year + 543 : year;
+  };
+
   const color = (sp?: number) => (sp === 1 ? '#4f46e5' : sp === 2 ? '#16a34a' : '#f59e0b');
 
   return (
@@ -61,12 +67,15 @@ function ScatterChart({ points, height = 260 }: { points: Array<{ x: number; y: 
         <line x1={padding.left} y1={yScale(0)} x2={padding.left + innerW} y2={yScale(0)} stroke="#cbd5e1" />
         <line x1={padding.left} y1={padding.top} x2={padding.left} y2={padding.top + innerH} stroke="#cbd5e1" />
 
-        {ticksX.map((t, idx) => (
-          <g key={`x-${t}-${idx}`}>
-            <line x1={xScale(t)} y1={yScale(0)} x2={xScale(t)} y2={yScale(0) + 6} stroke="#94a3b8" />
-            <text x={xScale(t)} y={yScale(0) + 18} textAnchor="middle" fontSize="10" fill="#64748b">{t}</text>
-          </g>
-        ))}
+        {ticksX.map((t, idx) => {
+          const yearBE = toBEYear(t);
+          return (
+            <g key={`x-${t}-${idx}`}>
+              <line x1={xScale(t)} y1={yScale(0)} x2={xScale(t)} y2={yScale(0) + 6} stroke="#94a3b8" />
+              <text x={xScale(t)} y={yScale(0) + 18} textAnchor="middle" fontSize="10" fill="#64748b">{yearBE}</text>
+            </g>
+          );
+        })}
         {ticksY.map((t) => (
           <g key={`y-${t}`}>
             <line x1={padding.left - 6} y1={yScale(t)} x2={padding.left} y2={yScale(t)} stroke="#94a3b8" />
@@ -136,6 +145,7 @@ export default function TimetablePage() {
   const [gpaByYear, setGpaByYear] = useState<Array<{ x: number; y: number }>>([]);
   const [scatterRaw, setScatterRaw] = useState<GpaScatterPoint[]>([]);
   const [subjectRowsForTable, setSubjectRowsForTable] = useState<SubjectGpaRow[]>([]);
+  const [gradeCounts, setGradeCounts] = useState<SubjectGradeCount[]>([]);
   const [wfPoints, setWfPoints] = useState<Array<{ x: number; y: number; type: 'F' | 'W' }>>([]);
 
   // ================= Filters =================
@@ -215,12 +225,17 @@ export default function TimetablePage() {
       setSubjectRowsForTable(subjectRows);
 
       // ดึงข้อมูล scatter ที่มี semesterPart เพื่อให้ตัวกรองภาคการศึกษามีผล
-      // ขอข้อมูลแบบกว้างก่อน (ไม่ส่ง semesterParts เพื่อเลี่ยงการกรองฝั่งเซิร์ฟเวอร์)
+      // ถ้าเลือกทั้ง 3 ภาคการศึกษา (1,2,0) ก็ไม่ต้องกรองตามภาคการศึกษา
+      const allSemestersSelected = semesterTerms.length === 3 && 
+        semesterTerms.includes(1) && semesterTerms.includes(2) && semesterTerms.includes(0);
+      const semesterPartsToSend = allSemestersSelected ? undefined : semesterTerms;
+      
       let scatterData = await fetchAvgGpaScatter({
         yearStart: yearRange[0],
         yearEnd: yearRange[1],
         departmentId: department,
         programId: program,
+        semesterParts: semesterPartsToSend,
       }).catch(() => []);
       // Fallback หากไม่พบข้อมูลและมีการกรองหลักสูตร ให้ลองดึงใหม่โดยไม่ส่ง programId
       if (scatterData.length === 0 && program != null) {
@@ -228,9 +243,39 @@ export default function TimetablePage() {
           yearStart: yearRange[0],
           yearEnd: yearRange[1],
           departmentId: department,
+          semesterParts: semesterPartsToSend,
+        }).catch(() => []);
+      }
+      // Fallback หากไม่พบข้อมูลและมีการกรองภาควิชา ให้ลองดึงใหม่โดยไม่ส่ง departmentId
+      if (scatterData.length === 0 && department != null) {
+        scatterData = await fetchAvgGpaScatter({
+          yearStart: yearRange[0],
+          yearEnd: yearRange[1],
+          semesterParts: semesterPartsToSend,
+        }).catch(() => []);
+      }
+      // Fallback หากไม่พบข้อมูลและเลือกเฉพาะ 1 อัน ให้ลองดึงข้อมูลทั้งหมด (ไม่กรองตามภาคการศึกษา) แล้วกรองฝั่ง frontend
+      if (scatterData.length === 0 && !allSemestersSelected && semesterTerms.length > 0) {
+        scatterData = await fetchAvgGpaScatter({
+          yearStart: yearRange[0],
+          yearEnd: yearRange[1],
+          departmentId: department,
+          programId: program,
+          // ไม่ส่ง semesterParts เพื่อดึงข้อมูลทั้งหมด
         }).catch(() => []);
       }
       setScatterRaw(scatterData);
+
+      // ดึงข้อมูล F/W/P count ต่อรายวิชา
+      // ถ้าเลือกทั้ง 3 ภาคการศึกษา (1,2,0) ก็ไม่ต้องกรองตามภาคการศึกษา
+      const counts = await fetchSubjectGradeCounts({
+        yearStart: yearRange[0],
+        yearEnd: yearRange[1],
+        departmentId: department,
+        programId: program,
+        semesterParts: semesterPartsToSend,
+      }).catch(() => []);
+      setGradeCounts(counts);
 
       // ดึงข้อมูล WF ตามปี เพื่อนับจำนวนผู้ได้ F/W ให้สัมพันธ์กับช่วงปีที่เลือก
       const wfPts: Array<{ x: number; y: number; type: 'F' | 'W' }> = [];
@@ -308,15 +353,85 @@ export default function TimetablePage() {
   }, [fetchData]);
 
   const filteredScatterPoints = useMemo(() => {
-    if (!scatterRaw.length) {
-      return gpaByYear.map(p => ({ x: p.x, y: p.y }));
+    // ตรวจสอบว่าการเลือกทั้ง 3 ภาคการศึกษา (1,2,0) หรือไม่
+    const allSemestersSelected = semesterTerms.length === 3 && 
+      semesterTerms.includes(1) && semesterTerms.includes(2) && semesterTerms.includes(0);
+    
+    // กรองตาม yearRange และ semesterTerms
+    const filtered = scatterRaw
+      .filter((p) => {
+        // แปลงปี ค.ศ. เป็น พ.ศ. ถ้าจำเป็น
+        const yearBE = p.year < 2200 ? p.year + 543 : p.year;
+        return yearBE >= yearRange[0] && yearBE <= yearRange[1];
+      })
+      .filter((p) => {
+        // ถ้าเลือกทั้ง 3 อันแล้วไม่ต้องกรองตามภาคการศึกษา
+        if (allSemestersSelected) return true;
+        // แปลง semesterPart เป็น number และตรวจสอบว่า match กับ semesterTerms
+        // รองรับทั้ง string ('1', '2', '0') และ number (1, 2, 0)
+        let sp: number;
+        if (typeof p.semesterPart === 'string') {
+          sp = parseInt(p.semesterPart, 10);
+        } else {
+          sp = Number(p.semesterPart);
+        }
+        // ตรวจสอบว่าเป็น number ที่ถูกต้องและ match กับ semesterTerms
+        if (isNaN(sp)) return false;
+        // ตรวจสอบว่า semesterTerms มีค่า sp หรือไม่
+        return semesterTerms.some(term => term === sp);
+      });
+
+    if (!filtered.length) {
+      // Fallback: ใช้ gpaByYear แต่กรองตาม yearRange
+      return gpaByYear
+        .filter((p) => {
+          const yearBE = p.x < 2200 ? p.x + 543 : p.x;
+          return yearBE >= yearRange[0] && yearBE <= yearRange[1];
+        })
+        .map(p => ({ x: p.x, y: p.y }));
     }
+
     const offset = (sp: number) => (sp === 1 ? 0.1 : sp === 2 ? 0.6 : 0.9);
-    return scatterRaw
-      .filter((p) => semesterTerms.includes(Number(p.semesterPart) as 0 | 1 | 2))
-      .map((p) => ({ x: p.year + offset(Number(p.semesterPart)), y: p.avgGpa ?? 0, sp: Number(p.semesterPart) }))
+    return filtered
+      .map((p) => {
+        const yearBE = p.year < 2200 ? p.year + 543 : p.year;
+        return { x: yearBE + offset(Number(p.semesterPart)), y: p.avgGpa ?? 0, sp: Number(p.semesterPart) };
+      })
       .filter((p) => Number.isFinite(p.y));
-  }, [scatterRaw, semesterTerms, gpaByYear]);
+  }, [scatterRaw, semesterTerms, gpaByYear, yearRange]);
+
+  // กรอง wfPoints ตาม yearRange และ semesterTerms
+  const filteredWfPoints = useMemo(() => {
+    // ตรวจสอบว่าการเลือกทั้ง 3 ภาคการศึกษา (1,2,0) หรือไม่
+    const allSemestersSelected = semesterTerms.length === 3 && 
+      semesterTerms.includes(1) && semesterTerms.includes(2) && semesterTerms.includes(0);
+    
+    // ใช้ข้อมูลจาก gradeCounts เพื่อคำนวณ F/W ตาม semesterTerms
+    const yearToCounts = new Map<number, { f: number; w: number }>();
+    gradeCounts
+      .filter((gc) => {
+        // ถ้าเลือกทั้ง 3 อันแล้วไม่ต้องกรองตามภาคการศึกษา
+        const matchesSemester = allSemestersSelected || semesterTerms.includes(gc.semesterPart);
+        return gc.year >= yearRange[0] && gc.year <= yearRange[1] && matchesSemester;
+      })
+      .forEach((gc) => {
+        if (!yearToCounts.has(gc.year)) {
+          yearToCounts.set(gc.year, { f: 0, w: 0 });
+        }
+        const counts = yearToCounts.get(gc.year)!;
+        counts.f += gc.countF;
+        counts.w += gc.countW;
+      });
+
+    // สร้าง points จาก yearToCounts
+    const points: Array<{ x: number; y: number; type: 'F' | 'W' }> = [];
+    yearToCounts.forEach((counts, year) => {
+      if (counts.f > 0) points.push({ x: year + 0.1, y: counts.f, type: 'F' });
+      if (counts.w > 0) points.push({ x: year + 0.6, y: counts.w, type: 'W' });
+    });
+
+    return points.length > 0 ? points : wfPoints.filter((p) => p.x >= yearRange[0] && p.x <= yearRange[1]);
+  }, [gradeCounts, yearRange, semesterTerms, wfPoints]);
 
   const columns = [
     { title: 'รหัสวิชา', dataIndex: 'subjectCode', key: 'subjectCode', width: 120 },
@@ -359,6 +474,14 @@ export default function TimetablePage() {
       }))
       .filter((r) => r.teachingTime !== '-'); // ข้ามแถวที่ไม่มีเวลาเรียน
   }, [scatterRaw, yearRange, semesterTerms]);
+
+  // Type สำหรับ filtered subject rows ที่มี F/W/P count และ semester_part
+  type FilteredSubjectRow = SubjectGpaRow & {
+    semester_part: 0 | 1 | 2;
+    countF: number;
+    countW: number;
+    countP: number;
+  };
 
   // คอลัมน์แบบเดียวกับหน้า 6520501000
   const subjectColumns = [
@@ -409,46 +532,100 @@ export default function TimetablePage() {
       dataIndex: 'studentCount', 
       key: 'studentCount', 
       width: 160, 
-      sorter: (a: SubjectGpaRow, b: SubjectGpaRow) => a.studentCount - b.studentCount, 
+      sorter: (a: FilteredSubjectRow, b: FilteredSubjectRow) => a.studentCount - b.studentCount, 
       align: 'right' as const 
     },
   
     // --- คอลัมน์ที่เพิ่มเข้ามา ---
     {
       title: 'จำนวน P (ผ่าน)',
-      dataIndex: 'countP', // ** <--- ตรวจสอบว่า dataIndex นี้ถูกต้อง
+      dataIndex: 'countP',
       key: 'countP',
       width: 140,
-      sorter: (a: SubjectGpaRow, b: SubjectGpaRow) => (a.countP || 0) - (b.countP || 0),
+      render: (v: number) => v.toLocaleString(),
+      sorter: (a: FilteredSubjectRow, b: FilteredSubjectRow) => a.countP - b.countP,
       align: 'right' as const,
     },
     {
       title: 'จำนวน F (ตก)',
-      dataIndex: 'countF', // ** <--- ตรวจสอบว่า dataIndex นี้ถูกต้อง
+      dataIndex: 'countF',
       key: 'countF',
       width: 140,
-      sorter: (a: SubjectGpaRow, b: SubjectGpaRow) => (a.countF || 0) - (b.countF || 0),
+      render: (v: number) => v.toLocaleString(),
+      sorter: (a: FilteredSubjectRow, b: FilteredSubjectRow) => a.countF - b.countF,
       align: 'right' as const,
     },
     {
       title: 'จำนวน W (ถอน)',
-      dataIndex: 'countW', // ** <--- ตรวจสอบว่า dataIndex นี้ถูกต้อง
+      dataIndex: 'countW',
       key: 'countW',
       width: 140,
-      sorter: (a: SubjectGpaRow, b: SubjectGpaRow) => (a.countW || 0) - (b.countW || 0),
+      render: (v: number) => v.toLocaleString(),
+      sorter: (a: FilteredSubjectRow, b: FilteredSubjectRow) => a.countW - b.countW,
       align: 'right' as const,
     },
   ];
 
-  const filteredSubjectRows = useMemo(() => {
-    // API ส่งปีเป็น ค.ศ. แต่ yearRange เป็น พ.ศ. ดังนั้นต้องแปลงก่อนกรอง
-    // หรือถ้า API ส่งเป็น พ.ศ. แล้วก็ใช้ตรงๆ
-    // ตรวจสอบ: ถ้า year ในข้อมูล < 2200 แสดงว่าเป็น ค.ศ. ต้องแปลงเป็น พ.ศ. ก่อน
-    return subjectRowsForTable.filter(r => {
-      const year = r.year < 2200 ? r.year + 543 : r.year; // แปลง ค.ศ. เป็น พ.ศ. ถ้าจำเป็น
-      return year >= yearRange[0] && year <= yearRange[1];
+  // สร้าง map สำหรับข้อมูลรายวิชา (subjectName, avgGpa, studentCount) จาก subjectRowsForTable
+  const subjectInfoMap = useMemo(() => {
+    const map = new Map<string, SubjectGpaRow>();
+    subjectRowsForTable.forEach((r) => {
+      const year = r.year < 2200 ? r.year + 543 : r.year; // แปลง ค.ศ. เป็น พ.ศ.
+      const key = `${r.subjectCode}-${year}`;
+      // เก็บข้อมูลล่าสุด (ถ้ามีหลายรายการ)
+      if (!map.has(key) || (r.avgGpa != null && map.get(key)?.avgGpa == null)) {
+        map.set(key, { ...r, year });
+      }
     });
-  }, [subjectRowsForTable, yearRange]);
+    return map;
+  }, [subjectRowsForTable]);
+
+  const filteredSubjectRows = useMemo((): FilteredSubjectRow[] => {
+    // ตรวจสอบว่าการเลือกทั้ง 3 ภาคการศึกษา (1,2,0) หรือไม่
+    const allSemestersSelected = semesterTerms.length === 3 && 
+      semesterTerms.includes(1) && semesterTerms.includes(2) && semesterTerms.includes(0);
+    
+    // ใช้ gradeCounts เป็นหลัก (เพราะมี semesterPart และ F/W/P count)
+    // และ merge กับ subjectRowsForTable เพื่อหา subjectName และ avgGpa
+    return gradeCounts
+      .filter((gc) => {
+        // ถ้าเลือกทั้ง 3 อันแล้วไม่ต้องกรองตามภาคการศึกษา
+        const matchesSemester = allSemestersSelected || semesterTerms.includes(gc.semesterPart);
+        // กรองตามปีการศึกษาและภาคการศึกษาที่เลือก
+        return gc.year >= yearRange[0] && gc.year <= yearRange[1] && matchesSemester;
+      })
+      .map((gc): FilteredSubjectRow | null => {
+        // หาข้อมูลรายวิชาจาก subjectRowsForTable
+        const subjectInfo = subjectInfoMap.get(`${gc.subjectCode}-${gc.year}`);
+        
+        if (!subjectInfo) {
+          // ถ้าไม่มีข้อมูลรายวิชา ให้ใช้ข้อมูลจาก gradeCounts เท่านั้น
+          return {
+            category: '', // ไม่มีข้อมูล
+            type: '', // ไม่มีข้อมูล
+            subjectCode: gc.subjectCode,
+            subjectName: gc.subjectCode, // ใช้รหัสวิชาแทนชื่อวิชา
+            year: gc.year,
+            avgGpa: null,
+            studentCount: gc.total,
+            semester_part: gc.semesterPart,
+            countF: gc.countF,
+            countW: gc.countW,
+            countP: gc.countP,
+          };
+        }
+
+        return {
+          ...subjectInfo,
+          year: gc.year,
+          semester_part: gc.semesterPart,
+          countF: gc.countF,
+          countW: gc.countW,
+          countP: gc.countP,
+        };
+      })
+      .filter((r): r is FilteredSubjectRow => r != null);
+  }, [gradeCounts, yearRange, semesterTerms, subjectInfoMap]);
 
   return (
     <DashboardLayout>
@@ -506,8 +683,8 @@ export default function TimetablePage() {
           <h2 className="text-xl font-bold text-indigo-700 border-b pb-2 mb-4">จำนวนผู้ได้ F/W ต่อหมวด (ประมาณการ)</h2>
           {loading ? (
             <Skeleton active />
-          ) : wfPoints.length > 0 ? (
-            <WFScatter data={wfPoints} />
+          ) : filteredWfPoints.length > 0 ? (
+            <WFScatter data={filteredWfPoints} />
           ) : (
             <Empty description="ไม่พบข้อมูลสำหรับกราฟ" />
           )}

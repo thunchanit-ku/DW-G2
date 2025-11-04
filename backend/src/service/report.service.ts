@@ -219,6 +219,75 @@ export class ReportService {
     ];
   }
 
+  // ========================== SUBJECT GRADE COUNTS (F/W/P) ==========================
+  async getSubjectGradeCounts(filters: {
+    departmentId?: number;
+    programId?: number;
+    yearStart: number;
+    yearEnd: number;
+    semesterParts?: number[];
+  }) {
+    const params: any[] = [];
+    const where: string[] = [];
+
+    // แปลงปี พ.ศ. เป็น ค.ศ. สำหรับ query (ถ้า yearStart > 2400 แสดงว่าเป็น พ.ศ.)
+    const yearStartCE = filters.yearStart > 2400 ? filters.yearStart - 543 : filters.yearStart;
+    const yearEndCE = filters.yearEnd > 2400 ? filters.yearEnd - 543 : filters.yearEnd;
+    where.push(`fr.semester_year_in_regis BETWEEN ? AND ?`);
+    params.push(yearStartCE, yearEndCE);
+
+    if (filters.departmentId) {
+      where.push(`fs.department_id = ?`);
+      params.push(filters.departmentId);
+    }
+    if (filters.programId) {
+      where.push(`fs.program_id = ?`);
+      params.push(filters.programId);
+    }
+    if (filters.semesterParts && filters.semesterParts.length) {
+      where.push(`fr.semester_part_in_regis IN (${filters.semesterParts.map(() => '?').join(',')})`);
+      params.push(...filters.semesterParts);
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+    const sql = `
+      SELECT
+        fr.subject_code_in_regis AS subjectCode,
+        fr.semester_year_in_regis AS year,
+        fr.semester_part_in_regis AS semesterPart,
+        COUNT(*) AS total,
+        SUM(CASE WHEN (UPPER(fr.grade_character) = 'F' OR UPPER(gl.grade_status_name) = 'F') THEN 1 ELSE 0 END) AS countF,
+        SUM(CASE WHEN (UPPER(fr.grade_character) = 'W' OR UPPER(gl.grade_status_name) = 'W') THEN 1 ELSE 0 END) AS countW
+      FROM fact_register fr
+      LEFT JOIN fact_student fs ON fs.student_id = fr.student_id
+      LEFT JOIN grade_label gl ON gl.grade_label_id = fr.grade_label_id
+      ${whereSql}
+      GROUP BY fr.subject_code_in_regis, fr.semester_year_in_regis, fr.semester_part_in_regis
+    `;
+
+    const rows: any[] = await this.progRepo.manager.query(sql, params);
+
+    return rows.map((r) => {
+      const total = Number(r.total) || 0;
+      const countF = Number(r.countF) || 0;
+      const countW = Number(r.countW) || 0;
+      const countP = Math.max(0, total - countF - countW);
+      const yearCE = Number(r.year);
+      // แปลงปี ค.ศ. เป็น พ.ศ. สำหรับ response (ถ้า year < 2200 แสดงว่าเป็น ค.ศ.)
+      const yearBE = yearCE < 2200 ? yearCE + 543 : yearCE;
+      return {
+        subjectCode: String(r.subjectCode),
+        year: yearBE,
+        semesterPart: Number(r.semesterPart),
+        total,
+        countF,
+        countW,
+        countP,
+      };
+    });
+  }
+
   // ========================== AVG GPA BY CATEGORY ==========================
   async getAvgGpaByCategory(filters: {
     departmentId?: number;
@@ -367,7 +436,8 @@ export class ReportService {
       params.push(filters.programId);
     }
     if (filters.semesterParts && filters.semesterParts.length) {
-      where.push(`fr.semester_part_in_regis IN (${filters.semesterParts.map(() => '?').join(',')})`);
+      // แปลง semester_part_in_regis เป็น number ก่อนเปรียบเทียบ (รองรับทั้ง string และ number)
+      where.push(`CAST(fr.semester_part_in_regis AS UNSIGNED) IN (${filters.semesterParts.map(() => '?').join(',')})`);
       params.push(...filters.semesterParts);
     }
 
