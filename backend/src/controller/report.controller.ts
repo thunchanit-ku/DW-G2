@@ -56,6 +56,33 @@ export class ReportController {
       programIds: progIds.length ? progIds : undefined,
     });
   }
+
+  @Get('wf-heatmap-year-category')
+  async getWFHeatmapYearCategory(
+    @Query('yearStart') yearStart: string,
+    @Query('yearEnd') yearEnd: string,
+    @Query('departmentId') departmentId?: string,
+    @Query('departmentIds') departmentIds?: string,
+    @Query('programId') programId?: string,
+    @Query('programIds') programIds?: string,
+  ) {
+    const ys = parseInt(yearStart, 10);
+    const ye = parseInt(yearEnd, 10);
+    const parseIds = (val?: string) =>
+      val ? val.split(',').map((v) => parseInt(v.trim(), 10)).filter((n) => Number.isFinite(n)) : [];
+    const depIds = departmentIds?.length ? parseIds(departmentIds) : (departmentId ? parseIds(departmentId) : []);
+    const progIds = programIds?.length ? parseIds(programIds) : (programId ? parseIds(programId) : []);
+    if (!Number.isFinite(ys) || !Number.isFinite(ye)) {
+      throw new Error('yearStart and yearEnd are required and must be numbers');
+    }
+    return this.reportService.getWFHeatmapByYearCategory({
+      yearStart: ys,
+      yearEnd: ye,
+      departmentIds: depIds.length ? depIds : undefined,
+      programIds: progIds.length ? progIds : undefined,
+    });
+  }
+
   @Get('departments')
   async getDepartments() {
     return this.reportService.listDepartments();
@@ -131,6 +158,32 @@ export class ReportController {
     const depIds = departmentIds?.length ? parseIds(departmentIds) : (departmentId ? parseIds(departmentId) : []);
     const progIds = programIds?.length ? parseIds(programIds) : (programId ? parseIds(programId) : []);
     return this.reportService.getSubjectGpaTable({
+      yearStart: ys,
+      yearEnd: ye,
+      departmentIds: depIds.length ? depIds : undefined,
+      programIds: progIds.length ? progIds : undefined,
+    });
+  }
+
+  @Get('wf-subject-table')
+  async getWFSubjectTable(
+    @Query('yearStart') yearStart: string,
+    @Query('yearEnd') yearEnd: string,
+    @Query('departmentId') departmentId?: string,
+    @Query('departmentIds') departmentIds?: string,
+    @Query('programId') programId?: string,
+    @Query('programIds') programIds?: string,
+  ) {
+    const ys = parseInt(yearStart, 10);
+    const ye = parseInt(yearEnd, 10);
+    const parseIds = (val?: string) =>
+      val ? val.split(',').map((v) => parseInt(v.trim(), 10)).filter((n) => Number.isFinite(n)) : [];
+    const depIds = departmentIds?.length ? parseIds(departmentIds) : (departmentId ? parseIds(departmentId) : []);
+    const progIds = programIds?.length ? parseIds(programIds) : (programId ? parseIds(programId) : []);
+    if (!Number.isFinite(ys) || !Number.isFinite(ye)) {
+      throw new Error('yearStart and yearEnd are required and must be numbers');
+    }
+    return this.reportService.getWFSubjectTable({
       yearStart: ys,
       yearEnd: ye,
       departmentIds: depIds.length ? depIds : undefined,

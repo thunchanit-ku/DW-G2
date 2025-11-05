@@ -60,6 +60,71 @@ export async function fetchWFBoxplotByCategory(params: {
   return res.json();
 }
 
+export type WFHeatmapRow = {
+  category: string;
+  year: number;
+  total: number;
+  percentW: number;
+  percentF: number;
+};
+
+export async function fetchWFHeatmapByYearCategory(params: {
+  yearStart: number;
+  yearEnd: number;
+  departmentId?: number;
+  programId?: number;
+}): Promise<WFHeatmapRow[]> {
+  const base = API_BASE_URL.replace(/\/+$/, '');
+  const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
+  const search = new URLSearchParams();
+  search.set('yearStart', String(params.yearStart));
+  search.set('yearEnd', String(params.yearEnd));
+  if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
+  if (params.programId != null) search.set('programId', String(params.programId));
+  const url = `${base}${prefix}/report/wf-heatmap-year-category?${search.toString()}`;
+  console.log('[WF HEATMAP API] GET', url);
+  const res = await fetch(url);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to fetch WF heatmap: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
+export type WFSubjectTableRow = {
+  category: string;
+  type: string;
+  subjectCode: string;
+  subjectName: string;
+  year: number;
+  wCount: number;
+  fCount: number;
+  total: number;
+};
+
+export async function fetchWFSubjectTable(params: {
+  yearStart: number;
+  yearEnd: number;
+  departmentId?: number;
+  programId?: number;
+}): Promise<WFSubjectTableRow[]> {
+  const base = API_BASE_URL.replace(/\/+$/, '');
+  const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
+  const search = new URLSearchParams();
+  search.set('yearStart', String(params.yearStart));
+  search.set('yearEnd', String(params.yearEnd));
+  if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
+  if (params.programId != null) search.set('programId', String(params.programId));
+  const url = `${base}${prefix}/report/wf-subject-table?${search.toString()}`;
+  console.log('[WF SUBJECT TABLE API] GET', url);
+  const res = await fetch(url);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to fetch WF subject table: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
 export type AvgGpaCategoryRow = { category: string; avgGpa: number | null; count: number };
 
 export async function fetchAvgGpaByCategory(params: {

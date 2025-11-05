@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Select, Slider } from 'antd';
+import { Select, Slider, Table } from 'antd';
 import DashboardLayout from '@/components/DashboardLayout';
 import WFBoxPlot from '@/components/charts/WFBoxPlot';
-import { fetchWFBoxplotByCategory } from '@/app/dashboard/service/wf-report.service';
+import WFYearCategoryHeatmap from '@/components/charts/WFYearCategoryHeatmap';
+import { fetchWFBoxplotByCategory, fetchWFHeatmapByYearCategory, fetchWFSubjectTable, type WFHeatmapRow, type WFSubjectTableRow } from '@/app/dashboard/service/wf-report.service';
 import { fetchDepartments, fetchPrograms, type LookupItem } from '@/app/dashboard/service/lookup.service';
 
 type CategoryRequire = {
@@ -16,6 +17,8 @@ export default function Student6520503363Page() {
   const studentId = '6520503363';
   const [loading, setLoading] = useState(true);
   const [wfBoxData, setWfBoxData] = useState<Array<{ category: string; W: any; F: any }>>([]);
+  const [wfHeatmapData, setWfHeatmapData] = useState<WFHeatmapRow[]>([]);
+  const [wfTableData, setWfTableData] = useState<WFSubjectTableRow[]>([]);
 
   // ================= Filters =================
   // options จะโหลดจากฐานข้อมูลจริงที่ mount แรก
@@ -30,14 +33,20 @@ export default function Student6520503363Page() {
     async function load() {
       setLoading(true);
       try {
-        const [data, deps, progs] = await Promise.all([
+        const [data, heatmapData, tableData, deps, progs] = await Promise.all([
           fetchWFBoxplotByCategory({ yearStart: yearRange[0], yearEnd: yearRange[1] }),
+          fetchWFHeatmapByYearCategory({ yearStart: yearRange[0], yearEnd: yearRange[1] }),
+          fetchWFSubjectTable({ yearStart: yearRange[0], yearEnd: yearRange[1] }),
           fetchDepartments().catch(() => []),
           fetchPrograms().catch(() => []),
         ]);
         if (!isMounted) return;
         console.log('[WF INIT BOX] rows', data);
+        console.log('[WF INIT HEATMAP] rows', heatmapData);
+        console.log('[WF INIT TABLE] rows', tableData);
         setWfBoxData(data);
+        setWfHeatmapData(heatmapData);
+        setWfTableData(tableData);
         setDepartmentList(deps);
         setProgramList(progs);
       } finally {
@@ -48,13 +57,21 @@ export default function Student6520503363Page() {
     return () => { isMounted = false; };
   }, []);
 
-  // Placeholder: handle filter change (ready for future API queries)
+  // Handle filter change
   useEffect(() => {
     (async () => {
       try {
-        const data = await fetchWFBoxplotByCategory({ yearStart: yearRange[0], yearEnd: yearRange[1], departmentId: department, programId: program });
+        const [data, heatmapData, tableData] = await Promise.all([
+          fetchWFBoxplotByCategory({ yearStart: yearRange[0], yearEnd: yearRange[1], departmentId: department, programId: program }),
+          fetchWFHeatmapByYearCategory({ yearStart: yearRange[0], yearEnd: yearRange[1], departmentId: department, programId: program }),
+          fetchWFSubjectTable({ yearStart: yearRange[0], yearEnd: yearRange[1], departmentId: department, programId: program }),
+        ]);
         console.log('[WF RELOAD BOX]', { department, program, yearRange, rows: data?.length });
+        console.log('[WF RELOAD HEATMAP]', { department, program, yearRange, rows: heatmapData?.length });
+        console.log('[WF RELOAD TABLE]', { department, program, yearRange, rows: tableData?.length });
         setWfBoxData(data);
+        setWfHeatmapData(heatmapData);
+        setWfTableData(tableData);
       } catch {}
     })();
   }, [department, program, yearRange]);
@@ -112,6 +129,94 @@ export default function Student6520503363Page() {
             <div className="bg-white rounded-lg shadow p-4 h-[480px]">
               <h2 className="text-lg font-medium mb-4">สัดส่วนผู้ลงทะเบียนที่ติด W/F ตามหมวดวิชา</h2>
               <WFBoxPlot data={wfBoxData} />
+            </div>
+          </div>
+          
+          {/* Heatmaps */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="text-lg font-medium mb-4">Heatmap: % W ตามปี × หมวดวิชา</h2>
+              <WFYearCategoryHeatmap data={wfHeatmapData} type="W" />
+            </div>
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="text-lg font-medium mb-4">Heatmap: % F ตามปี × หมวดวิชา</h2>
+              <WFYearCategoryHeatmap data={wfHeatmapData} type="F" />
+            </div>
+          </div>
+
+          {/* WF Subject Table */}
+          <div className="col-span-1">
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="text-lg font-medium mb-4">ตารางข้อมูล W/F ตามวิชา</h2>
+              <Table
+                columns={[
+                  {
+                    title: 'หมวด',
+                    dataIndex: 'category',
+                    key: 'category',
+                    width: 200,
+                    fixed: 'left' as const,
+                  },
+                  {
+                    title: 'ประเภท',
+                    dataIndex: 'type',
+                    key: 'type',
+                    width: 120,
+                  },
+                  {
+                    title: 'รหัสวิชา',
+                    dataIndex: 'subjectCode',
+                    key: 'subjectCode',
+                    width: 120,
+                  },
+                  {
+                    title: 'ชื่อวิชา',
+                    dataIndex: 'subjectName',
+                    key: 'subjectName',
+                    width: 250,
+                  },
+                  {
+                    title: 'ปีการศึกษา',
+                    dataIndex: 'year',
+                    key: 'year',
+                    width: 100,
+                    align: 'center' as const,
+                  },
+                  {
+                    title: 'จำนวน W',
+                    dataIndex: 'wCount',
+                    key: 'wCount',
+                    width: 100,
+                    align: 'right' as const,
+                    render: (val: number) => val.toLocaleString(),
+                  },
+                  {
+                    title: 'จำนวน F',
+                    dataIndex: 'fCount',
+                    key: 'fCount',
+                    width: 100,
+                    align: 'right' as const,
+                    render: (val: number) => val.toLocaleString(),
+                  },
+                  {
+                    title: 'ทั้งหมด (W+F)',
+                    dataIndex: 'total',
+                    key: 'total',
+                    width: 120,
+                    align: 'right' as const,
+                    render: (val: number) => val.toLocaleString(),
+                  },
+                ]}
+                dataSource={wfTableData}
+                rowKey={(record) => `${record.subjectCode}-${record.year}`}
+                scroll={{ x: 1200, y: 400 }}
+                pagination={{
+                  pageSize: 20,
+                  showSizeChanger: false,
+                  showTotal: (total) => `ทั้งหมด ${total} รายการ`,
+                }}
+                size="small"
+              />
             </div>
           </div>
         </div>

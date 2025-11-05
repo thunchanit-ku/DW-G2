@@ -170,13 +170,80 @@ export class ReportService {
       F: quantiles(f),
     }));
   }
+
+  // ========================== WF HEATMAP: YEAR × CATEGORY ==========================
+  async getWFHeatmapByYearCategory(filters: {
+    departmentId?: number;
+    programId?: number;
+    departmentIds?: number[];
+    programIds?: number[];
+    yearStart: number;
+    yearEnd: number;
+  }) {
+    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+
+    const qb = this.frRepo
+      .createQueryBuilder('fr')
+      .innerJoin(SubjectCourse, 'sc', 'sc.subject_course_id = fr.subject_course_id')
+      .innerJoin(Subject, 's', 's.subject_id = sc.subject_id')
+      .innerJoin('subject_category', 'sca', 'sca.subject_category_id = s.subject_category_id')
+      .leftJoin(FactStudent, 'fs', 'fs.student_id = fr.student_id')
+      .leftJoin(GradeLabel, 'gl', 'gl.grade_label_id = fr.grade_label_id')
+      .where(
+        `fr.semester_year_in_regis BETWEEN 
+         (CASE WHEN :ys > 2400 THEN :ys - 543 ELSE :ys END) AND 
+         (CASE WHEN :ye > 2400 THEN :ye - 543 ELSE :ye END)`,
+        { ys: yearStart, ye: yearEnd },
+      );
+
+    if (departmentIds && departmentIds.length) {
+      qb.andWhere('fs.department_id IN (:...departmentIds)', { departmentIds });
+    } else if (departmentId) {
+      qb.andWhere('fs.department_id = :departmentId', { departmentId });
+    }
+    if (programIds && programIds.length) {
+      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
+    } else if (programId) {
+      qb.andWhere('fs.program_id = :programId', { programId });
+    }
+
+    const rows = await qb
+      .select([
+        'sca.category_name AS category',
+        'fr.semester_year_in_regis AS year',
+        'COUNT(*) AS total',
+        "SUM(CASE WHEN (UPPER(fr.grade_character) = 'W' OR UPPER(gl.grade_status_name) = 'W') THEN 1 ELSE 0 END) AS w_count",
+        "SUM(CASE WHEN (UPPER(fr.grade_character) = 'F' OR UPPER(gl.grade_status_name) = 'F') THEN 1 ELSE 0 END) AS f_count",
+      ])
+      .groupBy('sca.category_name')
+      .addGroupBy('fr.semester_year_in_regis')
+      .orderBy('fr.semester_year_in_regis', 'ASC')
+      .addOrderBy('sca.category_name', 'ASC')
+      .getRawMany();
+
+    return rows.map((r: any) => {
+      const total = Number(r.total) || 0;
+      const w = Number(r.w_count) || 0;
+      const f = Number(r.f_count) || 0;
+      const yearInDb = Number(r.year); // ปีใน database เป็น คศ.
+      // แปลงคศ. เป็นพศ. สำหรับการแสดงผล (database เป็นคศ. แต่ต้องแสดงเป็นพศ.)
+      const yearDisplay = yearInDb + 543;
+      return {
+        category: String(r.category),
+        year: yearDisplay, // ส่งกลับเป็นพศ. เพื่อให้ frontend แสดงได้ทันที
+        total,
+        percentW: total > 0 ? (w / total) * 100 : 0,
+        percentF: total > 0 ? (f / total) * 100 : 0,
+      };
+    });
+  }
   
   // ========================== LIST DEPARTMENTS ==========================
   async listDepartments() {
-    // left join เพื่อให้โชว์ทุกภาควิชา แม้ไม่มีข้อมูลใน fact_student และนับจำนวนถ้ามี
+    // inner join เพื่อแสดงเฉพาะภาควิชาที่มีข้อมูลจริงใน fact_student
     const rows = await this.depRepo
       .createQueryBuilder('d')
-      .leftJoin(FactStudent, 'fs', 'fs.department_id = d.dept_id')
+      .innerJoin(FactStudent, 'fs', 'fs.department_id = d.dept_id')
       .select([
         'd.dept_id AS id',
         'COALESCE(d.dept_alias_th, d.dept_name) AS name',
@@ -185,6 +252,7 @@ export class ReportService {
       .groupBy('d.dept_id')
       .addGroupBy('d.dept_alias_th')
       .addGroupBy('d.dept_name')
+      .having('COUNT(DISTINCT fs.student_id) > 0')
       .orderBy('name', 'ASC')
       .getRawMany();
     return rows.map((r) => ({ id: Number(r.id), name: String(r.name), studentCount: Number(r.studentCount) }));
@@ -192,10 +260,10 @@ export class ReportService {
 
   // ========================== LIST PROGRAMS ==========================
   async listPrograms() {
-    // left join เพื่อให้โชว์ทุกหลักสูตร แม้ไม่มีข้อมูลใน fact_student และนับจำนวนถ้ามี
+    // inner join เพื่อแสดงเฉพาะหลักสูตรที่มีข้อมูลจริงใน fact_student
     const rows = await this.progRepo
       .createQueryBuilder('p')
-      .leftJoin(FactStudent, 'fs', 'fs.program_id = p.program_id')
+      .innerJoin(FactStudent, 'fs', 'fs.program_id = p.program_id')
       .select([
         'p.program_id AS id',
         'p.name_program AS name',
@@ -203,6 +271,7 @@ export class ReportService {
       ])
       .groupBy('p.program_id')
       .addGroupBy('p.name_program')
+      .having('COUNT(DISTINCT fs.student_id) > 0')
       .orderBy('name', 'ASC')
       .getRawMany();
     return rows.map((r) => ({ id: Number(r.id), name: String(r.name), studentCount: Number(r.studentCount) }));
@@ -403,6 +472,85 @@ export class ReportService {
       studentCount: Number(r.studentCount) || 0,
     }));
   }
+
+  // ========================== WF SUBJECT TABLE ==========================
+  async getWFSubjectTable(filters: {
+    departmentId?: number;
+    programId?: number;
+    departmentIds?: number[];
+    programIds?: number[];
+    yearStart: number;
+    yearEnd: number;
+  }) {
+    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+
+    const qb = this.frRepo
+      .createQueryBuilder('fr')
+      .innerJoin(SubjectCourse, 'sc', 'sc.subject_course_id = fr.subject_course_id')
+      .innerJoin(Subject, 's', 's.subject_id = sc.subject_id')
+      .innerJoin('subject_category', 'sca', 'sca.subject_category_id = s.subject_category_id')
+      .innerJoin('subject_type', 'st', 'st.subject_type_id = s.subject_type_id')
+      .leftJoin(FactStudent, 'fs', 'fs.student_id = fr.student_id')
+      .leftJoin(GradeLabel, 'gl', 'gl.grade_label_id = fr.grade_label_id')
+      .where(
+        `fr.semester_year_in_regis BETWEEN 
+         (CASE WHEN :ys > 2400 THEN :ys - 543 ELSE :ys END) AND 
+         (CASE WHEN :ye > 2400 THEN :ye - 543 ELSE :ye END)`,
+        { ys: yearStart, ye: yearEnd },
+      );
+
+    if (departmentIds && departmentIds.length) {
+      qb.andWhere('fs.department_id IN (:...departmentIds)', { departmentIds });
+    } else if (departmentId) {
+      qb.andWhere('fs.department_id = :departmentId', { departmentId });
+    }
+    if (programIds && programIds.length) {
+      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
+    } else if (programId) {
+      qb.andWhere('fs.program_id = :programId', { programId });
+    }
+
+     const rows = await qb
+       .select([
+         'sca.category_name AS category',
+         'st.name_subject_type AS type',
+         's.subject_code AS subjectCode',
+         's.name_subject_thai AS subjectName',
+         'fr.semester_year_in_regis AS year',
+         "SUM(CASE WHEN (UPPER(fr.grade_character) = 'W' OR UPPER(gl.grade_status_name) = 'W') THEN 1 ELSE 0 END) AS w_count",
+         "SUM(CASE WHEN (UPPER(fr.grade_character) = 'F' OR UPPER(gl.grade_status_name) = 'F') THEN 1 ELSE 0 END) AS f_count",
+       ])
+       .groupBy('sca.category_name')
+       .addGroupBy('st.name_subject_type')
+       .addGroupBy('s.subject_code')
+       .addGroupBy('s.name_subject_thai')
+       .addGroupBy('fr.semester_year_in_regis')
+       .having(
+         "(SUM(CASE WHEN (UPPER(fr.grade_character) = 'W' OR UPPER(gl.grade_status_name) = 'W') THEN 1 ELSE 0 END) > 0 OR SUM(CASE WHEN (UPPER(fr.grade_character) = 'F' OR UPPER(gl.grade_status_name) = 'F') THEN 1 ELSE 0 END) > 0)"
+       )
+       .orderBy('sca.category_name', 'ASC')
+       .addOrderBy('st.name_subject_type', 'ASC')
+       .addOrderBy('s.subject_code', 'ASC')
+       .addOrderBy('fr.semester_year_in_regis', 'ASC')
+       .getRawMany();
+
+     return rows.map((r: any) => {
+       const yearInDb = Number(r.year); // ปีใน database เป็น คศ.
+       const yearDisplay = yearInDb + 543; // แปลงเป็นพศ.
+       const wCount = Number(r.w_count) || 0;
+       const fCount = Number(r.f_count) || 0;
+       return {
+         category: String(r.category),
+         type: String(r.type),
+         subjectCode: String(r.subjectCode),
+         subjectName: String(r.subjectName),
+         year: yearDisplay,
+         wCount,
+         fCount,
+         total: wCount + fCount, // รวม W + F เท่านั้น
+       };
+     });
+   }
 
   // ========================== HEATMAP: CATEGORY × TEACHING MODE ==========================
   async getCategoryTeachingModeHeatmap(filters: {
