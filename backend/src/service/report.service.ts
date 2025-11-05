@@ -23,43 +23,51 @@ export class ReportService {
     @InjectRepository(GradeLabel) private readonly glRepo: Repository<GradeLabel>,
   ) {}
 
+  // ========================== WF PERCENTAGE ==========================
   async getWFPercentageByCategory(filters: {
     departmentId?: number;
     programId?: number;
+    departmentIds?: number[];
+    programIds?: number[];
     yearStart: number;
     yearEnd: number;
   }) {
-    const { departmentId, programId, yearStart, yearEnd } = filters;
-
-    // Convert BE -> CE if needed (e.g., 2560 → 2017)
-    const toCE = (y: number) => (y > 2400 ? y - 543 : y);
-    const ysCE = toCE(yearStart);
-    const yeCE = toCE(yearEnd);
+    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
 
     const qb = this.frRepo
       .createQueryBuilder('fr')
       .innerJoin(SubjectCourse, 'sc', 'sc.subject_course_id = fr.subject_course_id')
       .innerJoin(Subject, 's', 's.subject_id = sc.subject_id')
-      .innerJoin(SubjectType, 'st', 'st.subject_type_id = s.subject_type_id')
+      .innerJoin('subject_category', 'sca', 'sca.subject_category_id = s.subject_category_id')
       .leftJoin(FactStudent, 'fs', 'fs.student_id = fr.student_id')
       .leftJoin(GradeLabel, 'gl', 'gl.grade_label_id = fr.grade_label_id')
-      .where('fr.semester_year_in_regis BETWEEN :ys AND :ye', { ys: ysCE, ye: yeCE })
+      .where(
+        `fr.semester_year_in_regis BETWEEN 
+         (CASE WHEN :ys > 2400 THEN :ys - 543 ELSE :ys END) AND 
+         (CASE WHEN :ye > 2400 THEN :ye - 543 ELSE :ye END)`,
+        { ys: yearStart, ye: yearEnd },
+      )
 
-    if (departmentId) {
+    // ใช้ if block เพื่อเพิ่มเงื่อนไขการกรอง (วิธีดั้งเดิม)
+    if (departmentIds && departmentIds.length) {
+      qb.andWhere('fs.department_id IN (:...departmentIds)', { departmentIds });
+    } else if (departmentId) {
       qb.andWhere('fs.department_id = :departmentId', { departmentId });
     }
-    if (programId) {
+    if (programIds && programIds.length) {
+      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
+    } else if (programId) {
       qb.andWhere('fs.program_id = :programId', { programId });
     }
 
     qb.select([
-      'st.name_subject_type AS category',
+      'sca.category_name AS category',
       'COUNT(*) AS total',
       "SUM(CASE WHEN (UPPER(fr.grade_character) = 'W' OR UPPER(gl.grade_status_name) = 'W') THEN 1 ELSE 0 END) AS w_count",
       "SUM(CASE WHEN (UPPER(fr.grade_character) = 'F' OR UPPER(gl.grade_status_name) = 'F') THEN 1 ELSE 0 END) AS f_count",
     ])
-      .groupBy('st.name_subject_type')
-      .orderBy('st.name_subject_type', 'ASC');
+      .groupBy('sca.category_name')
+      .orderBy('sca.category_name', 'ASC');
 
     const rows = await qb.getRawMany();
 
@@ -76,36 +84,54 @@ export class ReportService {
     });
   }
 
+  // ========================== WF BOXPLOT ==========================
   async getWFBoxplotByCategory(filters: {
     departmentId?: number;
     programId?: number;
+    departmentIds?: number[];
+    programIds?: number[];
     yearStart: number;
     yearEnd: number;
   }) {
-    const { departmentId, programId, yearStart, yearEnd } = filters;
-    const toCE = (y: number) => (y > 2400 ? y - 543 : y);
-    const ysCE = toCE(yearStart);
-    const yeCE = toCE(yearEnd);
-
-    const rows = await this.frRepo
+    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+    
+    // ** การแก้ไข: เปลี่ยนการใช้ andWhere ให้ใช้ if block เหมือนฟังก์ชันด้านบนเพื่อความสม่ำเสมอและชัดเจน
+    const qb = this.frRepo
       .createQueryBuilder('fr')
       .innerJoin(SubjectCourse, 'sc', 'sc.subject_course_id = fr.subject_course_id')
       .innerJoin(Subject, 's', 's.subject_id = sc.subject_id')
-      .innerJoin(SubjectType, 'st', 'st.subject_type_id = s.subject_type_id')
+      .innerJoin('subject_category', 'sca', 'sca.subject_category_id = s.subject_category_id')
       .leftJoin(FactStudent, 'fs', 'fs.student_id = fr.student_id')
       .leftJoin(GradeLabel, 'gl', 'gl.grade_label_id = fr.grade_label_id')
-      .where('fr.semester_year_in_regis BETWEEN :ys AND :ye', { ys: ysCE, ye: yeCE })
-      .andWhere(departmentId ? 'fs.department_id = :departmentId' : '1=1', { departmentId })
-      .andWhere(programId ? 'fs.program_id = :programId' : '1=1', { programId })
+      .where(
+        `fr.semester_year_in_regis BETWEEN 
+         (CASE WHEN :ys > 2400 THEN :ys - 543 ELSE :ys END) AND 
+         (CASE WHEN :ye > 2400 THEN :ye - 543 ELSE :ye END)`,
+        { ys: yearStart, ye: yearEnd },
+      );
+    
+    // ใช้ if block เพื่อเพิ่มเงื่อนไขการกรอง (แก้ไขจากโค้ดเดิม)
+    if (departmentIds && departmentIds.length) {
+      qb.andWhere('fs.department_id IN (:...departmentIds)', { departmentIds });
+    } else if (departmentId) {
+      qb.andWhere('fs.department_id = :departmentId', { departmentId });
+    }
+    if (programIds && programIds.length) {
+      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
+    } else if (programId) {
+      qb.andWhere('fs.program_id = :programId', { programId });
+    }
+
+    const rows = await qb
       .select([
-        'st.name_subject_type AS category',
+        'sca.category_name AS category',
         'fr.semester_year_in_regis AS year',
         'fr.semester_part_in_regis AS part',
         'COUNT(*) AS total',
         "SUM(CASE WHEN (UPPER(fr.grade_character) = 'W' OR UPPER(gl.grade_status_name) = 'W') THEN 1 ELSE 0 END) AS w_count",
         "SUM(CASE WHEN (UPPER(fr.grade_character) = 'F' OR UPPER(gl.grade_status_name) = 'F') THEN 1 ELSE 0 END) AS f_count",
       ])
-      .groupBy('st.name_subject_type')
+      .groupBy('sca.category_name')
       .addGroupBy('fr.semester_year_in_regis')
       .addGroupBy('fr.semester_part_in_regis')
       .getRawMany();
@@ -144,11 +170,13 @@ export class ReportService {
       F: quantiles(f),
     }));
   }
+  
+  // ========================== LIST DEPARTMENTS ==========================
   async listDepartments() {
-    // join กับ fact_student เพื่อเอาเฉพาะภาควิชาที่มีข้อมูล และนับจำนวน
+    // left join เพื่อให้โชว์ทุกภาควิชา แม้ไม่มีข้อมูลใน fact_student และนับจำนวนถ้ามี
     const rows = await this.depRepo
       .createQueryBuilder('d')
-      .innerJoin(FactStudent, 'fs', 'fs.department_id = d.dept_id')
+      .leftJoin(FactStudent, 'fs', 'fs.department_id = d.dept_id')
       .select([
         'd.dept_id AS id',
         'COALESCE(d.dept_alias_th, d.dept_name) AS name',
@@ -162,11 +190,12 @@ export class ReportService {
     return rows.map((r) => ({ id: Number(r.id), name: String(r.name), studentCount: Number(r.studentCount) }));
   }
 
+  // ========================== LIST PROGRAMS ==========================
   async listPrograms() {
-    // join กับ fact_student เพื่อเอาเฉพาะหลักสูตรที่มีข้อมูล และนับจำนวน
+    // left join เพื่อให้โชว์ทุกหลักสูตร แม้ไม่มีข้อมูลใน fact_student และนับจำนวนถ้ามี
     const rows = await this.progRepo
       .createQueryBuilder('p')
-      .innerJoin(FactStudent, 'fs', 'fs.program_id = p.program_id')
+      .leftJoin(FactStudent, 'fs', 'fs.program_id = p.program_id')
       .select([
         'p.program_id AS id',
         'p.name_program AS name',
@@ -178,6 +207,266 @@ export class ReportService {
       .getRawMany();
     return rows.map((r) => ({ id: Number(r.id), name: String(r.name), studentCount: Number(r.studentCount) }));
   }
+
+  // ========================== AVG GPA BY CATEGORY ==========================
+  async getAvgGpaByCategory(filters: {
+    departmentId?: number;
+    programId?: number;
+    departmentIds?: number[];
+    programIds?: number[];
+    yearStart: number;
+    yearEnd: number;
+  }) {
+    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+
+    const qb = this.frRepo
+      .createQueryBuilder('fr')
+      .innerJoin(SubjectCourse, 'sc', 'sc.subject_course_id = fr.subject_course_id')
+      .innerJoin(Subject, 's', 's.subject_id = sc.subject_id')
+      .innerJoin('subject_category', 'sca', 'sca.subject_category_id = s.subject_category_id')
+      .leftJoin(FactStudent, 'fs', 'fs.student_id = fr.student_id')
+      .where(
+        `fr.semester_year_in_regis BETWEEN 
+         (CASE WHEN :ys > 2400 THEN :ys - 543 ELSE :ys END) AND 
+         (CASE WHEN :ye > 2400 THEN :ye - 543 ELSE :ye END)`,
+        { ys: yearStart, ye: yearEnd },
+      )
+      .andWhere('fr.grade_number IS NOT NULL');
+
+    if (departmentIds && departmentIds.length) {
+      qb.andWhere('fs.department_id IN (:...departmentIds)', { departmentIds });
+    } else if (departmentId) {
+      qb.andWhere('fs.department_id = :departmentId', { departmentId });
+    }
+    if (programIds && programIds.length) {
+      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
+    } else if (programId) {
+      qb.andWhere('fs.program_id = :programId', { programId });
+    }
+
+    const rows = await qb
+      .select([
+        'sca.category_name AS category',
+        'AVG(fr.grade_number) AS avg_gpa',
+        'COUNT(*) AS n',
+      ])
+      .groupBy('sca.category_name')
+      .orderBy('sca.category_name', 'ASC')
+      .getRawMany();
+
+    return rows.map((r: any) => ({
+      category: String(r.category),
+      avgGpa: r.avg_gpa != null ? Number(r.avg_gpa) : null,
+      count: Number(r.n) || 0,
+    }));
+  }
+
+  // ========================== GPA BOXPLOT BY CATEGORY ==========================
+  async getGpaBoxplotByCategory(filters: {
+    departmentId?: number;
+    programId?: number;
+    departmentIds?: number[];
+    programIds?: number[];
+    yearStart: number;
+    yearEnd: number;
+  }) {
+    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+
+    const qb = this.frRepo
+      .createQueryBuilder('fr')
+      .innerJoin(SubjectCourse, 'sc', 'sc.subject_course_id = fr.subject_course_id')
+      .innerJoin(Subject, 's', 's.subject_id = sc.subject_id')
+      .innerJoin('subject_category', 'sca', 'sca.subject_category_id = s.subject_category_id')
+      .leftJoin(FactStudent, 'fs', 'fs.student_id = fr.student_id')
+      .where(
+        `fr.semester_year_in_regis BETWEEN 
+         (CASE WHEN :ys > 2400 THEN :ys - 543 ELSE :ys END) AND 
+         (CASE WHEN :ye > 2400 THEN :ye - 543 ELSE :ye END)`,
+        { ys: yearStart, ye: yearEnd },
+      )
+      .andWhere('fr.grade_number IS NOT NULL');
+
+    if (departmentIds && departmentIds.length) {
+      qb.andWhere('fs.department_id IN (:...departmentIds)', { departmentIds });
+    } else if (departmentId) {
+      qb.andWhere('fs.department_id = :departmentId', { departmentId });
+    }
+    if (programIds && programIds.length) {
+      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
+    } else if (programId) {
+      qb.andWhere('fs.program_id = :programId', { programId });
+    }
+
+    const rows = await qb
+      .select([
+        'sca.category_name AS category',
+        'fr.grade_number AS grade',
+      ])
+      .getRawMany();
+
+    const byCat: Record<string, number[]> = {};
+    for (const r of rows as any[]) {
+      const category = String(r.category);
+      const g = Number(r.grade);
+      if (!Number.isFinite(g)) continue;
+      if (!byCat[category]) byCat[category] = [];
+      byCat[category].push(g);
+    }
+
+    const quantiles = (arr: number[]) => {
+      if (!arr.length) return { min: 0, q1: 0, median: 0, q3: 0, max: 0 };
+      const a = [...arr].sort((x, y) => x - y);
+      const q = (p: number) => {
+        const idx = (a.length - 1) * p;
+        const lo = Math.floor(idx);
+        const hi = Math.ceil(idx);
+        if (lo === hi) return a[lo];
+        const frac = idx - lo;
+        return a[lo] * (1 - frac) + a[hi] * frac;
+      };
+      return { min: a[0], q1: q(0.25), median: q(0.5), q3: q(0.75), max: a[a.length - 1] };
+    };
+
+    return Object.entries(byCat).map(([category, values]) => ({
+      category,
+      GPA: quantiles(values),
+    }));
+  }
+
+  // ========================== SUBJECT GPA TABLE ==========================
+  async getSubjectGpaTable(filters: {
+    departmentId?: number;
+    programId?: number;
+    departmentIds?: number[];
+    programIds?: number[];
+    yearStart: number;
+    yearEnd: number;
+  }) {
+    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+
+    const qb = this.frRepo
+      .createQueryBuilder('fr')
+      .innerJoin(SubjectCourse, 'sc', 'sc.subject_course_id = fr.subject_course_id')
+      .innerJoin(Subject, 's', 's.subject_id = sc.subject_id')
+      .innerJoin('subject_category', 'sca', 'sca.subject_category_id = s.subject_category_id')
+      .innerJoin('subject_type', 'st', 'st.subject_type_id = s.subject_type_id')
+      .leftJoin(FactStudent, 'fs', 'fs.student_id = fr.student_id')
+      .leftJoin(GradeLabel, 'gl', 'gl.grade_label_id = fr.grade_label_id')
+      .where(
+        `fr.semester_year_in_regis BETWEEN 
+         (CASE WHEN :ys > 2400 THEN :ys - 543 ELSE :ys END) AND 
+         (CASE WHEN :ye > 2400 THEN :ye - 543 ELSE :ye END)`,
+        { ys: yearStart, ye: yearEnd },
+      )
+      .andWhere("(UPPER(fr.grade_character) <> 'W' AND (gl.grade_status_name IS NULL OR UPPER(gl.grade_status_name) <> 'W'))")
+      .andWhere('fr.grade_number IS NOT NULL');
+
+    if (departmentIds && departmentIds.length) {
+      qb.andWhere('fs.department_id IN (:...departmentIds)', { departmentIds });
+    } else if (departmentId) {
+      qb.andWhere('fs.department_id = :departmentId', { departmentId });
+    }
+    if (programIds && programIds.length) {
+      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
+    } else if (programId) {
+      qb.andWhere('fs.program_id = :programId', { programId });
+    }
+
+    const rows = await qb
+      .select([
+        'sca.category_name AS category',
+        'st.name_subject_type AS type',
+        's.subject_code AS subjectCode',
+        's.name_subject_thai AS subjectName',
+        'fr.semester_year_in_regis AS year',
+        'AVG(fr.grade_number) AS avgGpa',
+        'COUNT(*) AS studentCount',
+      ])
+      .groupBy('sca.category_name')
+      .addGroupBy('st.name_subject_type')
+      .addGroupBy('s.subject_code')
+      .addGroupBy('s.name_subject_thai')
+      .addGroupBy('fr.semester_year_in_regis')
+      .orderBy('sca.category_name', 'ASC')
+      .addOrderBy('st.name_subject_type', 'ASC')
+      .addOrderBy('s.subject_code', 'ASC')
+      .addOrderBy('fr.semester_year_in_regis', 'ASC')
+      .getRawMany();
+
+    return rows.map((r: any) => ({
+      category: String(r.category),
+      type: String(r.type),
+      subjectCode: String(r.subjectCode),
+      subjectName: String(r.subjectName),
+      year: Number(r.year),
+      avgGpa: r.avgGpa != null ? Number(r.avgGpa) : null,
+      studentCount: Number(r.studentCount) || 0,
+    }));
+  }
+
+  // ========================== HEATMAP: CATEGORY × TEACHING MODE ==========================
+  async getCategoryTeachingModeHeatmap(filters: {
+    departmentId?: number;
+    programId?: number;
+    departmentIds?: number[];
+    programIds?: number[];
+    yearStart: number;
+    yearEnd: number;
+  }) {
+    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+
+    const qb = this.frRepo
+      .createQueryBuilder('fr')
+      .innerJoin(SubjectCourse, 'sc', 'sc.subject_course_id = fr.subject_course_id')
+      .innerJoin(Subject, 's', 's.subject_id = sc.subject_id')
+      .innerJoin('subject_category', 'sca', 'sca.subject_category_id = s.subject_category_id')
+      .leftJoin(FactStudent, 'fs', 'fs.student_id = fr.student_id')
+      .leftJoin(GradeLabel, 'gl', 'gl.grade_label_id = fr.grade_label_id')
+      .where(
+        `fr.semester_year_in_regis BETWEEN 
+         (CASE WHEN :ys > 2400 THEN :ys - 543 ELSE :ys END) AND 
+         (CASE WHEN :ye > 2400 THEN :ye - 543 ELSE :ye END)`,
+        { ys: yearStart, ye: yearEnd },
+      )
+      .andWhere('fr.grade_number IS NOT NULL')
+      .andWhere("(UPPER(fr.grade_character) <> 'W' AND (gl.grade_status_name IS NULL OR UPPER(gl.grade_status_name) <> 'W'))");
+
+    if (departmentIds && departmentIds.length) {
+      qb.andWhere('fs.department_id IN (:...departmentIds)', { departmentIds });
+    } else if (departmentId) {
+      qb.andWhere('fs.department_id = :departmentId', { departmentId });
+    }
+    if (programIds && programIds.length) {
+      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
+    } else if (programId) {
+      qb.andWhere('fs.program_id = :programId', { programId });
+    }
+
+    const modeCase = `CASE 
+      WHEN fr.sec_lecture IS NOT NULL AND fr.sec_lab IS NOT NULL AND fr.sec_lecture <> 0 AND fr.sec_lab <> 0 THEN 'บรรยายและปฏิบัติ'
+      WHEN fr.sec_lecture IS NOT NULL AND fr.sec_lecture <> 0 AND (fr.sec_lab IS NULL OR fr.sec_lab = 0) THEN 'ภาคบรรยาย'
+      WHEN fr.sec_lab IS NOT NULL AND fr.sec_lab <> 0 AND (fr.sec_lecture IS NULL OR fr.sec_lecture = 0) THEN 'ปฏิบัติ'
+      ELSE 'อื่นๆ'
+    END`;
+
+    const rows = await qb
+      .select([
+        'sca.category_name AS category',
+        `${modeCase} AS mode`,
+        'AVG(fr.grade_number) AS avgGpa',
+        'COUNT(*) AS studentCount',
+      ])
+      .groupBy('sca.category_name')
+      .addGroupBy('mode')
+      .orderBy('sca.category_name', 'ASC')
+      .addOrderBy('mode', 'ASC')
+      .getRawMany();
+
+    return rows.map((r: any) => ({
+      category: String(r.category),
+      mode: String(r.mode),
+      avgGpa: r.avgGpa != null ? Number(r.avgGpa) : null,
+      studentCount: Number(r.studentCount) || 0,
+    }));
+  }
 }
-
-

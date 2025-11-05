@@ -60,4 +60,121 @@ export async function fetchWFBoxplotByCategory(params: {
   return res.json();
 }
 
+export type AvgGpaCategoryRow = { category: string; avgGpa: number | null; count: number };
+
+export async function fetchAvgGpaByCategory(params: {
+  yearStart: number;
+  yearEnd: number;
+  departmentId?: number;
+  programId?: number;
+}): Promise<AvgGpaCategoryRow[]> {
+  const base = API_BASE_URL.replace(/\/+$/, '');
+  const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
+  const search = new URLSearchParams();
+  search.set('yearStart', String(params.yearStart));
+  search.set('yearEnd', String(params.yearEnd));
+  if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
+  if (params.programId != null) search.set('programId', String(params.programId));
+  const url = `${base}${prefix}/report/avg-gpa-category?${search.toString()}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to fetch Avg GPA: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
+export type GpaBoxplotRow = { category: string; GPA: BoxStats };
+
+export async function fetchGpaBoxplotByCategory(params: {
+  yearStart: number;
+  yearEnd: number;
+  departmentId?: number;
+  programId?: number;
+}): Promise<GpaBoxplotRow[]> {
+  const base = API_BASE_URL.replace(/\/+$/, '');
+  const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
+  const search = new URLSearchParams();
+  search.set('yearStart', String(params.yearStart));
+  search.set('yearEnd', String(params.yearEnd));
+  if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
+  if (params.programId != null) search.set('programId', String(params.programId));
+  const url = `${base}${prefix}/report/gpa-category-boxplot?${search.toString()}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to fetch GPA boxplot: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
+export type SubjectGpaRow = {
+  category: string;
+  type: string;
+  subjectCode: string;
+  subjectName: string;
+  year: number;
+  avgGpa: number | null;
+  studentCount: number;
+};
+
+export async function fetchSubjectGpaTable(params: {
+  yearStart: number;
+  yearEnd: number;
+  departmentIds?: number[];
+  programIds?: number[];
+  departmentId?: number;
+  programId?: number;
+}): Promise<SubjectGpaRow[]> {
+  const base = API_BASE_URL.replace(/\/+$/, '');
+  const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
+  const search = new URLSearchParams();
+  search.set('yearStart', String(params.yearStart));
+  search.set('yearEnd', String(params.yearEnd));
+  if (params.departmentIds?.length) search.set('departmentIds', params.departmentIds.join(','));
+  else if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
+  if (params.programIds?.length) search.set('programIds', params.programIds.join(','));
+  else if (params.programId != null) search.set('programId', String(params.programId));
+  const url = `${base}${prefix}/report/subject-gpa-table?${search.toString()}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to fetch Subject GPA table: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
+export type CategoryTeachingHeatmapRow = {
+  category: string;
+  mode: 'ภาคบรรยาย' | 'ปฏิบัติ' | 'บรรยายและปฏิบัติ' | 'อื่นๆ';
+  avgGpa: number | null;
+  studentCount: number;
+};
+
+export async function fetchCategoryTeachingHeatmap(params: {
+  yearStart: number;
+  yearEnd: number;
+  departmentIds?: number[];
+  programIds?: number[];
+  departmentId?: number;
+  programId?: number;
+}): Promise<CategoryTeachingHeatmapRow[]> {
+  const base = API_BASE_URL.replace(/\/+$/, '');
+  const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
+  const search = new URLSearchParams();
+  search.set('yearStart', String(params.yearStart));
+  search.set('yearEnd', String(params.yearEnd));
+  if (params.departmentIds?.length) search.set('departmentIds', params.departmentIds.join(','));
+  else if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
+  if (params.programIds?.length) search.set('programIds', params.programIds.join(','));
+  else if (params.programId != null) search.set('programId', String(params.programId));
+  const url = `${base}${prefix}/report/heatmap-category-teaching?${search.toString()}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to fetch category teaching heatmap: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
 

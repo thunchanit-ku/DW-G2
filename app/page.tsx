@@ -9,7 +9,7 @@ export default function RootPage() {
 
   useEffect(() => {
     // Redirect to dashboard/home
-    router.push('/dashboard/home');
+    router.push('/6520501000');
   }, [router]);
 
   return (
