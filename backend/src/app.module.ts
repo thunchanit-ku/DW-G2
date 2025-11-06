@@ -2,8 +2,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TestModule } from './module/test.module';
-import { FdModule } from './module/fd.module';
 import { ReportModule } from './module/report.module';
 import { join } from 'path';
 
@@ -53,8 +51,6 @@ import { join } from 'path';
         };
       },
     }),
-    TestModule,
-    FdModule,
     ReportModule,
   ],
   

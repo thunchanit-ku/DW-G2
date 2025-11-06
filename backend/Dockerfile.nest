@@ -3,12 +3,12 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # บังคับให้รวม devDependencies ตอนติดตั้ง
-ENV NODE_ENV=development \
-    NPM_CONFIG_AUDIT=false \
+ENV NPM_CONFIG_AUDIT=false \
     NPM_CONFIG_FUND=false
 
 COPY package*.json ./
-RUN npm ci
+# ติดตั้งทั้งหมดรวม devDependencies (จำเป็นสำหรับ build)
+RUN npm ci --include=dev
 
 COPY . .
 # (ถ้าต้องการเช็คเวอร์ชัน: RUN npx tsc -v && npx tsc-alias --version)
