@@ -59,12 +59,12 @@ export default function WFYearCategoryHeatmap({ data, type }: Props) {
     }
   };
 
-  const MAX_BODY_HEIGHT = '380px';
-  const YEAR_COLUMN_WIDTH = '80px';
-  const CATEGORY_COLUMN_WIDTH = '180px';
+  const MAX_BODY_HEIGHT = '280px';
+  const YEAR_COLUMN_WIDTH = '70px';
+  const CATEGORY_COLUMN_WIDTH = '140px';
 
   // Helper function to wrap long category names
-  const wrapCategoryLabel = (label: string, maxChars = 20) => {
+  const wrapCategoryLabel = (label: string, maxChars = 18) => {
     const words = label.split(/\s+/);
     const lines: string[] = [];
     let current = '';
@@ -83,23 +83,23 @@ export default function WFYearCategoryHeatmap({ data, type }: Props) {
   };
 
   return (
-    <div className="w-full relative overflow-hidden">
+    <div className="w-full h-full relative overflow-hidden flex flex-col">
       {/* Scrollable container for both header and body */}
-      <div className="w-full overflow-auto" style={{ maxHeight: MAX_BODY_HEIGHT }}>
+      <div className="w-full flex-1 overflow-auto" style={{ maxHeight: MAX_BODY_HEIGHT }}>
         <table className="min-w-full border-collapse">
           {/* Header */}
           <thead className="sticky top-0 bg-white z-20" style={{ boxShadow: '0 2px 2px -1px rgba(0, 0, 0, 0.1)' }}>
             <tr>
               {/* Header: Sticky Column for Year */}
-              <th className="sticky left-0 bg-white z-30 border-b border-r p-2 text-left font-semibold text-gray-800 shadow-sm" style={{ width: YEAR_COLUMN_WIDTH, minWidth: YEAR_COLUMN_WIDTH }}>
+              <th className="sticky left-0 bg-white z-30 border-b border-r p-1 text-left font-semibold text-gray-800 shadow-sm text-xs" style={{ width: YEAR_COLUMN_WIDTH, minWidth: YEAR_COLUMN_WIDTH }}>
                 ปี
               </th>
               {/* Header: Category Columns */}
               {categories.map((cat) => {
                 const wrapped = wrapCategoryLabel(cat);
                 return (
-                  <th key={cat} className="border-b border-r p-1.5 text-xs font-semibold text-gray-700 align-top whitespace-normal" style={{ width: CATEGORY_COLUMN_WIDTH, minWidth: CATEGORY_COLUMN_WIDTH, maxWidth: CATEGORY_COLUMN_WIDTH, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-                    <div className="leading-tight min-h-[40px] flex flex-col justify-start">
+                  <th key={cat} className="border-b border-r p-1 text-[10px] font-semibold text-gray-700 align-top whitespace-normal" style={{ width: CATEGORY_COLUMN_WIDTH, minWidth: CATEGORY_COLUMN_WIDTH, maxWidth: CATEGORY_COLUMN_WIDTH, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                    <div className="leading-tight min-h-[32px] flex flex-col justify-start">
                       {wrapped.map((line, idx) => (
                         <div key={idx} className="break-words">{line}</div>
                       ))}
@@ -116,7 +116,7 @@ export default function WFYearCategoryHeatmap({ data, type }: Props) {
               return (
                 <tr key={year}>
                   {/* Body: Sticky Column for Year */}
-                  <td className={`sticky left-0 bg-white z-10 border-r p-2 text-sm text-gray-800 font-medium ${!isLastRow ? 'border-b' : ''}`} style={{ width: YEAR_COLUMN_WIDTH, minWidth: YEAR_COLUMN_WIDTH }}>
+                  <td className={`sticky left-0 bg-white z-10 border-r p-1 text-xs text-gray-800 font-medium ${!isLastRow ? 'border-b' : ''}`} style={{ width: YEAR_COLUMN_WIDTH, minWidth: YEAR_COLUMN_WIDTH }}>
                     {year}
                   </td>
                   {/* Body: Data Cells */}
@@ -129,7 +129,7 @@ export default function WFYearCategoryHeatmap({ data, type }: Props) {
                     return (
                       <td key={cat} className={`border-r p-0 ${!isLastRow ? 'border-b' : ''}`} style={{ width: CATEGORY_COLUMN_WIDTH, minWidth: CATEGORY_COLUMN_WIDTH }}>
                         <div
-                          className="h-10 flex items-center justify-center text-xs font-semibold transition-colors duration-300"
+                          className="h-8 flex items-center justify-center text-[10px] font-semibold transition-colors duration-300"
                           style={{ backgroundColor: color, color: textColor }}
                           title={percent != null ? `${type}: ${percent.toFixed(2)}% (N=${row?.total ?? 0})` : 'ไม่มีข้อมูล'}
                         >
@@ -146,15 +146,15 @@ export default function WFYearCategoryHeatmap({ data, type }: Props) {
       </div>
 
       {/* Color Scale Legend */}
-      <div className="mt-4 text-xs text-gray-600 flex items-center gap-3">
+      <div className="mt-2 text-[10px] text-gray-600 flex items-center gap-2 flex-wrap">
         <span>สเกลสี (0% - {maxPercent.toFixed(1)}%):</span>
         <div className="flex items-center gap-1">
-          <span className="w-6 h-3 inline-block bg-green-100" style={{ background: '#f0fff0' }} />
-          <span className="w-6 h-3 inline-block bg-yellow-300" style={{ background: '#fff59e' }} />
-          <span className="w-6 h-3 inline-block bg-orange-400" style={{ background: '#ffa500' }} />
-          <span className="w-6 h-3 inline-block bg-red-600" style={{ background: '#dc2626' }} />
+          <span className="w-4 h-2 inline-block bg-green-100" style={{ background: '#f0fff0' }} />
+          <span className="w-4 h-2 inline-block bg-yellow-300" style={{ background: '#fff59e' }} />
+          <span className="w-4 h-2 inline-block bg-orange-400" style={{ background: '#ffa500' }} />
+          <span className="w-4 h-2 inline-block bg-red-600" style={{ background: '#dc2626' }} />
         </div>
-        <span className="ml-1">ต่ำ → สูง</span>
+        <span>ต่ำ → สูง</span>
       </div>
     </div>
   );

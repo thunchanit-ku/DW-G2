@@ -9,6 +9,8 @@ import { FactStudent } from '../entity/fact-student.entity';
 import { Department } from '../entity/department.entity';
 import { Program } from '../entity/program.entity';
 import { GradeLabel } from '../entity/grade-label.entity';
+import { Course } from '../entity/course.entity';
+import { CoursePlan } from '../entity/course-plan.entity';
 
 @Injectable()
 export class ReportService {
@@ -21,18 +23,20 @@ export class ReportService {
     @InjectRepository(Department) private readonly depRepo: Repository<Department>,
     @InjectRepository(Program) private readonly progRepo: Repository<Program>,
     @InjectRepository(GradeLabel) private readonly glRepo: Repository<GradeLabel>,
+    @InjectRepository(Course) private readonly courseRepo: Repository<Course>,
+    @InjectRepository(CoursePlan) private readonly coursePlanRepo: Repository<CoursePlan>,
   ) {}
 
   // ========================== WF PERCENTAGE ==========================
   async getWFPercentageByCategory(filters: {
     departmentId?: number;
-    programId?: number;
+    coursePlanId?: number;
     departmentIds?: number[];
-    programIds?: number[];
+    coursePlanIds?: number[];
     yearStart: number;
     yearEnd: number;
   }) {
-    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+    const { departmentId, coursePlanId, departmentIds, coursePlanIds, yearStart, yearEnd } = filters;
 
     const qb = this.frRepo
       .createQueryBuilder('fr')
@@ -54,10 +58,10 @@ export class ReportService {
     } else if (departmentId) {
       qb.andWhere('fs.department_id = :departmentId', { departmentId });
     }
-    if (programIds && programIds.length) {
-      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
-    } else if (programId) {
-      qb.andWhere('fs.program_id = :programId', { programId });
+    if (coursePlanIds && coursePlanIds.length) {
+      qb.andWhere('fs.course_plan_id IN (:...coursePlanIds)', { coursePlanIds });
+    } else if (coursePlanId) {
+      qb.andWhere('fs.course_plan_id = :coursePlanId', { coursePlanId });
     }
 
     qb.select([
@@ -87,13 +91,13 @@ export class ReportService {
   // ========================== WF BOXPLOT ==========================
   async getWFBoxplotByCategory(filters: {
     departmentId?: number;
-    programId?: number;
+    coursePlanId?: number;
     departmentIds?: number[];
-    programIds?: number[];
+    coursePlanIds?: number[];
     yearStart: number;
     yearEnd: number;
   }) {
-    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+    const { departmentId, coursePlanId, departmentIds, coursePlanIds, yearStart, yearEnd } = filters;
     
     // ** การแก้ไข: เปลี่ยนการใช้ andWhere ให้ใช้ if block เหมือนฟังก์ชันด้านบนเพื่อความสม่ำเสมอและชัดเจน
     const qb = this.frRepo
@@ -116,10 +120,10 @@ export class ReportService {
     } else if (departmentId) {
       qb.andWhere('fs.department_id = :departmentId', { departmentId });
     }
-    if (programIds && programIds.length) {
-      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
-    } else if (programId) {
-      qb.andWhere('fs.program_id = :programId', { programId });
+    if (coursePlanIds && coursePlanIds.length) {
+      qb.andWhere('fs.course_plan_id IN (:...coursePlanIds)', { coursePlanIds });
+    } else if (coursePlanId) {
+      qb.andWhere('fs.course_plan_id = :coursePlanId', { coursePlanId });
     }
 
     const rows = await qb
@@ -174,13 +178,13 @@ export class ReportService {
   // ========================== WF HEATMAP: YEAR × CATEGORY ==========================
   async getWFHeatmapByYearCategory(filters: {
     departmentId?: number;
-    programId?: number;
+    coursePlanId?: number;
     departmentIds?: number[];
-    programIds?: number[];
+    coursePlanIds?: number[];
     yearStart: number;
     yearEnd: number;
   }) {
-    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+    const { departmentId, coursePlanId, departmentIds, coursePlanIds, yearStart, yearEnd } = filters;
 
     const qb = this.frRepo
       .createQueryBuilder('fr')
@@ -201,10 +205,10 @@ export class ReportService {
     } else if (departmentId) {
       qb.andWhere('fs.department_id = :departmentId', { departmentId });
     }
-    if (programIds && programIds.length) {
-      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
-    } else if (programId) {
-      qb.andWhere('fs.program_id = :programId', { programId });
+    if (coursePlanIds && coursePlanIds.length) {
+      qb.andWhere('fs.course_plan_id IN (:...coursePlanIds)', { coursePlanIds });
+    } else if (coursePlanId) {
+      qb.andWhere('fs.course_plan_id = :coursePlanId', { coursePlanId });
     }
 
     const rows = await qb
@@ -273,6 +277,30 @@ export class ReportService {
       .addGroupBy('p.name_program')
       .having('COUNT(DISTINCT fs.student_id) > 0')
       .orderBy('name', 'ASC')
+      .getRawMany();
+    return rows.map((r) => ({ id: Number(r.id), name: String(r.name), studentCount: Number(r.studentCount) }));
+  }
+
+  // ========================== LIST COURSE PLANS ==========================
+  async listCoursePlans() {
+    // inner join เพื่อแสดงเฉพาะ course_plan ที่มีข้อมูลจริงใน fact_student
+    // แสดงเป็น "name_course_use (plan_course)" เช่น "วศ.คอม 60 (แผนสหกิจศึกษา)"
+    const rows = await this.coursePlanRepo
+      .createQueryBuilder('cp')
+      .innerJoin(FactStudent, 'fs', 'fs.course_plan_id = cp.course_plan_id')
+      .innerJoin(Course, 'c', 'c.course_id = cp.course_id')
+      .where('cp.is_visible = 1') // แสดงเฉพาะที่ is_visible = 1
+      .select([
+        'cp.course_plan_id AS id',
+        'CONCAT(c.name_course_use, " (", cp.plan_course, ")") AS name',
+        'COUNT(DISTINCT fs.student_id) AS studentCount',
+      ])
+      .groupBy('cp.course_plan_id')
+      .addGroupBy('c.name_course_use')
+      .addGroupBy('cp.plan_course')
+      .having('COUNT(DISTINCT fs.student_id) > 0')
+      .orderBy('c.name_course_use', 'ASC')
+      .addOrderBy('cp.plan_course', 'ASC')
       .getRawMany();
     return rows.map((r) => ({ id: Number(r.id), name: String(r.name), studentCount: Number(r.studentCount) }));
   }
@@ -476,13 +504,13 @@ export class ReportService {
   // ========================== WF SUBJECT TABLE ==========================
   async getWFSubjectTable(filters: {
     departmentId?: number;
-    programId?: number;
+    coursePlanId?: number;
     departmentIds?: number[];
-    programIds?: number[];
+    coursePlanIds?: number[];
     yearStart: number;
     yearEnd: number;
   }) {
-    const { departmentId, programId, departmentIds, programIds, yearStart, yearEnd } = filters;
+    const { departmentId, coursePlanId, departmentIds, coursePlanIds, yearStart, yearEnd } = filters;
 
     const qb = this.frRepo
       .createQueryBuilder('fr')
@@ -504,10 +532,10 @@ export class ReportService {
     } else if (departmentId) {
       qb.andWhere('fs.department_id = :departmentId', { departmentId });
     }
-    if (programIds && programIds.length) {
-      qb.andWhere('fs.program_id IN (:...programIds)', { programIds });
-    } else if (programId) {
-      qb.andWhere('fs.program_id = :programId', { programId });
+    if (coursePlanIds && coursePlanIds.length) {
+      qb.andWhere('fs.course_plan_id IN (:...coursePlanIds)', { coursePlanIds });
+    } else if (coursePlanId) {
+      qb.andWhere('fs.course_plan_id = :coursePlanId', { coursePlanId });
     }
 
      const rows = await qb

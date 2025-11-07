@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Select, Slider, Table } from 'antd';
+import { Select, Slider, Table, Spin, Alert } from 'antd';
 import DashboardLayout from '@/components/DashboardLayout';
 import WFBoxPlot from '@/components/charts/WFBoxPlot';
 import WFYearCategoryHeatmap from '@/components/charts/WFYearCategoryHeatmap';
 import { fetchWFBoxplotByCategory, fetchWFHeatmapByYearCategory, fetchWFSubjectTable, type WFHeatmapRow, type WFSubjectTableRow } from '@/app/dashboard/service/wf-report.service';
-import { fetchDepartments, fetchPrograms, type LookupItem } from '@/app/dashboard/service/lookup.service';
+import { fetchDepartments, fetchCoursePlans, type LookupItem } from '@/app/dashboard/service/lookup.service';
 
 type CategoryRequire = {
   creditEarned?: number | null;
@@ -15,7 +15,7 @@ type CategoryRequire = {
 
 export default function Student6520503363Page() {
   const studentId = '6520503363';
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [wfBoxData, setWfBoxData] = useState<Array<{ category: string; W: any; F: any }>>([]);
   const [wfHeatmapData, setWfHeatmapData] = useState<WFHeatmapRow[]>([]);
   const [wfTableData, setWfTableData] = useState<WFSubjectTableRow[]>([]);
@@ -23,69 +23,77 @@ export default function Student6520503363Page() {
   // ================= Filters =================
   // options จะโหลดจากฐานข้อมูลจริงที่ mount แรก
   const [department, setDepartment] = useState<number | undefined>();
-  const [program, setProgram] = useState<number | undefined>();
+  const [coursePlan, setCoursePlan] = useState<number | undefined>();
   const [yearRange, setYearRange] = useState<[number, number]>([2560, 2573]);
   const [departmentList, setDepartmentList] = useState<LookupItem[]>([]);
-  const [programList, setProgramList] = useState<LookupItem[]>([]);
+  const [coursePlanList, setCoursePlanList] = useState<LookupItem[]>([]);
 
+  // โหลดเฉพาะ dropdown lists เมื่อ mount
   useEffect(() => {
     let isMounted = true;
-    async function load() {
-      setLoading(true);
+    async function loadLists() {
       try {
-        const [data, heatmapData, tableData, deps, progs] = await Promise.all([
-          fetchWFBoxplotByCategory({ yearStart: yearRange[0], yearEnd: yearRange[1] }),
-          fetchWFHeatmapByYearCategory({ yearStart: yearRange[0], yearEnd: yearRange[1] }),
-          fetchWFSubjectTable({ yearStart: yearRange[0], yearEnd: yearRange[1] }),
+        const [deps, coursePlans] = await Promise.all([
           fetchDepartments().catch(() => []),
-          fetchPrograms().catch(() => []),
+          fetchCoursePlans().catch(() => []),
         ]);
         if (!isMounted) return;
-        console.log('[WF INIT BOX] rows', data);
-        console.log('[WF INIT HEATMAP] rows', heatmapData);
-        console.log('[WF INIT TABLE] rows', tableData);
+        setDepartmentList(deps);
+        setCoursePlanList(coursePlans);
+      } catch (error) {
+        console.error('Failed to load filter lists:', error);
+      }
+    }
+    loadLists();
+    return () => { isMounted = false; };
+  }, []);
+
+  // โหลดข้อมูลเมื่อมีการเลือก filter แล้วเท่านั้น
+  useEffect(() => {
+    // ถ้ายังไม่ได้เลือก filter ไม่ต้องโหลดข้อมูล
+    if (!department && !coursePlan) {
+      setWfBoxData([]);
+      setWfHeatmapData([]);
+      setWfTableData([]);
+      return;
+    }
+
+    let isMounted = true;
+    async function loadData() {
+      setLoading(true);
+      try {
+        const [data, heatmapData, tableData] = await Promise.all([
+          fetchWFBoxplotByCategory({ yearStart: yearRange[0], yearEnd: yearRange[1], departmentId: department, coursePlanId: coursePlan }),
+          fetchWFHeatmapByYearCategory({ yearStart: yearRange[0], yearEnd: yearRange[1], departmentId: department, coursePlanId: coursePlan }),
+          fetchWFSubjectTable({ yearStart: yearRange[0], yearEnd: yearRange[1], departmentId: department, coursePlanId: coursePlan }),
+        ]);
+        if (!isMounted) return;
+        console.log('[WF RELOAD BOX]', { department, coursePlan, yearRange, rows: data?.length });
+        console.log('[WF RELOAD HEATMAP]', { department, coursePlan, yearRange, rows: heatmapData?.length });
+        console.log('[WF RELOAD TABLE]', { department, coursePlan, yearRange, rows: tableData?.length });
         setWfBoxData(data);
         setWfHeatmapData(heatmapData);
         setWfTableData(tableData);
-        setDepartmentList(deps);
-        setProgramList(progs);
+      } catch (error) {
+        console.error('Failed to load WF data:', error);
       } finally {
         if (isMounted) setLoading(false);
       }
     }
-    load();
+    loadData();
     return () => { isMounted = false; };
-  }, []);
-
-  // Handle filter change
-  useEffect(() => {
-    (async () => {
-      try {
-        const [data, heatmapData, tableData] = await Promise.all([
-          fetchWFBoxplotByCategory({ yearStart: yearRange[0], yearEnd: yearRange[1], departmentId: department, programId: program }),
-          fetchWFHeatmapByYearCategory({ yearStart: yearRange[0], yearEnd: yearRange[1], departmentId: department, programId: program }),
-          fetchWFSubjectTable({ yearStart: yearRange[0], yearEnd: yearRange[1], departmentId: department, programId: program }),
-        ]);
-        console.log('[WF RELOAD BOX]', { department, program, yearRange, rows: data?.length });
-        console.log('[WF RELOAD HEATMAP]', { department, program, yearRange, rows: heatmapData?.length });
-        console.log('[WF RELOAD TABLE]', { department, program, yearRange, rows: tableData?.length });
-        setWfBoxData(data);
-        setWfHeatmapData(heatmapData);
-        setWfTableData(tableData);
-      } catch {}
-    })();
-  }, [department, program, yearRange]);
+  }, [department, coursePlan, yearRange]);
 
   // no GPA/progress card in this page
 
   return (
     <DashboardLayout>
-      <div className="p-6">
+      <div className="p-3">
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+        <div className="bg-white rounded-lg shadow p-3 mb-3">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
             <div>
-              <div className="text-sm text-gray-600 mb-1">ภาควิชา</div>
+              <div className="text-xs text-gray-600 mb-1">ภาควิชา</div>
               <Select
                 className="w-full"
                 placeholder="เลือกภาควิชา"
@@ -96,20 +104,20 @@ export default function Student6520503363Page() {
               />
             </div>
             <div>
-              <div className="text-sm text-gray-600 mb-1">หลักสูตร</div>
+              <div className="text-xs text-gray-600 mb-1">หลักสูตร</div>
               <Select
                 className="w-full"
                 placeholder="เลือกหลักสูตร"
-                options={programList.map((p) => ({ label: `${p.name}${p.studentCount ? ` (${p.studentCount})` : ''}` , value: p.id }))}
-                value={program}
-                onChange={setProgram}
+                options={coursePlanList.map((p) => ({ label: `${p.name}${p.studentCount ? ` (${p.studentCount})` : ''}` , value: p.id }))}
+                value={coursePlan}
+                onChange={setCoursePlan}
                 allowClear
               />
             </div>
             <div className="md:col-span-2">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm text-gray-600">ช่วงปีการศึกษา</span>
-                <span className="text-xs text-gray-500">{yearRange[0]} - {yearRange[1]}</span>
+                <span className="text-xs text-gray-600">ช่วงปีการศึกษา</span>
+                <span className="text-[10px] text-gray-500">{yearRange[0]} - {yearRange[1]}</span>
               </div>
               <Slider
                 range
@@ -124,102 +132,145 @@ export default function Student6520503363Page() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
-          <div className="col-span-1">
-            <div className="bg-white rounded-lg shadow p-4 h-[480px]">
-              <h2 className="text-lg font-medium mb-4">สัดส่วนผู้ลงทะเบียนที่ติด W/F ตามหมวดวิชา</h2>
-              <WFBoxPlot data={wfBoxData} />
-            </div>
+        {!department && !coursePlan && (
+          <Alert
+            message="กรุณาเลือกภาควิชาหรือหลักสูตรเพื่อแสดงข้อมูล"
+            type="info"
+            showIcon
+            className="mb-3 text-xs"
+          />
+        )}
+
+        {loading && (
+          <div className="flex justify-center items-center py-8">
+            <Spin size="large" />
           </div>
+        )}
+
+        {!loading && (department || coursePlan) && (
+          <div className="grid grid-cols-1 gap-3">
+            <div className="col-span-1">
+              <div className="bg-white rounded-lg shadow p-2 h-[320px] flex flex-col">
+                <h2 className="text-sm font-medium mb-2">สัดส่วนผู้ลงทะเบียนที่ติด W/F ตามหมวดวิชา</h2>
+                <div className="flex-1 min-h-0">
+                  <WFBoxPlot data={wfBoxData} />
+                </div>
+              </div>
+            </div>
           
           {/* Heatmaps */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-lg font-medium mb-4">Heatmap: % W ตามปี × หมวดวิชา</h2>
-              <WFYearCategoryHeatmap data={wfHeatmapData} type="W" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="bg-white rounded-lg shadow p-2 flex flex-col">
+              <h2 className="text-sm font-medium mb-2">Heatmap: % W ตามปี × หมวดวิชา</h2>
+              <div className="flex-1 min-h-0">
+                <WFYearCategoryHeatmap data={wfHeatmapData} type="W" />
+              </div>
             </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-lg font-medium mb-4">Heatmap: % F ตามปี × หมวดวิชา</h2>
-              <WFYearCategoryHeatmap data={wfHeatmapData} type="F" />
+            <div className="bg-white rounded-lg shadow p-2 flex flex-col">
+              <h2 className="text-sm font-medium mb-2">Heatmap: % F ตามปี × หมวดวิชา</h2>
+              <div className="flex-1 min-h-0">
+                <WFYearCategoryHeatmap data={wfHeatmapData} type="F" />
+              </div>
             </div>
           </div>
 
           {/* WF Subject Table */}
           <div className="col-span-1">
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-lg font-medium mb-4">ตารางข้อมูล W/F ตามวิชา</h2>
+            <div className="bg-white rounded-lg shadow p-2">
+              <h2 className="text-sm font-medium mb-2">ตารางข้อมูล W/F ตามวิชา</h2>
               <Table
                 columns={[
                   {
                     title: 'หมวด',
                     dataIndex: 'category',
                     key: 'category',
-                    width: 200,
+                    width: 150,
                     fixed: 'left' as const,
+                    ellipsis: { showTitle: false },
+                    render: (text: string) => (
+                      <div className="text-xs whitespace-normal break-words" title={text}>
+                        {text}
+                      </div>
+                    ),
                   },
                   {
                     title: 'ประเภท',
                     dataIndex: 'type',
                     key: 'type',
-                    width: 120,
+                    width: 100,
+                    render: (text: string) => (
+                      <div className="text-xs">{text}</div>
+                    ),
                   },
                   {
                     title: 'รหัสวิชา',
                     dataIndex: 'subjectCode',
                     key: 'subjectCode',
-                    width: 120,
+                    width: 100,
+                    render: (text: string) => (
+                      <div className="text-xs">{text}</div>
+                    ),
                   },
                   {
                     title: 'ชื่อวิชา',
                     dataIndex: 'subjectName',
                     key: 'subjectName',
-                    width: 250,
+                    width: 200,
+                    ellipsis: { showTitle: false },
+                    render: (text: string) => (
+                      <div className="text-xs whitespace-normal break-words" title={text} style={{ maxWidth: 200 }}>
+                        {text}
+                      </div>
+                    ),
                   },
                   {
                     title: 'ปีการศึกษา',
                     dataIndex: 'year',
                     key: 'year',
-                    width: 100,
+                    width: 90,
                     align: 'center' as const,
+                    render: (val: number) => <div className="text-xs">{val}</div>,
                   },
                   {
                     title: 'จำนวน W',
                     dataIndex: 'wCount',
                     key: 'wCount',
-                    width: 100,
+                    width: 90,
                     align: 'right' as const,
-                    render: (val: number) => val.toLocaleString(),
+                    render: (val: number) => <div className="text-xs">{val.toLocaleString()}</div>,
                   },
                   {
                     title: 'จำนวน F',
                     dataIndex: 'fCount',
                     key: 'fCount',
-                    width: 100,
+                    width: 90,
                     align: 'right' as const,
-                    render: (val: number) => val.toLocaleString(),
+                    render: (val: number) => <div className="text-xs">{val.toLocaleString()}</div>,
                   },
                   {
                     title: 'ทั้งหมด (W+F)',
                     dataIndex: 'total',
                     key: 'total',
-                    width: 120,
+                    width: 100,
                     align: 'right' as const,
-                    render: (val: number) => val.toLocaleString(),
+                    render: (val: number) => <div className="text-xs">{val.toLocaleString()}</div>,
                   },
                 ]}
                 dataSource={wfTableData}
                 rowKey={(record) => `${record.subjectCode}-${record.year}`}
-                scroll={{ x: 1200, y: 400 }}
+                scroll={{ x: 'max-content', y: 300 }}
                 pagination={{
-                  pageSize: 20,
+                  pageSize: 15,
                   showSizeChanger: false,
                   showTotal: (total) => `ทั้งหมด ${total} รายการ`,
+                  size: 'small',
                 }}
                 size="small"
               />
             </div>
           </div>
-        </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

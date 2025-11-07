@@ -22,4 +22,8 @@ export function fetchPrograms(): Promise<LookupItem[]> {
   return getJson('/report/programs');
 }
 
+export function fetchCoursePlans(): Promise<LookupItem[]> {
+  return getJson('/report/course-plans');
+}
+
 

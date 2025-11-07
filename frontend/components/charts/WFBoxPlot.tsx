@@ -22,11 +22,14 @@ export default function WFBoxPlot({ data }: Props) {
   const minY = Math.floor(Math.min(...allValues));
   const maxY = Math.ceil(Math.max(...allValues));
 
-  const height = 360;
-  const margin = { top: 20, right: 20, bottom: 120, left: 50 }; // Increased bottom margin for horizontal labels
-  const perCategoryWidth = 170; // a bit wider for two boxes (W/F)
+  // Dynamic sizing based on container
+  const containerHeight = 280;
+  const margin = { top: 15, right: 20, bottom: 80, left: 45 };
+  const minCategoryWidth = 140;
+  const perCategoryWidth = Math.max(minCategoryWidth, 140);
   const innerW = perCategoryWidth * data.length;
-  const width = margin.left + innerW + margin.right;
+  const width = Math.max(600, margin.left + innerW + margin.right); // Minimum width
+  const height = containerHeight;
   const innerH = height - margin.top - margin.bottom;
 
   const xStep = innerW / data.length;
@@ -134,8 +137,8 @@ export default function WFBoxPlot({ data }: Props) {
     );
   };
 
-  // Wrap labels to avoid overlap (increased maxChars for horizontal labels)
-  const wrapLabel = (label: string, maxChars = 24, maxLines = 3): string[] => {
+  // Wrap labels to avoid overlap
+  const wrapLabel = (label: string, maxChars = 20, maxLines = 3): string[] => {
     const words = String(label).split(/\s+/).filter(Boolean);
     const lines: string[] = [];
     let current = '';
@@ -155,8 +158,13 @@ export default function WFBoxPlot({ data }: Props) {
   };
 
   return (
-    <div ref={containerRef} className="w-full h-full overflow-x-auto relative">
-    <svg viewBox={`0 0 ${width} ${height}`} style={{ width, height }}>
+    <div ref={containerRef} className="w-full h-full overflow-auto relative" style={{ maxHeight: '100%' }}>
+    <svg 
+      viewBox={`0 0 ${width} ${height}`} 
+      preserveAspectRatio="xMinYMin meet"
+      className="block"
+      style={{ width: '100%', height: '100%', minWidth: width }}
+    >
       {/* Legend */}
       <g>
         <rect x={width - margin.right - 80} y={margin.top} width={70} height={35} fill="white" stroke="#ddd" strokeWidth={1} rx={4} />
@@ -173,7 +181,7 @@ export default function WFBoxPlot({ data }: Props) {
         return (
           <g key={i}>
             <line x1={margin.left} x2={width - margin.right} y1={y} y2={y} stroke="#eee" />
-            <text x={margin.left - 10} y={y + 4} textAnchor="end" className="fill-gray-500 text-xs">{v.toFixed(0)}%</text>
+            <text x={margin.left - 10} y={y + 4} textAnchor="end" className="fill-gray-500 text-[10px]">{v.toFixed(0)}%</text>
           </g>
         );
       })}
@@ -188,13 +196,13 @@ export default function WFBoxPlot({ data }: Props) {
             <BoxPlot x={cx + 20} box={d.F} color="#FF6384" category={d.category} type="F" />
             <text
               x={cx}
-              y={height - 20}
+              y={height - 15}
               textAnchor="middle"
-              className="fill-gray-700 text-[10px]"
+              className="fill-gray-700 text-[9px]"
             >
               <title>{d.category}</title>
-              {wrapLabel(d.category).map((line, idx) => (
-                <tspan key={idx} x={cx} dy={idx === 0 ? 0 : 13}>{line}</tspan>
+              {wrapLabel(d.category, 20, 3).map((line, idx) => (
+                <tspan key={idx} x={cx} dy={idx === 0 ? 0 : 11}>{line}</tspan>
               ))}
             </text>
           </g>

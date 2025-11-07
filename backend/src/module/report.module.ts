@@ -10,6 +10,8 @@ import { FactStudent } from '../entity/fact-student.entity';
 import { Department } from '../entity/department.entity';
 import { Program } from '../entity/program.entity';
 import { GradeLabel } from '../entity/grade-label.entity';
+import { Course } from '../entity/course.entity';
+import { CoursePlan } from '../entity/course-plan.entity';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { GradeLabel } from '../entity/grade-label.entity';
       Department,
       Program,
       GradeLabel,
+      Course,
+      CoursePlan,
     ]),
   ],
   controllers: [ReportController],

@@ -41,7 +41,7 @@ export async function fetchWFBoxplotByCategory(params: {
   yearStart: number;
   yearEnd: number;
   departmentId?: number;
-  programId?: number;
+  coursePlanId?: number;
 }): Promise<WFBoxplotRow[]> {
   const base = API_BASE_URL.replace(/\/+$/, '');
   const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
@@ -49,7 +49,7 @@ export async function fetchWFBoxplotByCategory(params: {
   search.set('yearStart', String(params.yearStart));
   search.set('yearEnd', String(params.yearEnd));
   if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
-  if (params.programId != null) search.set('programId', String(params.programId));
+  if (params.coursePlanId != null) search.set('coursePlanId', String(params.coursePlanId));
   const url = `${base}${prefix}/report/wf-category-boxplot?${search.toString()}`;
   console.log('[WF BOX API] GET', url);
   const res = await fetch(url);
@@ -72,7 +72,7 @@ export async function fetchWFHeatmapByYearCategory(params: {
   yearStart: number;
   yearEnd: number;
   departmentId?: number;
-  programId?: number;
+  coursePlanId?: number;
 }): Promise<WFHeatmapRow[]> {
   const base = API_BASE_URL.replace(/\/+$/, '');
   const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
@@ -80,7 +80,7 @@ export async function fetchWFHeatmapByYearCategory(params: {
   search.set('yearStart', String(params.yearStart));
   search.set('yearEnd', String(params.yearEnd));
   if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
-  if (params.programId != null) search.set('programId', String(params.programId));
+  if (params.coursePlanId != null) search.set('coursePlanId', String(params.coursePlanId));
   const url = `${base}${prefix}/report/wf-heatmap-year-category?${search.toString()}`;
   console.log('[WF HEATMAP API] GET', url);
   const res = await fetch(url);
@@ -106,7 +106,7 @@ export async function fetchWFSubjectTable(params: {
   yearStart: number;
   yearEnd: number;
   departmentId?: number;
-  programId?: number;
+  coursePlanId?: number;
 }): Promise<WFSubjectTableRow[]> {
   const base = API_BASE_URL.replace(/\/+$/, '');
   const prefix = API_PREFIX ? `/${API_PREFIX}` : '';
@@ -114,7 +114,7 @@ export async function fetchWFSubjectTable(params: {
   search.set('yearStart', String(params.yearStart));
   search.set('yearEnd', String(params.yearEnd));
   if (params.departmentId != null) search.set('departmentId', String(params.departmentId));
-  if (params.programId != null) search.set('programId', String(params.programId));
+  if (params.coursePlanId != null) search.set('coursePlanId', String(params.coursePlanId));
   const url = `${base}${prefix}/report/wf-subject-table?${search.toString()}`;
   console.log('[WF SUBJECT TABLE API] GET', url);
   const res = await fetch(url);
