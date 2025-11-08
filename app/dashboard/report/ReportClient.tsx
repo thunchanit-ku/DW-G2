@@ -52,50 +52,149 @@ export default function ReportClient() {
       if (studentId) {
         try {
           // โหลดข้อมูลนักศึกษา
-
           const profileData = await getStudentProfile(studentId);
           setStudentInfo(profileData || null);
 
           // โหลดข้อมูล courseplan checking
           const courseplanRes = await getStudent_coursePlan(studentId);
+
           // API อาจคืนเป็น array โดยตรง หรืออยู่ใน .data
-          const rawCourses = Array.isArray(courseplanRes) ? courseplanRes : (Array.isArray(courseplanRes?.data) ? courseplanRes.data : []);
+          const rawCourses = Array.isArray(courseplanRes)
+            ? courseplanRes
+            : (Array.isArray(courseplanRes?.data) ? courseplanRes.data : []);
+
           console.log("courseplan raw", rawCourses);
 
-          // แยก passed / failed โดยดูจากฟิลด์ isPass และ normalize ฟิลด์ให้ตรงกับที่ UI คาดหวัง
+          // ---------- รายการหมวดที่จะตัดออก (ใช้กับ failed เท่านั้น) ----------
+          const excludedCategoryNames = [
+            "กลุ่มสาระอยู่ดีมีสุข",
+            "กลุ่มสาระสุนทรียศาสตร์",
+            "กลุ่มสาระภาษากับการสื่อสาร",
+          ];
+          const isExcludedCategory = (row: any) => {
+            const name =
+              (row?.subject?.categoryName ??
+                row?.categoryName ??
+                row?.category ??
+                "").toString().trim();
+            return excludedCategoryNames.includes(name);
+          };
+
+          // ---------- helpers ----------
+          const toNum = (v: any) => {
+            const n = Number(v);
+            return Number.isFinite(n) ? n : null;
+          };
+
+          const isDueOrPast = (
+            expectedYear: number | null,
+            expectedTerm: number | null,
+            latestYear: number | null,
+            latestTerm: number | null
+          ) => {
+            if (expectedYear == null || expectedTerm == null || latestYear == null || latestTerm == null) return false;
+            // ถึง/เลยกำหนด (เทอมปัจจุบัน >= กำหนด)
+            return expectedYear < latestYear || (expectedYear === latestYear && expectedTerm <= latestTerm);
+          };
+
+          // ---------- หา lastRegisterYear/lastRegisterTerm ที่มากที่สุด (ของนิสิต) ----------
+          let maxLastRegisterYear: number | null = null;
+          let maxLastRegisterTerm: number | null = null;
+
+          for (const r of rawCourses as any[]) {
+            const y = toNum(r?.lastRegisterYear);
+            const t = toNum(r?.lastRegisterTerm);
+            if (y == null || t == null) continue;
+
+            if (
+              maxLastRegisterYear == null ||
+              y > maxLastRegisterYear ||
+              (y === maxLastRegisterYear && (maxLastRegisterTerm == null || t > maxLastRegisterTerm))
+            ) {
+              maxLastRegisterYear = y;
+              maxLastRegisterTerm = t;
+            }
+          }
+
+          // ---------- รูปแบบข้อมูลที่ UI ใช้ ----------
           const normalize = (c: any) => ({
-            subjectCode: c.subject?.subjectCode || c.subjectCode || '',
-            courseName: c.subject?.nameSubjectThai || c.subject?.nameSubjectEng || c.courseName || '',
+            subjectCode: c.subject?.subjectCode || c.subjectCode || "",
+            courseName:
+              c.subject?.nameSubjectThai ||
+              c.subject?.nameSubjectEng ||
+              c.courseName ||
+              "",
             credits: c.subject?.credits ?? c.credits ?? 0,
-            category: c.subject?.categoryName || c.category || '',
+            category: c.subject?.categoryName || c.category || "",
             semester: c.passYear ?? c.lastRegisterYear ?? c.semester ?? null,
-            semesterPartInYear: c.passTerm ?? c.lastRegisterTerm ?? c.semesterPartInYear ?? null,
+            semesterPartInYear:
+              c.passTerm ?? c.lastRegisterTerm ?? c.semesterPartInYear ?? null,
             status: c.gradeDetails ?? (c.stdGrade != null ? String(c.stdGrade) : undefined),
           });
 
-          const passed = rawCourses.filter((r: any) => r.isPass === true).map(normalize);
-          // แค่เอาที่ isPass === false และเกรดเป็น F หรือ W เท่านั้น (case-insensitive)
-          const failed = rawCourses
+          // ---------- PASSED ----------
+          // ต้อง isPass = true และ (passTerm, passYear) != (expectedPassingTerm, expectedPassingYear)
+          // *ไม่กรอง category*
+          const passed = (rawCourses as any[])
             .filter((r: any) => {
-              if (r.isPass !== false) return false;
-              const grade = String(r.gradeDetails ?? r.gradeLabelId ?? r.status ?? '').toUpperCase();
-              return ['F', 'W'].includes(grade);
+              const isPassFlag = r.isPass === true || r.ispass === true;
+
+              const pT = toNum(r.passTerm);
+              const pY = toNum(r.passYear);
+              const eT = toNum(r.expectedPassingTerm);
+              const eY = toNum(r.expectedPassingYear);
+
+              const hasAll = pT != null && pY != null && eT != null && eY != null;
+              const pairDifferent = pT !== eT || pY !== eY;
+
+              return isPassFlag && hasAll && pairDifferent;
             })
             .map(normalize);
 
-           console.log("datapass", passed);
-           console.log("datafail", failed);
+          // ---------- FAILED ----------
+          // (1) F/W หรือ (2) ยังไม่ผ่านและ expected ถึง/เลยกำหนดเทียบกับ last register ล่าสุดของนิสิต
+          // *กรอง category เฉพาะ failed*
+          const failed = (rawCourses as any[])
+            .filter((r: any) => {
+              const isPassFlag = r.isPass === true || r.ispass === true;
+
+              // (1) hard fail
+              const grade = String(
+                r.gradeDetails ?? r.gradeLabelId ?? r.status ?? ""
+              ).toUpperCase();
+              const hardFail = ["F", "W"].includes(grade);
+
+              // (2) overdue
+              const eTerm = toNum(r.expectedPassingTerm);
+              const eYear = toNum(r.expectedPassingYear);
+              const overdue =
+                !isPassFlag &&
+                isDueOrPast(eYear, eTerm, maxLastRegisterYear, maxLastRegisterTerm);
+
+              return hardFail || overdue;
+            })
+            // กรองหมวดเฉพาะ failed
+            .filter(r => !isExcludedCategory(r))
+            .map(normalize);
+
+          console.log("latest lastRegister =>", {
+            maxLastRegisterYear,
+            maxLastRegisterTerm,
+          });
+          console.log("datapass", passed);
+          console.log("datafail", failed);
 
           setFailedCourses(failed);
           setPassedCourses(passed);
-
         } catch (e) {
-          console.error('Error loading data:', e);
-          // Set empty arrays as fallback
+          console.error("Error loading data:", e);
+          // fallback
           setFailedCourses([]);
           setPassedCourses([]);
         }
-      } else {
+      }
+
+      else {
         // No studentId found, set empty data
         setFailedCourses([]);
         setPassedCourses([]);
